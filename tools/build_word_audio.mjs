@@ -102,7 +102,12 @@ export function rebuyLadder(text, accented, it, currentId) {
   const tried = new Set([currentId, ...((it && it.rebought) || []),
                          ...((it && it.verdicts) || []).filter((v) => v.verdict === "flag").map((v) => v.id)]);
   const options = ["stop", "dots", "", "cap"].map((h) => [h, clipId(rendering(text, h))]);
-  if (accented && accented !== text) options.push(["=" + accented, clipId(accented)]);
+  if (accented && accented !== text) {
+    options.push(["=" + accented, clipId(accented)]);
+    // The accented spelling with the ellipsis (§30db) is the last rung for a
+    // single word; a sentence never reaches here (`say` is tried as given).
+    if (!/\s/.test(accented.trim())) options.push(["=" + accented + "...", clipId(accented + "...")]);
+  }
   return options.filter(([, id]) => !tried.has(id)).map(([h]) => h);
 }
 export function noteRebought(key, id) {
@@ -404,7 +409,7 @@ async function main() {
      its bare-text id; and the lengths already measured. */
   let prior = { files: {}, ms: {} };
   if (existsSync(MANIFEST)) prior = { files: {}, ms: {}, ...JSON.parse(readFileSync(MANIFEST, "utf8")) };
-  const want = missing.map((m) => ({ key: m.bare, text: m.bare, gloss: m.gloss, was: m.was, word: true }))
+  const want = missing.map((m) => ({ key: m.bare, text: m.bare, gloss: m.gloss, was: m.was, word: true, accented: m.accented }))
     .concat(sentences.map((s) => ({ key: s.key, text: s.text, gloss: "", was: s.was, word: false, fixed: s.fixed })))
     .map((m) => {
       const kept = prior.files[m.key];
@@ -439,7 +444,10 @@ async function main() {
        when every rendering of the sentence itself has been tried — a dash
        where the voice ran two words together («Сериал сериалу — рознь.»), a
        full stop for a shouted exclamation. It is tried as given. */
-    const ladder = rebuyLadder(m.text, it.say || null, it, m.id);
+    /* …and a word's last rung is its accented spelling, as a form's is
+       (build_form_audio.mjs): a different text is a different draw from the
+       voice, which is what a word still rising after four renderings needs. */
+    const ladder = rebuyLadder(m.text, it.say || (m.word ? m.accented : null), it, m.id);
     if (!ladder.length) { console.log(`   !! ${m.text}: every rendering tried — needs a person's fix (\`say\` on the review item)`); continue; }
     m.ladder = ladder;
     m.rebuyKey = rkey;

@@ -489,7 +489,8 @@
    "rebought": [
     "6ec219997bcb57b4",
     "030f9524808b12e9",
-    "d77a57eb18a075d6"
+    "d77a57eb18a075d6",
+    "5fbc0c0510236a23"
    ]
   },
   "word:отрасль": {
@@ -591,12 +592,21 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.8 semitones over the lowest third, ending at 337 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "f776ec203ec05605",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.4 semitones over the lowest third, ending at 289 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "7f730d586d714954",
     "7adcb21d8a740fcf",
-    "bc47b96cc025c721"
+    "bc47b96cc025c721",
+    "f776ec203ec05605",
+    "d91ad8a136f5f6b7"
    ]
   },
   "word:мальчишка": {
@@ -633,7 +643,8 @@
    "rebought": [
     "dfd2c1014916ce6f",
     "a7af3cd712dc8c13",
-    "8383710580c838b5"
+    "8383710580c838b5",
+    "c799d83abb92a444"
    ]
   },
   "word:одинокий": {
@@ -1186,7 +1197,8 @@
    "rebought": [
     "7aa92a49f44f3b52",
     "7ed6378f949d6d9f",
-    "c911ea306159f384"
+    "c911ea306159f384",
+    "2778f16d4b8df00f"
    ]
   },
   "word:подъезд": {
@@ -1499,7 +1511,8 @@
    "rebought": [
     "562b4335ec43bdde",
     "ebed5a72d032e72e",
-    "d091f0e91439293a"
+    "d091f0e91439293a",
+    "6b3cb21ac1fe9144"
    ]
   },
   "word:покидать": {
@@ -1656,7 +1669,8 @@
    "rebought": [
     "6a3eae3e40a69945",
     "e7de5fad7d8ba918",
-    "03623d8bc25937e7"
+    "03623d8bc25937e7",
+    "9b36d00f45060e60"
    ]
   },
   "word:добыча": {
@@ -2003,7 +2017,8 @@
    "rebought": [
     "20e0278316543b95",
     "a5f87efafc5bf376",
-    "9d9f68442849daa6"
+    "9d9f68442849daa6",
+    "4be50b96f36c3137"
    ]
   },
   "word:использовать": {
@@ -2378,7 +2393,8 @@
    "rebought": [
     "166510cf006d95f2",
     "07097e6255cfc1fa",
-    "b9ab7780ecc8df5e"
+    "b9ab7780ecc8df5e",
+    "acabb2ea39ece741"
    ]
   },
   "word:оригинальный": {
@@ -3029,7 +3045,8 @@
    "rebought": [
     "f895046bd4dc078c",
     "1f93b88a9fa5c22f",
-    "ee7f9047b61e56fa"
+    "ee7f9047b61e56fa",
+    "50784429fe055eba"
    ]
   },
   "word:катастрофа": {
@@ -3122,7 +3139,8 @@
    "rebought": [
     "7bc61cf1cc001cbd",
     "b2458cd463bf6cec",
-    "36bef14d157667cc"
+    "36bef14d157667cc",
+    "df8896065ad19bc0"
    ]
   },
   "word:лампа": {
@@ -6517,7 +6535,8 @@
    "rebought": [
     "b7b04f9adef71bf7",
     "2a9f883000273f2c",
-    "7f1d5818744b7976"
+    "7f1d5818744b7976",
+    "c39c7aae3ed5db4b"
    ]
   },
   "word:полёт": {
@@ -6696,7 +6715,8 @@
    "rebought": [
     "dce37b88674d13c4",
     "6cadc749f910c656",
-    "6e864c192c592889"
+    "6e864c192c592889",
+    "943b41c4b944c1d2"
    ]
   },
   "word:несчастье": {
@@ -6854,12 +6874,21 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.9 semitones over the lowest third, ending at 324 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "d490bf54e1cb2626",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.4 semitones over the lowest third, ending at 272 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "218b3748db9ecefb",
     "a8b248ef5a532a0d",
-    "fddde0396c220676"
+    "fddde0396c220676",
+    "d490bf54e1cb2626",
+    "5ecec451a4ab3361"
    ]
   },
   "word:тут": {
@@ -7415,11 +7444,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.0 semitones over the lowest third, ending at 289 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "d7e9ec1fa3754341",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.5 semitones over the lowest third, ending at 292 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "fc8b964acb70a5db",
-    "d7e9ec1fa3754341"
+    "d7e9ec1fa3754341",
+    "5cbf32531f93f02e"
    ]
   },
   "form:гнёздами": {
@@ -7675,11 +7712,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.4 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "7e2a105b9d18dcae",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.5 semitones over the lowest third, ending at 314 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "dd3126c8db0308d9",
-    "7e2a105b9d18dcae"
+    "7e2a105b9d18dcae",
+    "f317fdd7ecd1fa45"
    ]
   },
   "form:моско́вскому": {
@@ -7739,11 +7784,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.3 semitones over the lowest third, ending at 363 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "d248bc68f1f20825",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +3.7 semitones over the lowest third, ending at 272 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c17ff1832dffc2bc",
-    "d248bc68f1f20825"
+    "d248bc68f1f20825",
+    "79a1d0ce897f6e5b"
    ]
   },
   "form:оде́ждою": {
@@ -8057,11 +8110,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.2 semitones over the lowest third, ending at 260 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b6afe7519a02deeb",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.2 semitones over the lowest third, ending at 287 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "60f5745c120efc27",
-    "b6afe7519a02deeb"
+    "b6afe7519a02deeb",
+    "30368c26ed78f53a"
    ]
   },
   "form:пистоле́тах": {
@@ -8261,11 +8322,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.6 semitones over the lowest third, ending at 324 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "464f9c5a80154d48",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.6 semitones over the lowest third, ending at 260 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "d406da283c280a6c",
-    "464f9c5a80154d48"
+    "464f9c5a80154d48",
+    "4ba55eb3fdaf4806"
    ]
   },
   "form:поста́вила": {
@@ -8675,11 +8744,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.8 semitones over the lowest third, ending at 338 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "5d155fe085201fe5",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.3 semitones over the lowest third, ending at 310 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "f83c7f77c54d726b",
-    "5d155fe085201fe5"
+    "5d155fe085201fe5",
+    "8a21aa87ec32e3b5"
    ]
   },
   "form:по́льзуюсь": {
@@ -8795,11 +8872,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.3 semitones over the lowest third, ending at 277 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8df7ce200a3e7dc6",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.0 semitones over the lowest third, ending at 324 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "64100d0c5504ff81",
-    "8df7ce200a3e7dc6"
+    "8df7ce200a3e7dc6",
+    "325b40fed1003bad"
    ]
   },
   "form:голо́дная": {
@@ -8923,11 +9008,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +16.4 semitones over the lowest third, ending at 476 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "452ec55ae8fd8e2c",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.1 semitones over the lowest third, ending at 304 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "dd084216d6c4005d",
-    "452ec55ae8fd8e2c"
+    "452ec55ae8fd8e2c",
+    "8f92172752024704"
    ]
   },
   "form:таре́лке": {
@@ -9395,11 +9488,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.4 semitones over the lowest third, ending at 325 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "3114a2b5c3fcc607",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.5 semitones over the lowest third, ending at 282 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "bcd8f37d5fe38a80",
-    "3114a2b5c3fcc607"
+    "3114a2b5c3fcc607",
+    "8a023d4f714548a5"
    ]
   },
   "form:автома́т": {
@@ -9859,11 +9960,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.1 semitones over the lowest third, ending at 334 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "82bf9666be2b4a2b",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.9 semitones over the lowest third, ending at 293 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "99e17ff40ca33068",
-    "82bf9666be2b4a2b"
+    "82bf9666be2b4a2b",
+    "e83c00c9d60b6732"
    ]
   },
   "form:оде́тая": {
@@ -9937,11 +10046,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.8 semitones over the lowest third, ending at 304 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "07c1298c56df828c",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.1 semitones over the lowest third, ending at 296 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "bcafc1e7e14a397e",
-    "07c1298c56df828c"
+    "07c1298c56df828c",
+    "fa1f5fcd8bf9b191"
    ]
   },
   "form:здоро́вую": {
@@ -9973,11 +10090,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +14.2 semitones over the lowest third, ending at 323 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "43c819446bd03cff",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +3.6 semitones over the lowest third, ending at 296 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "348a0656a5ebcb6c",
-    "43c819446bd03cff"
+    "43c819446bd03cff",
+    "997ab8c6e606cb0e"
    ]
   },
   "form:ба́бушку": {
@@ -10135,11 +10260,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.7 semitones over the lowest third, ending at 286 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "a0fa8c2b9d6ab22e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.4 semitones over the lowest third, ending at 268 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "01700689ed86087c",
-    "a0fa8c2b9d6ab22e"
+    "a0fa8c2b9d6ab22e",
+    "4336761186e6db64"
    ]
   },
   "form:ме́рите": {
@@ -10185,11 +10318,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.9 semitones over the lowest third, ending at 334 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "962adc7f717e3e01",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.0 semitones over the lowest third, ending at 265 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "8d39c2acf84444a6",
-    "962adc7f717e3e01"
+    "962adc7f717e3e01",
+    "4290723b8d5ccf5d"
    ]
   },
   "form:кни́жками": {
@@ -10439,11 +10580,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.9 semitones over the lowest third, ending at 314 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b33fb20c0263753b",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +4.2 semitones over the lowest third, ending at 277 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "a6c37920b45e8ae1",
-    "b33fb20c0263753b"
+    "b33fb20c0263753b",
+    "ab614324435b36da"
    ]
   },
   "form:выздора́вливай": {
@@ -10785,11 +10934,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.3 semitones over the lowest third, ending at 345 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "7b3858d12762dd3f",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.7 semitones over the lowest third, ending at 261 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "b4fa4a9c7d6c73da",
-    "7b3858d12762dd3f"
+    "7b3858d12762dd3f",
+    "a70a48948bf14c2c"
    ]
   },
   "form:за́йцы": {
@@ -10891,11 +11048,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +4.7 semitones over the lowest third, ending at 256 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "6b85ac097607cc0e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.3 semitones over the lowest third, ending at 274 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "9174390a01ce7a3e",
-    "6b85ac097607cc0e"
+    "6b85ac097607cc0e",
+    "02c915e764d5b756"
    ]
   },
   "form:телефо́нами": {
@@ -10955,11 +11120,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.0 semitones over the lowest third, ending at 342 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "193ec11c88068731",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.4 semitones over the lowest third, ending at 267 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "9f494e2944159df8",
-    "193ec11c88068731"
+    "193ec11c88068731",
+    "5f8901376f62bd22"
    ]
   },
   "form:дешёвой": {
@@ -11345,11 +11518,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.4 semitones over the lowest third, ending at 312 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "05c3b75c79b13113",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.6 semitones over the lowest third, ending at 290 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "87953258e1a3b71b",
-    "05c3b75c79b13113"
+    "05c3b75c79b13113",
+    "4d02ac10b3930940"
    ]
   },
   "form:понеде́льников": {
@@ -11493,11 +11674,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.5 semitones over the lowest third, ending at 343 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "e69da662de847fc8",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.5 semitones over the lowest third, ending at 269 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "a08723d1bbb839a3",
-    "e69da662de847fc8"
+    "e69da662de847fc8",
+    "2e446c2318e884a9"
    ]
   },
   "form:паспорто́в": {
@@ -11841,11 +12030,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.2 semitones over the lowest third, ending at 316 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b82b8f510f5ff8d3",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.5 semitones over the lowest third, ending at 283 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "ed8fbcd47608f613",
-    "b82b8f510f5ff8d3"
+    "b82b8f510f5ff8d3",
+    "8a4c0c2cdb71ab79"
    ]
   },
   "form:доба́вила": {
@@ -11863,11 +12060,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.4 semitones over the lowest third, ending at 258 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "32a742782a6abe67",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.0 semitones over the lowest third, ending at 291 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "3c0bd124a4a982f7",
-    "32a742782a6abe67"
+    "32a742782a6abe67",
+    "f5485d511b9873f8"
    ]
   },
   "form:выбра́сываю": {
@@ -12033,11 +12238,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +7.4 semitones over the lowest third, ending at 261 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "920d34b85edf1ba2",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.5 semitones over the lowest third, ending at 342 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "072c5184450c80a3",
-    "920d34b85edf1ba2"
+    "920d34b85edf1ba2",
+    "8f68f6829c355f49"
    ]
   },
   "form:отде́льная": {
@@ -12175,11 +12388,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +3.4 semitones over the lowest third, ending at 252 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "c60be3777ea10525",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.1 semitones over the lowest third, ending at 299 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "eed336464c24903d",
-    "c60be3777ea10525"
+    "c60be3777ea10525",
+    "8733599ca03d2afe"
    ]
   },
   "form:положу́": {
@@ -13479,11 +13700,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +7.7 semitones over the lowest third, ending at 262 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "27c78207692bfbc1",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.0 semitones over the lowest third, ending at 382 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "fed4aa09a8663698",
-    "27c78207692bfbc1"
+    "27c78207692bfbc1",
+    "d09549e5fc94de26"
    ]
   },
   "form:по́воде": {
@@ -13515,11 +13744,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.3 semitones over the lowest third, ending at 310 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "45b3893fd8771ee3",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.0 semitones over the lowest third, ending at 292 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "57e24825d9d2d14e",
-    "45b3893fd8771ee3"
+    "45b3893fd8771ee3",
+    "3a43da5d576f33a1"
    ]
   },
   "form:ча́шка": {
@@ -13565,11 +13802,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.3 semitones over the lowest third, ending at 280 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "4c6e344ab120fd4c",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.4 semitones over the lowest third, ending at 275 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "b86687860eb1be85",
-    "4c6e344ab120fd4c"
+    "4c6e344ab120fd4c",
+    "e3ad9c7a4cd38766"
    ]
   },
   "form:пистоле́ты": {
@@ -13701,11 +13946,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.6 semitones over the lowest third, ending at 355 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "888d5f17de5b6a12",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.7 semitones over the lowest third, ending at 298 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "064de36dd6df6d0e",
-    "888d5f17de5b6a12"
+    "888d5f17de5b6a12",
+    "cf0bde67c4c17401"
    ]
   },
   "form:бери́": {
@@ -14165,11 +14418,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +7.6 semitones over the lowest third, ending at 335 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "a5f87efafc5bf376",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.6 semitones over the lowest third, ending at 270 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "20e0278316543b95",
-    "a5f87efafc5bf376"
+    "a5f87efafc5bf376",
+    "9d9f68442849daa6"
    ]
   },
   "form:продолжа́ете": {
@@ -14201,11 +14462,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.6 semitones over the lowest third, ending at 349 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "458714176d2ba3f5",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.1 semitones over the lowest third, ending at 292 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e2bd9818109d53d8",
-    "458714176d2ba3f5"
+    "458714176d2ba3f5",
+    "9b26b5b59c120e8d"
    ]
   },
   "form:ви́русы": {
@@ -14457,11 +14726,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.5 semitones over the lowest third, ending at 313 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "4f93c38fca2b554d",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.1 semitones over the lowest third, ending at 326 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e26a8ae97cfa88fe",
-    "4f93c38fca2b554d"
+    "4f93c38fca2b554d",
+    "c24796b9a4dbd270"
    ]
   },
   "form:те́ннисом": {
@@ -14493,11 +14770,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.1 semitones over the lowest third, ending at 330 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b4f80ea395d516c1",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.9 semitones over the lowest third, ending at 340 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "50865d4abbd05c15",
-    "b4f80ea395d516c1"
+    "b4f80ea395d516c1",
+    "57d52cd271684130"
    ]
   },
   "form:культу́рной": {
@@ -14809,11 +15094,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.8 semitones over the lowest third, ending at 276 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "26e10d22fe77a118",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.3 semitones over the lowest third, ending at 353 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "7f8beaa0161de208",
-    "26e10d22fe77a118"
+    "26e10d22fe77a118",
+    "8b8fd9b87b7b4410"
    ]
   },
   "form:адвока́ты": {
@@ -14845,11 +15138,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.4 semitones over the lowest third, ending at 335 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "d71705d24e093fb0",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.0 semitones over the lowest third, ending at 265 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e95e0262d5619537",
-    "d71705d24e093fb0"
+    "d71705d24e093fb0",
+    "875b87599922593a"
    ]
   },
   "form:предло́жим": {
@@ -15029,11 +15330,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.1 semitones over the lowest third, ending at 349 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "2ec0af9a60c78d7e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.1 semitones over the lowest third, ending at 307 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e2286d35bfa05737",
-    "2ec0af9a60c78d7e"
+    "2ec0af9a60c78d7e",
+    "d75ccd1ddbcb8379"
    ]
   },
   "form:францу́зских": {
@@ -15177,11 +15486,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.8 semitones over the lowest third, ending at 348 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "315c1914016cab94",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.2 semitones over the lowest third, ending at 326 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "8e723a5febee4824",
-    "315c1914016cab94"
+    "315c1914016cab94",
+    "e27d62e26d080a77"
    ]
   },
   "form:дохо́д": {
@@ -15713,11 +16030,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.4 semitones over the lowest third, ending at 251 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "07097e6255cfc1fa",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +3.3 semitones over the lowest third, ending at 274 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "166510cf006d95f2",
-    "07097e6255cfc1fa"
+    "07097e6255cfc1fa",
+    "b9ab7780ecc8df5e"
    ]
   },
   "form:класси́ческую": {
@@ -15847,11 +16172,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.9 semitones over the lowest third, ending at 305 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b172ae9a1b47334e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +4.6 semitones over the lowest third, ending at 304 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "f75d1abc13d5bc94",
-    "b172ae9a1b47334e"
+    "b172ae9a1b47334e",
+    "72205a9f9eb309fe"
    ]
   },
   "form:рабо́тала": {
@@ -16109,11 +16442,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.4 semitones over the lowest third, ending at 352 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "de9bc36074100513",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +12.0 semitones over the lowest third, ending at 309 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "7a44fe849785470b",
-    "de9bc36074100513"
+    "de9bc36074100513",
+    "8f55e194e6b2cb07"
    ]
   },
   "form:чая́ми": {
@@ -16391,11 +16732,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +5.5 semitones over the lowest third, ending at 252 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "de6ad72c51ca729a",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.1 semitones over the lowest third, ending at 299 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "b69fd71cb6623dce",
-    "de6ad72c51ca729a"
+    "de6ad72c51ca729a",
+    "fb391349f7ddba17"
    ]
   },
   "form:це́ло": {
@@ -16861,11 +17210,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.7 semitones over the lowest third, ending at 318 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "95c702c2f4730bab",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.1 semitones over the lowest third, ending at 323 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "b80bcee6c7b7b367",
-    "95c702c2f4730bab"
+    "95c702c2f4730bab",
+    "bd67f07466f0c7bc"
    ]
   },
   "form:оце́ниваешь": {
@@ -16947,11 +17304,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.0 semitones over the lowest third, ending at 268 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "7be0023189e04706",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +12.9 semitones over the lowest third, ending at 371 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "1e2218a3e161d6b2",
-    "7be0023189e04706"
+    "7be0023189e04706",
+    "961f32e2e00c7fbe"
    ]
   },
   "form:спорти́вный": {
@@ -17061,11 +17426,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.5 semitones over the lowest third, ending at 333 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8ade088df4fd8dce",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +14.1 semitones over the lowest third, ending at 367 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "4bce263544866494",
-    "8ade088df4fd8dce"
+    "8ade088df4fd8dce",
+    "112556fbc9036f5e"
    ]
   },
   "form:подру́г": {
@@ -17083,11 +17456,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.0 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "f9843566645d3a61",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.8 semitones over the lowest third, ending at 267 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "75a9e8f2689cdfd5",
-    "f9843566645d3a61"
+    "f9843566645d3a61",
+    "2d31772bbde26845"
    ]
   },
   "form:полови́нами": {
@@ -17357,11 +17738,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.4 semitones over the lowest third, ending at 362 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "cc9668c1f516f73c",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.6 semitones over the lowest third, ending at 297 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "f50ab4b27e3b74a0",
-    "cc9668c1f516f73c"
+    "cc9668c1f516f73c",
+    "b565b72fa1c06c4c"
    ]
   },
   "form:свои́м": {
@@ -17435,11 +17824,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.9 semitones over the lowest third, ending at 299 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "e75a528e7af60256",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.0 semitones over the lowest third, ending at 283 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "efe70f885567c6d6",
-    "e75a528e7af60256"
+    "e75a528e7af60256",
+    "81c175f6ebabc7b5"
    ]
   },
   "form:игру́шкой": {
@@ -17555,11 +17952,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.5 semitones over the lowest third, ending at 339 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "a61eba1f52cc3ef0",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.3 semitones over the lowest third, ending at 288 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e1269c1fd0d927e7",
-    "a61eba1f52cc3ef0"
+    "a61eba1f52cc3ef0",
+    "bb38a8d0ce8bb304"
    ]
   },
   "form:поменя́ешь": {
@@ -17675,11 +18080,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.9 semitones over the lowest third, ending at 285 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "260d8bd2276ad9a5",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +13.9 semitones over the lowest third, ending at 345 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "ab2581faf08220f8",
-    "260d8bd2276ad9a5"
+    "260d8bd2276ad9a5",
+    "9a78c15b6415a661"
    ]
   },
   "form:пройди́": {
@@ -17711,11 +18124,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.8 semitones over the lowest third, ending at 343 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8e19eb26797742bf",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.2 semitones over the lowest third, ending at 324 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "34bffa184f258f29",
-    "8e19eb26797742bf"
+    "8e19eb26797742bf",
+    "965607cf54244bc6"
    ]
   },
   "form:наказа́ний": {
@@ -17951,11 +18372,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.6 semitones over the lowest third, ending at 268 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b92d2c035faa2b08",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.1 semitones over the lowest third, ending at 351 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c87138dad2882dca",
-    "b92d2c035faa2b08"
+    "b92d2c035faa2b08",
+    "47111494fea1993a"
    ]
   },
   "form:атаку́ем": {
@@ -18113,11 +18542,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.4 semitones over the lowest third, ending at 297 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8e049cf217c46460",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.2 semitones over the lowest third, ending at 287 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "3b982ab01f324a91",
-    "8e049cf217c46460"
+    "8e049cf217c46460",
+    "6d6b00b141e6138a"
    ]
   },
   "form:кно́пок": {
@@ -18233,11 +18670,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +7.1 semitones over the lowest third, ending at 259 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "39c78b623023e4dc",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.2 semitones over the lowest third, ending at 287 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "028e7cc763a21f91",
-    "39c78b623023e4dc"
+    "39c78b623023e4dc",
+    "a4e9a8a7f072b387"
    ]
   },
   "form:отпра́вимся": {
@@ -18255,11 +18700,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.2 semitones over the lowest third, ending at 318 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "f548804c03c42684",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.2 semitones over the lowest third, ending at 314 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "4baf9619689d5232",
-    "f548804c03c42684"
+    "f548804c03c42684",
+    "551a477e754690fc"
    ]
   },
   "form:ока́жетесь": {
@@ -18333,11 +18786,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.7 semitones over the lowest third, ending at 288 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "481fa0db79a03159",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.9 semitones over the lowest third, ending at 290 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "be6af5d2dab31e56",
-    "481fa0db79a03159"
+    "481fa0db79a03159",
+    "03348dec2d4a376f"
    ]
   },
   "form:компью́тера": {
@@ -18539,11 +19000,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.2 semitones over the lowest third, ending at 282 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "9adeefa006608263",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.7 semitones over the lowest third, ending at 336 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "92f95398cf00784d",
-    "9adeefa006608263"
+    "9adeefa006608263",
+    "6e0546afaf87e98e"
    ]
   },
   "form:обе́даю": {
@@ -18639,11 +19108,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.2 semitones over the lowest third, ending at 292 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "e7b7b7b30d3e166e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.1 semitones over the lowest third, ending at 270 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "780618846636a59d",
-    "e7b7b7b30d3e166e"
+    "e7b7b7b30d3e166e",
+    "4fcb0e331db4f8ca"
    ]
   },
   "form:научи́сь": {
@@ -18661,11 +19138,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.6 semitones over the lowest third, ending at 317 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "a035c16434b3a34f",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.3 semitones over the lowest third, ending at 326 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c39f981a90d26bbc",
-    "a035c16434b3a34f"
+    "a035c16434b3a34f",
+    "aacbd2a46f4795bd"
    ]
   },
   "form:класси́ческих": {
@@ -18789,11 +19274,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.6 semitones over the lowest third, ending at 259 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "5782261243b89236",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.2 semitones over the lowest third, ending at 302 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c0af0300b94a9401",
-    "5782261243b89236"
+    "5782261243b89236",
+    "42ed9bf13130cd82"
    ]
   },
   "form:дома́шней": {
@@ -19035,11 +19528,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +5.7 semitones over the lowest third, ending at 252 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "033f1379061a0d8e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.2 semitones over the lowest third, ending at 264 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "a7ce9acfc78d9445",
-    "033f1379061a0d8e"
+    "033f1379061a0d8e",
+    "f9a27068493bffa5"
    ]
   },
   "form:ждёшь": {
@@ -19219,11 +19720,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.2 semitones over the lowest third, ending at 338 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "2bad8b9a6451f3e9",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.5 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "9a0c0ddaa998e497",
-    "2bad8b9a6451f3e9"
+    "2bad8b9a6451f3e9",
+    "c802258bc40f49ce"
    ]
   },
   "form:элеме́нту": {
@@ -19629,11 +20138,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.0 semitones over the lowest third, ending at 337 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8eb24b6b08098333",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.7 semitones over the lowest third, ending at 332 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "d8feb41fd2269414",
-    "8eb24b6b08098333"
+    "8eb24b6b08098333",
+    "6369ad5b0d8a5ccb"
    ]
   },
   "form:переходи́л": {
@@ -19651,11 +20168,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +14.6 semitones over the lowest third, ending at 357 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "107e96e4748a9942",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.3 semitones over the lowest third, ending at 350 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "2dbe47e93ce362aa",
-    "107e96e4748a9942"
+    "107e96e4748a9942",
+    "897f31699fe75ac3"
    ]
   },
   "form:пра́здничной": {
@@ -20087,11 +20612,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.4 semitones over the lowest third, ending at 340 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8fd88d3e6e77f0ac",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.4 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "d6216e3fedbd92bc",
-    "8fd88d3e6e77f0ac"
+    "8fd88d3e6e77f0ac",
+    "09591e7c2737eee2"
    ]
   },
   "form:францу́зскому": {
@@ -20165,11 +20698,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.0 semitones over the lowest third, ending at 265 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "60449c0dfc50c396",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.7 semitones over the lowest third, ending at 323 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "6355b881370f57aa",
-    "60449c0dfc50c396"
+    "60449c0dfc50c396",
+    "72325820f7b9eedf"
    ]
   },
   "form:сы́ру": {
@@ -20425,11 +20966,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.3 semitones over the lowest third, ending at 274 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "6b0a6342786734e4",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.1 semitones over the lowest third, ending at 292 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e59b88a6937b35ab",
-    "6b0a6342786734e4"
+    "6b0a6342786734e4",
+    "83e635a7430ea7ad"
    ]
   },
   "form:капу́ст": {
@@ -20575,11 +21124,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.8 semitones over the lowest third, ending at 255 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "bde14e99a700aea9",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.6 semitones over the lowest third, ending at 300 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "438f40b66b9e050d",
-    "bde14e99a700aea9"
+    "bde14e99a700aea9",
+    "a4476bfeb786b454"
    ]
   },
   "form:рабо́тайте": {
@@ -20639,11 +21196,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.8 semitones over the lowest third, ending at 278 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "0498092ba71ebbd8",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.9 semitones over the lowest third, ending at 338 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "fd2e26e61ecfdb4d",
-    "0498092ba71ebbd8"
+    "0498092ba71ebbd8",
+    "6d992c7722445e5c"
    ]
   },
   "form:долга́м": {
@@ -21181,11 +21746,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.5 semitones over the lowest third, ending at 322 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "0742540b1d177053",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.8 semitones over the lowest third, ending at 352 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "ffdbc257df185f62",
-    "0742540b1d177053"
+    "0742540b1d177053",
+    "25c91403d6785920"
    ]
   },
   "form:ча́шкам": {
@@ -21773,11 +22346,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.3 semitones over the lowest third, ending at 333 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "fb9fcad8abb5f609",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +9.2 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "881f454fdbd59fc3",
-    "fb9fcad8abb5f609"
+    "fb9fcad8abb5f609",
+    "160d09b7a7fe5150"
    ]
   },
   "form:не́рвничайте": {
@@ -21865,11 +22446,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.4 semitones over the lowest third, ending at 276 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "65821eedf50f9c2b",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.1 semitones over the lowest third, ending at 300 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "ce4397b0132c0c6e",
-    "65821eedf50f9c2b"
+    "65821eedf50f9c2b",
+    "b28e1f2ed1252dec"
    ]
   },
   "form:магази́н": {
@@ -22069,11 +22658,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +7.6 semitones over the lowest third, ending at 254 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "f1485e2737083176",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.0 semitones over the lowest third, ending at 325 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "f1bdac7773ab2ca5",
-    "f1485e2737083176"
+    "f1485e2737083176",
+    "1124cdaf51c86b0c"
    ]
   },
   "form:убы́тке": {
@@ -22233,11 +22830,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +12.5 semitones over the lowest third, ending at 329 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "222027a7c893078b",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.5 semitones over the lowest third, ending at 323 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "a8919077b7e4a122",
-    "222027a7c893078b"
+    "222027a7c893078b",
+    "1c74de5577bc1de9"
    ]
   },
   "form:со́лнцам": {
@@ -22507,11 +23112,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +3.4 semitones over the lowest third, ending at 287 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "1c3f6c4bd3c69048",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.0 semitones over the lowest third, ending at 295 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "6c3b7be5cec5979f",
-    "1c3f6c4bd3c69048"
+    "1c3f6c4bd3c69048",
+    "c02e107fe60a733a"
    ]
   },
   "form:люби́мый": {
@@ -22845,11 +23458,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.4 semitones over the lowest third, ending at 405 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "0c56dffa1917e5c0",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.4 semitones over the lowest third, ending at 304 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "bd65b7ae1f629adf",
-    "0c56dffa1917e5c0"
+    "0c56dffa1917e5c0",
+    "5cc5f853fc89c18f"
    ]
   },
   "form:туале́тами": {
@@ -22925,11 +23546,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +5.0 semitones over the lowest third, ending at 253 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "bbaabcbad5a532a0",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.1 semitones over the lowest third, ending at 338 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c90bd6e974fbe5cf",
-    "bbaabcbad5a532a0"
+    "bbaabcbad5a532a0",
+    "b9c565943134b0b1"
    ]
   },
   "form:президе́нт": {
@@ -24831,11 +25460,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.5 semitones over the lowest third, ending at 339 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "977f77fc656aaeb1",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.7 semitones over the lowest third, ending at 287 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "e7c2a1c5ffb441f3",
-    "977f77fc656aaeb1"
+    "977f77fc656aaeb1",
+    "d05398f6489b2190"
    ]
   },
   "form:взро́слую": {
@@ -24987,11 +25624,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +7.1 semitones over the lowest third, ending at 283 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "6eebe7f319eaf94a",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.9 semitones over the lowest third, ending at 317 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c59c854410c4a7e6",
-    "6eebe7f319eaf94a"
+    "6eebe7f319eaf94a",
+    "cce95ede55d3e632"
    ]
   },
   "form:бе́дной": {
@@ -25107,11 +25752,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.9 semitones over the lowest third, ending at 309 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "01490c13fdc2a0df",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.5 semitones over the lowest third, ending at 268 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "f780f287a97ffa99",
-    "01490c13fdc2a0df"
+    "01490c13fdc2a0df",
+    "8757ce1bd0cc8025"
    ]
   },
   "form:про́шлою": {
@@ -25165,11 +25818,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.0 semitones over the lowest third, ending at 329 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "c67cccae4cb49e55",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.4 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "2a8fc25a3e567561",
-    "c67cccae4cb49e55"
+    "c67cccae4cb49e55",
+    "d26d5d9f2fd849fa"
    ]
   },
   "form:звони́": {
@@ -25421,11 +26082,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.5 semitones over the lowest third, ending at 323 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "3438291eb8e6c47a",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.3 semitones over the lowest third, ending at 265 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "4050d685a6ec8b16",
-    "3438291eb8e6c47a"
+    "3438291eb8e6c47a",
+    "abb18b5aa090338d"
    ]
   },
   "form:пишу́": {
@@ -26223,11 +26892,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.5 semitones over the lowest third, ending at 277 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "d66db6f0cd616a01",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.0 semitones over the lowest third, ending at 294 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "c95f09c493d09b6b",
-    "d66db6f0cd616a01"
+    "d66db6f0cd616a01",
+    "e0847f913cd7b80c"
    ]
   },
   "form:опера́ция": {
@@ -26385,11 +27062,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +4.7 semitones over the lowest third, ending at 260 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "39d16fda778d6a5a",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.5 semitones over the lowest third, ending at 297 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "572e313fa62a73bf",
-    "39d16fda778d6a5a"
+    "39d16fda778d6a5a",
+    "58e9fbd207061935"
    ]
   },
   "form:у́жинов": {
@@ -27055,11 +27740,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +5.5 semitones over the lowest third, ending at 296 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b527f68d23d51654",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.2 semitones over the lowest third, ending at 316 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "b116220e3fbca5c5",
-    "b527f68d23d51654"
+    "b527f68d23d51654",
+    "88df38f16a6e1dc7"
    ]
   },
   "form:переведёт": {
@@ -27119,11 +27812,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.2 semitones over the lowest third, ending at 304 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "b9c37ce3ac787c97",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +11.8 semitones over the lowest third, ending at 298 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "6ead986f5f071e61",
-    "b9c37ce3ac787c97"
+    "b9c37ce3ac787c97",
+    "46302dacbe09f1c9"
    ]
   },
   "form:начина́лась": {
@@ -27459,11 +28160,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +10.3 semitones over the lowest third, ending at 332 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "8d6a16d0488c46b0",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.4 semitones over the lowest third, ending at 272 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "91bfec107905135f",
-    "8d6a16d0488c46b0"
+    "8d6a16d0488c46b0",
+    "d3516bfe2ed1cd60"
    ]
   },
   "form:сове́тах": {
@@ -27719,11 +28428,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.0 semitones over the lowest third, ending at 261 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "e2808d7431efdde7",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +8.2 semitones over the lowest third, ending at 270 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "385cb8a4c0732d85",
-    "e2808d7431efdde7"
+    "e2808d7431efdde7",
+    "0236263bbaa95483"
    ]
   },
   "form:ме́рю": {
@@ -27825,11 +28542,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +4.2 semitones over the lowest third, ending at 287 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "cdb334f483963837",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.1 semitones over the lowest third, ending at 294 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "4935e436e53d2b7d",
-    "cdb334f483963837"
+    "cdb334f483963837",
+    "aef140dd9012116b"
    ]
   },
   "form:авто́бусу": {
@@ -27847,11 +28572,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +5.7 semitones over the lowest third, ending at 280 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "84fe8afeb8dd11ca",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +14.4 semitones over the lowest third, ending at 336 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "a014ac63908b298b",
-    "84fe8afeb8dd11ca"
+    "84fe8afeb8dd11ca",
+    "b2431dc9f28e1f18"
    ]
   },
   "form:компью́терах": {
@@ -27869,11 +28602,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.3 semitones over the lowest third, ending at 256 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "6cf98ef22c51d236",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.4 semitones over the lowest third, ending at 296 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "76c987cda748ae55",
-    "6cf98ef22c51d236"
+    "6cf98ef22c51d236",
+    "b08551b673f2db7b"
    ]
   },
   "form:на́шему": {
@@ -28620,11 +29361,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +9.6 semitones over the lowest third, ending at 337 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "0849b19f5a20bf8e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +5.4 semitones over the lowest third, ending at 315 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "486d2db46e22f29e",
-    "0849b19f5a20bf8e"
+    "0849b19f5a20bf8e",
+    "61f3d0f316dd1a03"
    ]
   },
   "form:ку́ртку": {
@@ -28712,11 +29461,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +13.0 semitones over the lowest third, ending at 356 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "a01d2309b185d17e",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +7.8 semitones over the lowest third, ending at 260 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "34ed46872863dfab",
-    "a01d2309b185d17e"
+    "a01d2309b185d17e",
+    "83e148c9a931f0bc"
    ]
   },
   "form:гру́стная": {
@@ -29050,11 +29807,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +8.0 semitones over the lowest third, ending at 321 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "e4c6742161e44792",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +6.3 semitones over the lowest third, ending at 320 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "5560207e70db15f3",
-    "e4c6742161e44792"
+    "e4c6742161e44792",
+    "711c597d53ef5fbd"
    ]
   },
   "form:росси́йских": {
@@ -29142,11 +29907,19 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.3 semitones over the lowest third, ending at 267 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "flag",
+     "id": "0a6f9db6be1ade09",
+     "at": "2026-11-18",
+     "who": "intonation",
+     "note": "rises at the end: +10.0 semitones over the lowest third, ending at 308 Hz (tools/audio_intonation.py)"
     }
    ],
    "rebought": [
     "a9ca04957d9add1d",
-    "0a6f9db6be1ade09"
+    "0a6f9db6be1ade09",
+    "a3e0b82e1449b36f"
    ]
   },
   "form:капу́стами": {

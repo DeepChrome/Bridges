@@ -7898,10 +7898,13 @@ the portal every iteration).
   ladders pick them up, and the ladder gained a rung: **`dots` — «Слух...»**,
   tried after the statement, because ten rising words bought that way all
   came back falling (ends 102–204 Hz) where the bare word tends to lift. Four
-  rungs took the words **444 → 67 → 28 → 13**; the 11,672 table forms
-  measured 1,476 rising, the dots rung alone took them to 200, the next to
-  93 — **106 clips in all** still rise after every rendering and stay flagged.
-  About $0.70 all told. A clip still flagged after every rung is
+  rungs took the words **444 → 67 → 28 → 13**, and the accented spelling —
+  which a word's ladder now has, as a form's always had — and the accented
+  spelling with the dots (the last rung for any single word) took them to 1;
+  the 11,672 table forms measured 1,476 rising, the dots rung alone took them
+  to 200, the next rungs to 58 — **59 clips in all** still rise after every
+  rendering the voice offers and stay flagged for a person. About $0.75 all
+  told. A clip still flagged after every rung is
   listed for a person on the review site. A sentence has no dots rung — a question is meant to rise, and a
   stop was being doubled. **Run the tool after buying any words**, and read
   the ranked list before `--flag`.

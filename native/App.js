@@ -21,7 +21,7 @@ import { SessionProvider, useSession } from "./src/session";
 import { palette, fontFiles, faceFor } from "./src/theme";
 import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
-import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
+import { Loading, HeaderTitle, Text } from "./src/ui";
 import { AskButton } from "./src/askai";
 import { HeaderTools } from "./src/headermenu";
 import { DRILL_TYPES, wordDrillSpec } from "./src/questions";
@@ -29,7 +29,8 @@ import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
 import Translate from "./src/screens/Translate";
 import { DriveList, DriveEpisode } from "./src/screens/Drive";
-import { unitById, chapterOf, L, resolveWord, dueCount, videoById } from "./src/data";
+import { unitById, chapterOf, L, resolveWord, dueCount, routePosition } from "./src/data";
+import { ensurePacks } from "./src/audiopacks";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
 import Study from "./src/screens/Study";
@@ -506,6 +507,16 @@ function Shell() {
     const h = InteractionManager.runAfterInteractions(warmForms);
     return () => { if (h && h.cancel) h.cancel(); };
   }, []);
+  /* The audio packs for where the learner is and the chapter after, fetched
+     in the background (audiopacks.js): once the profile is here, whenever the
+     chapter changes, and on coming back to the foreground. */
+  const stage = ready && account ? routePosition(st).stage : null;
+  useEffect(() => {
+    if (stage === null) return undefined;
+    ensurePacks(stage).catch(() => {});
+    const sub = AppState.addEventListener("change", (s) => { if (s === "active") ensurePacks(stage).catch(() => {}); });
+    return () => sub.remove();
+  }, [stage]);
   /* …and so does the vibration motor, for the same reason: a call site that
      had to read state to decide whether to buzz would be a call site that
      could get it wrong. */

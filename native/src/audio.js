@@ -8,7 +8,8 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
 import { bare, fold } from "@core/util";
-import { wordClip } from "./wordaudio";
+import { wordClip, PACKS } from "./wordaudio";
+import { packedClip } from "./packs";
 
 /* The table forms' recordings, for anything `say` is handed (2026-10-04). A
    drill's answer «возьмёт» is a form, not a headword, so it had no clip in
@@ -21,6 +22,10 @@ import { wordClip } from "./wordaudio";
    never pays for, and which jest mocks empty (jest.setup.js). */
 let FORMS = null;
 let FORMS_FOLDED = null;
+/* Two entries are one clip when they require the same asset or name the same
+   packed file (an entry is a `require` id or `[pack, name]` since the packs,
+   2026-11-19). */
+const sameClip = (a, b) => (Array.isArray(a) && Array.isArray(b) ? a[0] === b[0] && a[1] === b[1] : a === b);
 export function formClip(text) {
   // A form is one word; a sentence never is, and need not load the table.
   if (/\s/.test(String(text || "").trim())) return null;
@@ -29,10 +34,14 @@ export function formClip(text) {
     FORMS_FOLDED = new Map();
     for (const [k, v] of Object.entries(FORMS.FORM_CLIPS || {})) {
       const f = fold(k);
-      FORMS_FOLDED.set(f, FORMS_FOLDED.has(f) && FORMS_FOLDED.get(f) !== v ? null : v);
+      FORMS_FOLDED.set(f, FORMS_FOLDED.has(f) && !sameClip(FORMS_FOLDED.get(f), v) ? null : v);
     }
   }
-  return FORMS.formClip(text) || FORMS_FOLDED.get(fold(text || "")) || null;
+  const own = FORMS.formClip(text);
+  if (own) return own;
+  const folded = FORMS_FOLDED.get(fold(text || ""));
+  if (!folded) return null;
+  return Array.isArray(folded) ? packedClip(folded, FORMS.PACKS || PACKS) : folded;
 }
 /* Every speaker asks the form table whether a recording exists, and the
    first ask loads ~9,600 entries. App.js calls this once the first screen has

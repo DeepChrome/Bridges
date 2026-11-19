@@ -9,6 +9,11 @@
 import { fold } from "@core/util";
 import { wordClip } from "../../../native/src/wordaudio.js";
 import { formClip } from "../../../native/src/formaudio.js";
+import { setPackResolver } from "../../../native/src/packs.js";
+
+/* The phone fetches chapters' clips in packs (native/src/audiopacks.js); the
+   desktop ships every file, so a packed clip is its asset URL like any other. */
+setPackResolver((pack, name) => `ya://assets/words/${name}.mp3`);
 
 export const SPEEDS = [
   { id: "normal", name: "Normal", rate: 1 }, { id: "slower", name: "Slower", rate: 0.8 }, { id: "slowest", name: "Slowest", rate: 0.65 },

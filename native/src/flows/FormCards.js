@@ -31,7 +31,7 @@ import { WordSourceRows } from "./Drills";
 import { Table } from "../rules";
 import { Done, useAudioStopOnLeave } from "../screens/Run";
 import { Q, DRILL_TYPES } from "../questions";
-import { L, STAGES, chapterWords, knownPool, skillWeight } from "../data";
+import { L, chapterWords, knownPool, skillWeight } from "../data";
 import { gradeSkill, schedulerOpts } from "@core/scheduler";
 import { shuffle } from "@core/util";
 

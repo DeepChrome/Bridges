@@ -7909,6 +7909,68 @@ the portal every iteration).
   stop was being doubled. **Run the tool after buying any words**, and read
   the ranked list before `--flag`.
 
+## 30dc. The owner's day of notes, taken as one batch (2026-11-19)
+
+Fourteen items in one afternoon, each a message as he met the thing. The
+rules each left:
+
+- **One header on every screen** (headermenu.js): the sparkle, Home, and a
+  "+" whose sheet holds the profile, the screen's Options where it has any,
+  "How to use this screen" and "Report a problem". *"Looks too chaotic that
+  they're always changing around."* A screen registers its options with
+  `useHeaderOptions(route, open, label)`; the on-screen cogs and the sparkle
+  and flag inside an exercise (§30by) are gone. Tests open a screen's options
+  through `global.__openOptions()`, since no test mounts the header.
+- **An options sheet is a list of rows, each opening its choices** (ui.js
+  `OptionRow`/`PickSheet` — *"similar to an Excel filter"*). Study's first row
+  is Personalized or Custom, and the chapters and decks show only under
+  Custom. The drills, the form cards, drive mode, the tutor, Talk and
+  Settings' choices are the same shape. The sub-sheet's state lives in the
+  row (§30be's Modal trap).
+- **Practice is two tabs of tiles** (`SegmentTabs`): Drills, and Grammar with
+  the reference under it.
+- **The front stays the front**: turned back, a card shows what it showed
+  before Show; the full card is the back alone (reverses §30cm).
+- **One answer a question** (Run.js `answeredRef`): word building's "Next
+  word" stayed under the verdict and each press rang the cue again. **A clean
+  spoken pass advances itself** after the reading (`AUTO_NEXT_KINDS`, say ·
+  shadow · buildup); a miss, a partial or a chosen answer waits for Continue.
+- **Today's new words are tacked onto the review** (core/queue.js `tackOn`,
+  `tackedToday`, `untack`): a lesson's words as its walk or quiz first makes
+  their cards (the Runner's `lesson` prop, flows/Lesson.js), a watched video's unmet words
+  (Video.js); each adds one to the goal, uncapped, and is dealt in the chunk
+  before the fill whatever its schedule; answered in Study it leaves the list;
+  the next day forgets the list and keeps the number. **The chunk is
+  shuffled** unless the order is From the start. Tests that asserted the old
+  order assert membership now.
+- **The sparkle speaks and listens** (converse.js `useConverse`, mic.js's
+  toggles shared with the tutor): hold to ask in Russian or English, or the
+  waveform for a hands-free exchange; the reply is read with `speakMixed` —
+  English in English, the «Russian» in Teddy's voice. `converse: true` rides
+  to `/v1/ask`, which may then end with a question about the screen.
+- **The tutor marks in two lines** (backend tutor.js `mark` {ok, yours,
+  right}; Tutor.js `Mark`): You in red, Correct in green, one sentence of why
+  (`NOTE_WORDS` 26). *"Things are getting buried in a wall of text."*
+- **Stats explain themselves on a tap and nowhere else**: every figure, level
+  and bar opens a `Bubble` of one or two lines; "Due by day" and "Cards
+  answered"; the day sheet lists topics with counts, not names.
+- **For you** on Immerse (video.js `suggestVideos`): three unwatched videos
+  scored off the words held (`KNOWN_AT`), the chapter and the level.
+- **Search beyond the dictionary** (wiktionary.js): a Russian word with no
+  entry offers Look up on Wiktionary, shown in the app with the CC BY-SA line;
+  one request a word, on a press, never for English.
+- **The audio ships in packs by chapter** (tools/build_word_assets.mjs,
+  audiopacks.js, packs.js). Chapters 1–2 and the grammar's clips ride in the
+  APK; every other chapter is a zip named by its contents
+  (`ch3-<hash>`), fetched a chapter ahead in the background from the dl
+  Worker (`/audio/<id>.zip`, `tools/dl/upload_audio.mjs`), unpacked into the
+  document directory, and resolved by `[pack, name]` entries in the generated
+  modules; a word whose pack has not landed is the device voice, and that
+  miss queues the pack. `native/assets/words/` still holds every file for the
+  desktop and the review site. Settings → Audio lists the packs. R2 is not
+  enabled on the Cloudflare account, so the packs live in KV (25 MiB a
+  value; `more` is cut to parts).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -7976,6 +8038,12 @@ the script stamps the build (§30cv), and an unstamped APK carries versionCode
 27, which the update check cannot tell from any other. Then
 `node tools/dl/upload.mjs native\build-out\Ya-<commit>.apk --notes "..."`
 publishes it and makes it the one the app offers.
+
+**After `build_word_assets.mjs`, upload the packs before the build ships**
+(§30dc): `node tools/dl/upload_audio.mjs` puts every pack in
+native/build-out/audio/ on the host, skipping ones already there. A build
+whose packs are not on the host reads every word past chapter 2 in the
+device voice.
 
 **A locally built APK cannot update one installed from EAS.** The local build is
 signed with `android/app/debug.keystore`; Android refuses the update with

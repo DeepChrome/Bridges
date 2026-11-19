@@ -5,8 +5,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
-import { Screen, Btn, List, Row, SectionLabel, Tick, Text,
-         Sheet, Loading, RowText, OptionRow, ToggleRow } from "../ui";
+import { Screen, Btn, List, Text, Sheet, Loading, OptionRow, ToggleRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { clearRun, savedRun, useResume } from "../resume";

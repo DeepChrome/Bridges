@@ -16,7 +16,8 @@ describe("the form recordings", () => {
     // At least some keys carry a stress mark: a folded key would carry none.
     expect(keys.filter((k) => /́/.test(k)).length).toBeGreaterThan(keys.length / 2);
     for (const k of keys.slice(0, 200)) expect(k).toBe(k.normalize("NFC"));
-    const k = keys.find((x) => /́/.test(x));
+    // A bundled form (a chapter's pack entry resolves only once fetched, audiopacks.test.js).
+    const k = keys.find((x) => /́/.test(x) && !Array.isArray(FORM_CLIPS[x]));
     expect(formClip(k)).toBeTruthy();
     expect(formClip(` ${k.normalize("NFD")} `)).toBe(formClip(k));
     expect(formClip("несуществующееслово")).toBeNull();

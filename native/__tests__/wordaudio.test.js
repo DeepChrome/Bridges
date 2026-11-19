@@ -30,8 +30,9 @@ describe("the words with no recording", () => {
       .map((i) => L[i])
       .filter((w) => w && w.b && !AUDIO[fold(w.b)]);
     expect(gaps.length).toBeGreaterThan(0);
+    // Each has an entry: bundled, or in a chapter's pack (2026-11-19).
     for (const w of gaps) {
-      expect(wordClip(fold(w.b))).toBeTruthy();
+      expect(WORD_CLIPS[fold(w.b)]).toBeTruthy();
     }
     /* Keyed folded, which is the whole reason the first count came out at 75
        instead of 61: the collection's manifest folds ё to е and a lemma's bare
@@ -40,8 +41,12 @@ describe("the words with no recording", () => {
     expect(Object.keys(WORD_CLIPS).every((k) => k === fold(k))).toBe(true);
   });
 
+  /* A bundled clip — a `require`, not a `[pack, name]` entry, which is a
+     chapter's pack the phone fetches (audiopacks.test.js covers those). */
+  const bundledWord = () => Object.keys(WORD_CLIPS).find((k) => !Array.isArray(WORD_CLIPS[k]));
+
   it("counts as a recording rather than the device voice", () => {
-    const word = Object.keys(WORD_CLIPS)[0];
+    const word = bundledWord();
     expect(hasRealAudio(word)).toBe(true);
     /* §27's rule is that the *device voice* is never mistaken for a prepared
        recording. It has never meant "a human said this" — the collection is
@@ -49,7 +54,7 @@ describe("the words with no recording", () => {
   });
 
   it("plays the bundled clip instead of speaking it", async () => {
-    const word = Object.keys(WORD_CLIPS)[0];
+    const word = bundledWord();
     await say(word);
     // A player opened, and the phone did not read it aloud.
     expect(global.__played.length).toBe(1);

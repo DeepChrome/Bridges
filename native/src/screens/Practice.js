@@ -22,7 +22,6 @@
  * owner, 2026-09-23). No tile has a caption of its own beyond its kind. */
 
 import React, { useMemo, useState } from "react";
-import { View } from "react-native";
 import { useSession } from "../session";
 import { Screen, SectionLabel, Tile, TileGrid, SegmentTabs } from "../ui";
 import { DRILL_TYPES } from "../questions";

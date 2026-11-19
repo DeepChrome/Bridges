@@ -10,13 +10,14 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { View } from "react-native";
+import { View, ActivityIndicator, Linking } from "react-native";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
-import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip, Text } from "../ui";
+import { useTheme, type as T } from "../theme";
+import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip, Text, Btn } from "../ui";
 import { searchWordsScored } from "../data";
 import { LANG, LANG_EN } from "../speech";
 import { MATCH } from "@core/search";
+import { lookupWiktionary, canLookUp, WIKTIONARY_LICENCE } from "../wiktionary";
 
 const RECENT_MAX = 6;
 
@@ -83,6 +84,50 @@ function Hit({ h, onOpen }) {
   );
 }
 
+/* The Wiktionary entry for a word the dictionary lacks: a button, then the
+   senses by part of speech, the licence line, and the page itself for more. */
+function WiktionaryLookup({ word }) {
+  const t = useTheme();
+  const [state, setState] = useState({ word: null, busy: false, result: undefined });
+  const result = state.word === word ? state.result : undefined;
+  const busy = state.word === word && state.busy;
+  const look = async () => {
+    setState({ word, busy: true, result: undefined });
+    const r = await lookupWiktionary(word);
+    setState((s) => (s.word === word ? { word, busy: false, result: r } : s));
+  };
+  if (result === undefined && !busy) {
+    return <Btn kind="plain" testID="wiktionary-look" label="Look up on Wiktionary" onPress={look} />;
+  }
+  if (busy) return <ActivityIndicator testID="wiktionary-busy" color={t.ink3} />;
+  if (!result) {
+    return <Muted testID="wiktionary-none" style={{ textAlign: "center" }}>Not on Wiktionary either</Muted>;
+  }
+  return (
+    <View testID="wiktionary-entry" style={{ alignSelf: "stretch", gap: 10 }}>
+      <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600", textAlign: "center" }}>{result.word}</Text>
+      <List>
+        {result.entries.map((e, k) => (
+          <Row key={k} testID={`wiktionary-${e.pos}`}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Pill>{e.pos}</Pill>
+              {e.senses.slice(0, 6).map((s, j) => (
+                <Text key={j} style={{ color: t.ink, fontSize: T.body, lineHeight: 22 }}>
+                  {e.senses.length > 1 ? `${j + 1}. ` : ""}{s}
+                </Text>
+              ))}
+            </View>
+          </Row>
+        ))}
+      </List>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <Muted size={12}>{WIKTIONARY_LICENCE}</Muted>
+        <Btn kind="link" label="Open the page" onPress={() => Linking.openURL(result.url).catch(() => {})} />
+      </View>
+    </View>
+  );
+}
+
 export default function Search({ navigation }) {
   const t = useTheme();
   const { st, update } = useSession();
@@ -129,9 +174,13 @@ export default function Search({ navigation }) {
       ) : null}
 
       {q && !hits.length ? (
-        <Muted style={{ textAlign: "center", marginTop: 34 }}>
-          {`Nothing for “${q}”.`}
-        </Muted>
+        <View style={{ alignItems: "center", marginTop: 34, gap: 14 }}>
+          <Muted style={{ textAlign: "center" }}>{`Nothing for “${q}”.`}</Muted>
+          {/* Beyond the dictionary: Wiktionary, in the app (wiktionary.js). A
+              press, not every keystroke — one request a word, and a train has
+              no network. For a Russian word only. */}
+          {canLookUp(q) ? <WiktionaryLookup word={q} /> : null}
+        </View>
       ) : null}
 
       {matches.length ? (

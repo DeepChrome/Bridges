@@ -22,7 +22,7 @@ import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-nat
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
-import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
+import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, SectionLabel, Text,
          Marked, BULB_PATH, Sheet, RowText, IconButton, ChatTurn, OptionRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { Linked } from "../words";

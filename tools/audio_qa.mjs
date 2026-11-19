@@ -187,9 +187,22 @@ if (unmeasured.length) errors.push(`${unmeasured.length} bought word clip(s) nev
 for (const mod of ["wordaudio.js", "formaudio.js", "endingaudio.js"]) {
   const file = join(ROOT, "native", "src", mod);
   if (!existsSync(file)) continue;
-  const gone = [...readFileSync(file, "utf8").matchAll(/require\("\.\.\/assets\/([^"]+)"\)/g)]
+  const src = readFileSync(file, "utf8");
+  const gone = [...src.matchAll(/require\("\.\.\/assets\/([^"]+)"\)/g)]
     .map((m) => m[1]).filter((p) => !existsSync(join(ROOT, "native", "assets", p)));
   if (gone.length) errors.push(`${gone.length} clip(s) ${mod} requires are not on disk: ${gone.slice(0, 6).join(", ")}`);
+  /* …and every packed clip (2026-11-19) is a file on disk and in a pack this
+     build made: `[pack, name]` names the zip through PACKS, and the zip is
+     what the phone fetches. */
+  const packed = [...src.matchAll(/: \[(\d+), "([^"]+)"\]/g)].map((m) => [Number(m[1]), m[2]]);
+  if (packed.length) {
+    const lost = packed.filter(([, n]) => !existsSync(join(ROOT, "native", "assets", "words", n + ".mp3")));
+    if (lost.length) errors.push(`${lost.length} packed clip(s) in ${mod} are not on disk: ${lost.slice(0, 6).map((x) => x[1]).join(", ")}`);
+    const packs = JSON.parse(readFileSync(join(ROOT, "native", "build-out", "audio", "packs.json"), "utf8")).packs;
+    const noZip = packs.filter((p) => !existsSync(join(ROOT, "native", "build-out", "audio", p.id + ".zip")));
+    if (noZip.length) errors.push(`${noZip.length} pack(s) have no zip in native/build-out/audio: ${noZip.map((p) => p.id).join(", ")}`);
+    if (mod === "wordaudio.js") notes.push(`audio packs: ${packs.length} (${packs.map((p) => `${p.label} ${Math.round(p.bytes / 1048576)} MB`).join(", ")})`);
+  }
 }
 
 /* A bundled clip wins over the collection's file (`say()` checks the bundle

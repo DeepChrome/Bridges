@@ -46,6 +46,30 @@ export default {
         "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
     }
 
+    /* The audio packs (2026-11-19, tools/build_word_assets.mjs): a zip a
+       chapter, stored by upload_audio.mjs in pieces like a build but with no
+       expiry — a pack is named by its contents, so an old build's pack stays
+       good for as long as that build is installed anywhere. Cacheable for a
+       day at the edge: the content behind a name never changes. */
+    const pack = /^audio\/([a-z]+\d*-[0-9a-f]{10})\.zip$/.exec(name);
+    if (pack) {
+      if (request.method !== "GET") return new Response("method", { status: 405 });
+      const meta = await env.FILES.get(`audio:${pack[1]}:meta`, "json");
+      if (!meta) return new Response("not found", { status: 404 });
+      const { readable, writable } = new TransformStream();
+      (async () => {
+        const w = writable.getWriter();
+        for (let i = 0; i < meta.parts; i++) {
+          const part = await env.FILES.get(`audio:${pack[1]}:${i}`, "arrayBuffer");
+          await w.write(new Uint8Array(part));
+        }
+        await w.close();
+      })();
+      return new Response(readable, { headers: {
+        "content-type": "application/zip", "content-length": String(meta.size),
+        "cache-control": "public, max-age=86400" } });
+    }
+
     // ?dl=1 saves the file instead of playing it in the tab.
     const save = url.searchParams.has("dl");
     if (!/^[A-Za-z0-9_-]{16,}\.(apk|aab|mp4)$/.test(name)) return new Response("not found", { status: 404 });

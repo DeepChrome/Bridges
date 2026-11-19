@@ -1,0 +1,112 @@
+# The 2026-11-19 batch (CLAUDE.md 30dc), on a clean install: the one header
+# and its menu, Practice's two tabs, the Study options as rows, a card turned
+# back, the sparkle's voice row, the tutor's mark, Stats' taps, Immerse's
+# For you, Search beyond the dictionary, Settings' Audio section.
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\batch1119.txt -Device emulator-5554
+#
+# Screenshots land in native/screenshots/walk/. Read them - that is the audit.
+# The emulator needs a universal APK (31).
+
+wait:3
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:4
+shot:b00-learn-header
+
+# The header's menu, the same on every screen.
+tap:More
+wait:1
+shot:b01-more-menu
+back
+wait:1
+
+tap:^Practice$
+wait:2
+shot:b02-practice-drills
+tap:^Grammar$
+wait:1
+shot:b03-practice-grammar
+tap:^Drills$
+wait:1
+
+tap:^Study$
+wait:3
+tap:More
+wait:1
+tap:Study options
+wait:2
+shot:b04-study-options
+tap:^Review$
+wait:1
+shot:b05-review-pick
+tap:^Custom$
+wait:1
+shot:b06-custom-rows
+tap:^Front$
+wait:1
+shot:b07-front-pick
+back
+wait:1
+back
+wait:1
+tap:^Personal review$
+wait:3
+tap:^Show$
+wait:2
+shot:b08-card-back
+tap:Turn the card
+wait:2
+shot:b09-card-front-again
+
+# The sparkle: the voice row under the box.
+tap:Ask the AI about the Russian here
+wait:2
+shot:b10-ask-voice
+back
+wait:1
+
+tap:^Immerse$
+wait:3
+tap:For you
+wait:2
+shot:b11-for-you
+back
+wait:1
+
+tap:^Search$
+wait:2
+tap:Russian or English
+type:зюзюка
+wait:2
+shot:b12-search-wiktionary
+back
+wait:1
+
+tap:More
+wait:1
+tap:^Jared$
+wait:2
+tap:^Statistics$
+wait:3
+shot:b13-stats
+tap:to go today
+wait:1
+shot:b14-stats-tip
+back
+wait:1
+back
+wait:1
+tap:^Settings$
+wait:2
+scroll
+scroll
+shot:b15-settings-audio
+back
+wait:1

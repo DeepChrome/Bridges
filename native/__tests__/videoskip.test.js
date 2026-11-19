@@ -38,8 +38,9 @@ describe("the skip setting", () => {
   it("is set in Settings and saved with the profile", async () => {
     await withProfile(<Settings visible onClose={() => {}} onLab={() => {}} onTour={() => {}}
                                 onCredits={() => {}} onFeedback={() => {}} />);
-    const chip = await screen.findByText("20 s");
-    await act(async () => { fireEvent.press(chip); });
+    // A row opening its choices (ui.js OptionRow, 2026-11-19).
+    await act(async () => { fireEvent.press(await screen.findByTestId("skip-choice")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("skip-choice-opt-20")); });
     await flushState();
     expect((await global.__db.saved("p1")).skip).toBe(20);
   });

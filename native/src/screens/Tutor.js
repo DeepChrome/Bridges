@@ -34,11 +34,11 @@ import { View, Pressable, ScrollView, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
-import { Screen, Btn, Muted, Text, TextInput, Marked, Note, BulbButton, Sheet,
+import { Screen, Btn, Muted, Text, TextInput, Note, BulbButton, Sheet,
          List, Row, SectionLabel, Choice, RowText, IconButton, ChatTurn, TypingTurn, OptionRow, ToggleRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { Linked } from "../words";
-import { L, STAGES, studiedFor, routePosition, rankOf, lessonCount, lessonsDone } from "../data";
+import { STAGES, studiedFor, routePosition, rankOf, lessonCount, lessonsDone } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop, voiceFor } from "../audio";
 // The tutor is Teddy (backend/src/tutor.js), and sounds like him.

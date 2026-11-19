@@ -403,7 +403,7 @@ export function useAudioStopOnLeave() {
    after every answer, so it can be picked up where it was left; finishing
    clears it. `restore` is such a saved run to start from instead of `steps`. */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
-                         allowBack = false, stepBack = false, navigation, save, restore, onAnswered }) {
+                         allowBack = false, stepBack = false, navigation, save, restore, onAnswered, lesson = false }) {
   const { st, update } = useSession();
   const t = useTheme();
   /* A saved run is only started from while it is still saved: once that run
@@ -479,8 +479,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
   const q = queue[at];
   guard.current = at > 0 && !finished.current;
-  // A lesson's run: its new words are today's exposure (tackOn in `record`).
-  const tacks = !!(save && /^(quiz|vocab):/.test(save.key));
+  // A lesson's run (`lesson`, flows/Lesson.js): its new words are today's
+  // exposure (tackOn in `record`). A Practice drill's are not.
+  const tacks = !!lesson;
   /* What the bulb has behind it for this question. Reading it always counts
      as a hint — see referenceFor. */
   const ref = q ? referenceFor(q) : { tables: [] };

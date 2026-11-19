@@ -259,6 +259,13 @@ jest.mock("expo-notifications", () => ({
    mocks its own); formaudio.test.js checks the real generated table. */
 jest.mock("./src/formaudio", () => ({ FORM_CLIPS: {}, formClip: () => null }));
 
+/* The chapters' audio packs count as installed (src/packs.js): a clip past
+   chapter 2 is `[pack, name]` in the generated table and resolves only through
+   whoever owns the packs — on the phone src/audiopacks.js, once fetched. The
+   suites assume the steady state, every recording present; audiopacks.test.js
+   imports the real resolver over this one and drives the fetching itself. */
+require("./src/packs").setPackResolver((pack, name) => ({ uri: `pack://${pack.id}/${name}.mp3` }));
+
 /* The suites seed profiles on the *current* curriculum without its stamp, so
    the once-per-curriculum reconcile (data.js, Phase 14 V7) would re-derive
    their lesson progress from their cards and undo what each test set up. It
@@ -318,11 +325,22 @@ jest.mock("expo-file-system", () => {
   const join = (...parts) => parts.map((p) => (typeof p === "string" ? p : p.uri)).join("/").replace(/([^:/])\/{2,}/g, "$1/");
   class Directory {
     constructor(...uris) { this.uri = join(...uris); }
+    get name() { return this.uri.split("/").pop(); }
     get exists() { return fs.dirs.has(this.uri); }
     create() { fs.dirs.add(this.uri); }
+    /* The entries one level down: files, and the directories made with
+       `create` (the audio packs, each a directory of clips). */
     list() {
-      return [...fs.files.keys()].filter((u) => u.startsWith(this.uri + "/"))
+      const prefix = this.uri + "/";
+      const files = [...fs.files.keys()].filter((u) => u.startsWith(prefix) && !u.slice(prefix.length).includes("/"))
         .map((u) => new File(u));
+      const dirs = [...fs.dirs].filter((u) => u.startsWith(prefix) && !u.slice(prefix.length).includes("/"))
+        .map((u) => new Directory(u));
+      return dirs.concat(files);
+    }
+    delete() {
+      for (const u of [...fs.files.keys()]) if (u.startsWith(this.uri + "/")) fs.files.delete(u);
+      for (const u of [...fs.dirs]) if (u === this.uri || u.startsWith(this.uri + "/")) fs.dirs.delete(u);
     }
   }
   class File {
@@ -352,7 +370,7 @@ jest.mock("expo-file-system", () => {
       return f;
     }
   }
-  return { File, Directory, Paths: { cache: new Directory("file:///cache") } };
+  return { File, Directory, Paths: { cache: new Directory("file:///cache"), document: new Directory("file:///documents") } };
 });
 /* The legacy file-system API, which src/update.js uses for a download with
    progress and for the content URI the package installer reads. The same

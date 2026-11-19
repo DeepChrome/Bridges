@@ -71,9 +71,9 @@ describe("tacking on", () => {
 
   it("a lesson quiz's first grade tacks the word on; a drill's does not", async () => {
     await seed();
-    const unit = UN[0];
-    const save = { key: `quiz:${unit.id}:0`, route: "Quiz", params: {}, title: "quiz" };
-    await render(<SessionProvider><Runner steps={[step]} onFinish={() => {}} recycle={false} save={save} /></SessionProvider>);
+    // `lesson` is what the lesson's two runners pass (flows/Lesson.js).
+    await render(<SessionProvider><Runner steps={[step]} onFinish={() => {}} recycle={false} lesson /></SessionProvider>);
+    void UN;
     await answer();
     let st = await saved();
     expect(tackedToday(st.daily, now)).toEqual(["книга"]);
@@ -83,8 +83,7 @@ describe("tacking on", () => {
     // The same word answered again in a drill adds nothing.
     await AsyncStorage.clear();
     await seed();
-    await render(<SessionProvider><Runner steps={[step]} onFinish={() => {}} recycle={false}
-      save={{ key: "drill:cases", route: "Drill", params: {}, title: "d" }} /></SessionProvider>);
+    await render(<SessionProvider><Runner steps={[step]} onFinish={() => {}} recycle={false} /></SessionProvider>);
     await answer();
     st = await saved();
     expect(tackedToday(st.daily, now)).toEqual([]);

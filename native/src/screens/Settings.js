@@ -22,6 +22,7 @@ import { QUEUE_DEFAULTS, ALL_DAYS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
 import { SyncSection } from "../syncui";
+import { AudioPacksSection } from "../audiopacksui";
 import { installedBuild } from "../update";
 
 /* What build this is, at the foot of Settings: the installed package's own
@@ -343,6 +344,8 @@ export function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedbac
 
             {/* This profile on another device (src/syncui.js, 2026-11-07). */}
             <SyncSection />
+            {/* The chapters' recordings on this phone (src/audiopacks.js, 2026-11-19). */}
+            <AudioPacksSection />
 
             {/* The schedule off the phone and back: the one thing no rebuild
                 can regenerate (ROADMAP P9.10). */}

@@ -209,6 +209,7 @@ export function VocabFlow({ route, navigation }) {
       steps={[step]}
       progress={{ at, total: steps.length }}
       recycle={false}
+      lesson
       onFinish={advance}
       /* Saved the moment the answer is in, pointing past it — saving on
          Continue left a run that re-asked a graded question (the review). */
@@ -368,6 +369,7 @@ export function QuizFlow({ route, navigation }) {
       steps={steps}
       navigation={navigation}
       stepBack
+      lesson
       save={save}
       restore={resume.restore}
       onFinish={(r) => {

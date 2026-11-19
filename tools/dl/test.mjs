@@ -63,4 +63,15 @@ ok((await get(`/${file}`)).status === 404, "and the file is gone");
 kv.set("dl:latest", JSON.stringify({ code: 1 }));
 ok((await get("/latest.json")).status === 404, "a record naming no file is a 404");
 
+// An audio pack: pieces streamed whole, cacheable, named by its contents.
+ok((await get("/audio/ch3-0123456789.zip")).status === 404, "a pack not uploaded is a 404");
+ok((await get("/audio/ch3.zip")).status === 404, "a pack name without its hash is nothing");
+kv.set("audio:ch3-0123456789:meta", JSON.stringify({ parts: 2, size: 4 }));
+kv.set("audio:ch3-0123456789:0", new Uint8Array([9, 8]).buffer);
+kv.set("audio:ch3-0123456789:1", new Uint8Array([7, 6]).buffer);
+const z = await get("/audio/ch3-0123456789.zip");
+ok(z.status === 200 && z.headers.get("content-type") === "application/zip", "a pack is served as a zip");
+ok(/max-age/.test(z.headers.get("cache-control")), "and may be cached");
+assert.deepEqual([...new Uint8Array(await z.arrayBuffer())], [9, 8, 7, 6]); checks++;
+
 console.log(`dl worker: ${checks} checks, all passed`);

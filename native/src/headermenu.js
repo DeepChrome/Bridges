@@ -57,7 +57,9 @@ export function MoreButton({ navigation, route }) {
   const [open, setOpen] = useState(false);
   const [help, setHelp] = useState(false);
   const name = route && route.name;
-  const options = optionsFor(route);
+  /* Read when the menu opens, not when the header draws: a screen registers
+     its options from an effect, after the header has already rendered. */
+  const [options, setOptions] = useState(null);
   const hasHelp = !!HELP[name] || aiOffered();
   const profile = () => {
     setOpen(false);
@@ -72,7 +74,7 @@ export function MoreButton({ navigation, route }) {
   };
   return (
     <>
-      <Pressable testID="more-button" onPress={() => setOpen(true)} hitSlop={8}
+      <Pressable testID="more-button" onPress={() => { setOptions(optionsFor(route)); setOpen(true); }} hitSlop={8}
                  accessibilityRole="button" accessibilityLabel="More" style={[GLYPH, { marginRight: 4 }]}>
         <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
              strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">

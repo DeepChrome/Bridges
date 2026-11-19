@@ -709,23 +709,9 @@ export function Bubble({ visible = true, onClose, title, children, footer, testI
   );
 }
 
-/* The cog that opens a screen's options — what a drill asks about, which cards
-   a session deals. One drawing for both (the owner, 2026-09-26: *"let's make
-   sure we have a settings cog to customize the exercises"*). It sits beside
-   the progress, where the thing being configured is, rather than in the
-   header with Home and the profile. */
-export function CogButton({ onPress, testID = "cog", label = "Options" }) {
-  const t = useTheme();
-  return (
-    <IconButton onPress={onPress} testID={testID} label={label}>
-      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
-           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-        <Path d={COG_PATH} />
-      </Svg>
-    </IconButton>
-  );
-}
-/* The cog, drawn once: here and on the video overlay (screens/Video.js). */
+/* The cog, drawn once, on the video overlay (screens/Video.js). A screen's
+   options open from the header's menu since 2026-11-19 (headermenu.js); the
+   `CogButton` that sat beside a drill's progress went with that. */
 export const COG_PATH = "M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z";
 
 /* The reference a learner can always reach for (the owner, 2026-09-27: *"when

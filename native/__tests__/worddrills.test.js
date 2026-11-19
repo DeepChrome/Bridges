@@ -29,7 +29,9 @@ const due = () => ({ dueAt: now - DAY, lastAt: now - 2 * DAY, s: 1, d: 5, state:
 const base = {
   v: 10, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0,
-  flash: ["recognise"], newPerDay: 5, learnAhead: 20, cardKinds: ["words"],
+  /* No new cards, so the seeded card is the pile: the day's chunk is shuffled
+     since 2026-11-19 and a new sentence card could otherwise come first. */
+  flash: ["recognise"], newPerDay: 0, learnAhead: 20, cardKinds: ["words"],
 };
 async function withProfile(state = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({

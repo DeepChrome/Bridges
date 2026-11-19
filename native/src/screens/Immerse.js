@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Image, Pressable, Linking } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme, radius, type as T } from "../theme";
+import { useTheme, type as T } from "../theme";
 import { Screen, List, Row, Btn, Pill, Muted, SearchField, SectionLabel, Sheet, Dropdown, Text } from "../ui";
 import { videos, videoById, videoWatched, unitById, CHANNELS, routePosition, rankOf, KNOWN_AT } from "../data";
 import { libraryState, setLibraryState, watchHistory } from "../immerse";

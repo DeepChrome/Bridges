@@ -418,7 +418,7 @@ export default function Stats() {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 20, marginTop: 8 }}>
         <Pressable testID="retention-figure" accessibilityRole="button"
                    onPress={() => setTip({ title: "Retention", value: pct === null ? "–" : `${pct}%`,
-                     lines: ["Of the cards you had learned and reviewed in the last 30 days, the share you remembered.",
+                     lines: ["The share of reviewed cards you remembered, last 30 days.",
                              "Anything but Again counts as remembered."] })}>
           {pct === null
             ? <View style={{ width: 84, height: 84, borderRadius: 42, borderWidth: 7, borderColor: t.surface3 }} />
@@ -432,11 +432,11 @@ export default function Stats() {
                             "A day skipped carries over."] })} />
           <Figure testID="run-figure" value={String(run)} label={run === 1 ? "day in a row" : "days in a row"}
                   onPress={() => setTip({ title: "Days in a row", value: String(run),
-                    lines: ["Days with at least one card answered, counting back from today.",
+                    lines: ["Days with a card answered, counting back from today.",
                             "Yesterday still counts until today is done."] })} />
           <Figure testID="week-figure" value={weekTotal === null ? "–" : String(weekTotal)} label="reviews this week"
                   onPress={() => setTip({ title: "Reviews this week", value: weekTotal === null ? "–" : String(weekTotal),
-                    lines: ["Cards answered in the last seven days, in lessons, drills and the review."] })} />
+                    lines: ["Cards answered in the last seven days, everywhere."] })} />
         </View>
       </View>
 

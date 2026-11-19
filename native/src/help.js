@@ -42,14 +42,14 @@ export const HELP = {
   Cards: { title: "Study", lines: [
     ["Show, then grade", "Again, Hard, Good, Easy set the next review"],
     ["Counter", "Done, coming back, left; tap it for more"],
-    ["Cog", "Fronts, sources, order, new words a day"],
+    ["Options", "In the + menu: review, front, cards, order, new words"],
     ["Goal reached", "A note; the cards keep coming"],
     ["Finish", "Past the goal: stop, and choose another round"],
     ["Resting", "Ten misses in a row: a new word instead"],
     ["Wrench", "Developer mode: why this card came up"],
     ["a_", "On the front: the answer a letter at a time"],
     ["Drills", "On the back: every drill for that word"],
-    ["Low priority", "Out of the rotation; the cog lists them"],
+    ["Low priority", "Out of the rotation; Options lists them"],
     ["Switch", "Offered when one direction falls far behind"],
   ] },
   WordDrill: { title: "One word's drill", lines: [
@@ -69,10 +69,10 @@ export const HELP = {
     ["Front", "The word and the form it asks for"],
     ["Show", "The form, its sound and the table"],
     ["Again · Hard · Good · Easy", "Your own grade; moves Cases & forms only"],
-    ["Cog", "Which drills, which words"],
+    ["Options", "In the + menu: which drills, which words"],
   ] },
   Drill: { title: "A drill", lines: [
-    ["Cog", "What to ask, which words, written or chosen"],
+    ["Options", "In the + menu: what to ask, words, answer style"],
     ["a_", "The answer a piece at a time; costs the grade"],
     ["Bulb", "The word's tables and rules; costs the grade"],
     ["Speaker", "Hear the word; twice for slower"],
@@ -108,7 +108,7 @@ export const HELP = {
   Drive: { title: "Drive mode", lines: [
     ["Episodes", "Each chapter's words, about fifty an episode"],
     ["Your playlists", "Your studied words, trouble words, a chapter's learned words"],
-    ["Cog", "Prompt, pause, speed, voice, next episode"],
+    ["Options", "In the + menu: prompt, pause, speed, voice, next episode"],
   ] },
   DriveEpisode: { title: "An episode", lines: [
     ["The pause", "Say the Russian aloud before you hear it"],
@@ -123,7 +123,7 @@ export const HELP = {
     ["Microphone", "Hold to speak, in either language"],
     ["Loop", "Hands-free: it listens after each answer"],
     ["Bulb", "The grammar reference"],
-    ["Cog", "Level, English under the Russian, start over"],
+    ["Options", "In the + menu: level, English under Russian, start over"],
   ] },
 };
 HELP.GrammarRun = HELP.Drill;

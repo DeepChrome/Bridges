@@ -25,9 +25,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text, Muted, Sheet, Loading,
-         RowText, Lift, toneOf, Speaker, Pill } from "../ui";
+import { Screen, Btn, List, Text, Muted, Sheet, Loading, RowText, Lift, toneOf, Speaker, Pill, OptionRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
+import { WordSourceRows } from "./Drills";
 import { Table } from "../rules";
 import { Done, useAudioStopOnLeave } from "../screens/Run";
 import { Q, DRILL_TYPES } from "../questions";
@@ -66,43 +66,21 @@ export function formDeck(kinds, pool, weight, n = FORM_CARDS_N) {
   return shuffle(out).slice(0, n);
 }
 
+/* Two rows, each opening its choices (ui.js OptionRow; the drills' sheet has
+   the same shape): which kinds, and which words. The last kind cannot be
+   unticked — a deck of nothing is not a drill (§30ac). */
 function FormCardOptions({ prefs, onChange, onClose }) {
   const kinds = prefs.kinds && prefs.kinds.length ? prefs.kinds : FORM_CARD_KINDS;
   const chapters = prefs.chapters || [];
-  const toggle = (id) => {
-    // The last tick cannot be removed: a deck of nothing is not a drill (§30ac).
-    const next = kinds.includes(id) ? (kinds.length > 1 ? kinds.filter((x) => x !== id) : kinds) : kinds.concat([id]);
-    onChange({ ...prefs, kinds: next.length === FORM_CARD_KINDS.length ? null : next });
-  };
-  const toggleChapter = (k) => onChange({
-    ...prefs,
-    chapters: chapters.includes(k) ? chapters.filter((x) => x !== k) : chapters.concat([k]).sort((a, b) => a - b),
-  });
   return (
-    <Sheet onClose={onClose} testID="formcards-options" maxHeight="88%"
+    <Sheet onClose={onClose} testID="formcards-options" title="Form card options" maxHeight="88%"
            footer={<Btn block kind="pri" testID="formcards-apply" label="Apply" style={{ marginTop: 8 }} onPress={onClose} />}>
-      <View style={{ marginBottom: 18 }}>
-        <SectionLabel>Ask about</SectionLabel>
-        <List>
-          {DRILL_TYPES.filter((d) => FORM_CARD_KINDS.includes(d.id)).map((d) => (
-            <Row key={d.id} testID={`formcards-kind-${d.id}`} onPress={() => toggle(d.id)}>
-              <Tick on={kinds.includes(d.id)} />
-              <RowText title={d.name} bold={false} />
-            </Row>
-          ))}
-        </List>
-      </View>
-      <View style={{ marginBottom: 6 }}>
-        <SectionLabel>Words from</SectionLabel>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-          <Chip testID="formcards-mine" on={!chapters.length} label="Your words"
-                onPress={() => onChange({ ...prefs, chapters: [] })} />
-          {STAGES.map((s, k) => (
-            <Chip key={s.core.id} testID={`formcards-ch${k + 1}`} on={chapters.includes(k)}
-                  label={`Ch ${k + 1}`} onPress={() => toggleChapter(k)} />
-          ))}
-        </View>
-      </View>
+      <List>
+        <OptionRow testID="formcards-kinds" title="Ask about" multi minOne value={kinds}
+                   options={DRILL_TYPES.filter((d) => FORM_CARD_KINDS.includes(d.id)).map((d) => ({ id: d.id, name: d.name }))}
+                   onPick={(ids) => onChange({ ...prefs, kinds: ids.length === FORM_CARD_KINDS.length ? null : ids })} />
+        <WordSourceRows prefix="formcards" chapters={chapters} onChange={(c) => onChange({ ...prefs, chapters: c })} />
+      </List>
     </Sheet>
   );
 }

@@ -70,10 +70,14 @@ describe("the drill cog", () => {
     await open("cases", { unit: through(2) });
     await global.__openOptions();
     expect(await screen.findByTestId("drill-options")).toBeTruthy();
-    // Every case can be ticked, not only the route's (the owner, 2026-09-26).
-    for (const c of CASE_ROWS) expect(screen.getByTestId(`focus-${c}`)).toBeTruthy();
+    // Every case can be ticked, not only the route's (the owner, 2026-09-26);
+    // the ticks are behind the "Ask about" row (ui.js OptionRow).
+    await press("focus");
+    for (const c of CASE_ROWS) expect(screen.getByTestId(`focus-opt-${c}`)).toBeTruthy();
+    await press("focus-sheet-done");
     // "Your words" is the default source, and written answers the default.
-    expect(screen.getByTestId("words-mine").props.accessibilityState.selected).toBe(true);
+    expect(screen.getByTestId("drill-words-value").props.children).toBe("Your words");
+    expect(screen.getByTestId("drill-answers-value").props.children).toBe("Written");
     expect(screen.getByTestId("drill-apply")).toBeTruthy();
   });
 
@@ -97,9 +101,11 @@ describe("the drill cog", () => {
     await screen.findByTestId("answer-block");
     await global.__openOptions();
     // Untick everything but the imperative.
-    await press("focus-present");
-    await press("focus-past");
-    await press("focus-who");
+    await press("focus");
+    await press("focus-opt-present");
+    await press("focus-opt-past");
+    await press("focus-opt-who");
+    await press("focus-sheet-done");
     await press("drill-apply");
     const st = await saved();
     expect(st.drillPrefs.conjugation.only).toEqual(["imperative"]);
@@ -110,8 +116,10 @@ describe("the drill cog", () => {
   it("the last tick cannot be removed", async () => {
     await open("aspect", { unit: through(8) });
     await global.__openOptions();
-    await press("focus-which");
-    await press("focus-partner");                       // the last one: stays
+    await press("focus");
+    await press("focus-opt-which");
+    await press("focus-opt-partner");                   // the last one: stays
+    await press("focus-sheet-done");
     await press("drill-apply");
     const st = await saved();
     expect(st.drillPrefs.aspect.only).toEqual(["partner"]);
@@ -121,9 +129,13 @@ describe("the drill cog", () => {
   it("draws on the chosen chapters' words when chapters are picked", async () => {
     await open("cases", { unit: through(4) });
     await global.__openOptions();
-    await press("words-ch1");
-    await press("words-ch2");
-    expect(screen.getByTestId("words-mine").props.accessibilityState.selected).toBe(false);
+    await press("drill-words");
+    await press("drill-words-opt-chapters");
+    await press("drill-chapters");
+    await press("drill-chapters-opt-0");
+    await press("drill-chapters-opt-1");
+    await press("drill-chapters-sheet-done");
+    expect(screen.getByTestId("drill-words-value").props.children).toBe("Chapters");
     await press("drill-apply");
     const st = await saved();
     expect(st.drillPrefs.cases.chapters).toEqual([0, 1]);
@@ -135,7 +147,8 @@ describe("the drill cog", () => {
     expect(qs.every((q) => pool.has(q.i))).toBe(true);
     // "Your words" clears the chapters again.
     await global.__openOptions();
-    await press("words-mine");
+    await press("drill-words");
+    await press("drill-words-opt-mine");
     await press("drill-apply");
     expect((await saved()).drillPrefs.cases.chapters).toEqual([]);
   });
@@ -143,7 +156,8 @@ describe("the drill cog", () => {
   it("switches every drill between written and chosen answers from the cog", async () => {
     await open("cases", { unit: through(4) });
     await global.__openOptions();
-    fireEvent.press(screen.getByText("Multiple choice"));
+    await press("drill-answers");
+    await press("drill-answers-opt-chosen");
     await press("drill-apply");
     expect((await saved()).typedDrills).toBe(false);
     // A chosen run shows options.

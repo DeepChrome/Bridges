@@ -5,8 +5,8 @@ import React, { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
-import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text,
-         Sheet, Choice, Loading, RowText } from "../ui";
+import { Screen, Btn, List, Row, SectionLabel, Tick, Text,
+         Sheet, Loading, RowText, OptionRow, ToggleRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { clearRun, savedRun, useResume } from "../resume";
@@ -203,74 +203,74 @@ export function BuildDrillFlow({ navigation }) {
  * `null` for a field is "as before" and is what a profile that has never
  * opened the cog carries.
  */
+/* Which words a drill draws on: the learner's own, or chapters chosen whole.
+   One row chooses between the two and the chapters row shows under the
+   second — the shape the Study options have (studypicker.js), so an options
+   sheet is the same thing wherever it opens (the owner, 2026-11-19: "that's
+   the theme that we need to work towards throughout the entire app"). Shared
+   with the form cards. `chapters` are chapter indices; empty is "your words". */
+export const WORD_SOURCES = [{ id: "mine", name: "Your words", sub: "Held at 25 or above" },
+                             { id: "chapters", name: "Chapters", sub: "Chosen whole" }];
+export function WordSourceRows({ chapters, onChange, prefix }) {
+  const [fromChapters, setFromChapters] = useState(chapters.length > 0);
+  const pick = (id) => { setFromChapters(id === "chapters"); if (id === "mine") onChange([]); };
+  return (
+    <>
+      <OptionRow testID={`${prefix}-words`} title="Words from" value={fromChapters ? "chapters" : "mine"}
+                 options={WORD_SOURCES} onPick={pick} />
+      {fromChapters ? (
+        <OptionRow testID={`${prefix}-chapters`} title="Chapters" multi value={chapters.map(String)}
+                   valueText={chapters.length ? chapters.map((k) => k + 1).join(", ") : "None"}
+                   options={STAGES.map((s, k) => ({ id: String(k), name: `Chapter ${k + 1}`, sub: s.title || undefined }))}
+                   onPick={(ids) => onChange(ids.map(Number).sort((a, b) => a - b))} />
+      ) : null}
+    </>
+  );
+}
+
 export function DrillOptions({ type, prefs, onChange, onClose }) {
   const { st, update } = useSession();
-  const t = useTheme();
   const options = useMemo(() => Q.drillFocus(type), [type]);
   const suggested = useMemo(() => Q.defaultFocus(type, reachedUnits(st)), [type]);
   const on = prefs.only || suggested || options.map((o) => o.id);
   const chapters = prefs.chapters || [];
   const typed = st.typedDrills !== false;
 
-  const toggle = (id) => {
-    const next = on.includes(id) ? (on.length > 1 ? on.filter((x) => x !== id) : on) : on.concat([id]);
-    // Everything ticked is no filter, and saying so keeps the generators on
-    // their ordinary path rather than through a set that matches everything.
+  /* Everything ticked is no filter, and saying so keeps the generators on
+     their ordinary path rather than through a set that matches everything.
+     The cases and the stem classes are two rows over one list of ticks. */
+  const main = options.filter((o) => !o.group);
+  const stem = options.filter((o) => o.group === "stem");
+  const pickFrom = (list) => (ids) => {
+    const rest = on.filter((id) => !list.some((o) => o.id === id));
+    const next = options.map((o) => o.id).filter((id) => ids.includes(id) || rest.includes(id));
     onChange({ ...prefs, only: next.length === options.length ? null : next });
   };
-  const toggleChapter = (k) => onChange({
-    ...prefs,
-    chapters: chapters.includes(k) ? chapters.filter((x) => x !== k) : chapters.concat([k]).sort((a, b) => a - b),
-  });
-  const groups = [["Ask about", options.filter((o) => !o.group)], ["Stem", options.filter((o) => o.group === "stem")]]
-    .filter(([, list]) => list.length > 1);
 
   return (
-    <Sheet onClose={onClose} testID="drill-options" maxHeight="88%"
+    <Sheet onClose={onClose} testID="drill-options" title="Drill options" maxHeight="88%"
            footer={<Btn block kind="pri" testID="drill-apply" label="Apply" style={{ marginTop: 8 }} onPress={onClose} />}>
-      {groups.map(([label, list]) => (
-        <View key={label} style={{ marginBottom: 18 }}>
-          <SectionLabel>{label}</SectionLabel>
-          <List>
-            {list.map((o) => (
-              <Row key={o.id} testID={`focus-${o.id}`} onPress={() => toggle(o.id)}>
-                <Tick on={on.includes(o.id)} />
-                <RowText title={o.name} bold={false} />
-              </Row>
-            ))}
-          </List>
-        </View>
-      ))}
-      {/* The words that break the rules, on their own (the owner, 2026-09-29:
-          "have options to drill them specifically"). Only where the drill's
-          words have any: verbs for conjugation and aspect, nouns for cases. */}
-      {IRREGULAR_DRILLS.includes(type) ? (
-        <View style={{ marginBottom: 18 }}>
-          <List>
-            <Row testID="irregular-only" onPress={() => onChange({ ...prefs, irregular: !prefs.irregular })}>
-              <Tick on={!!prefs.irregular} />
-              <RowText title="Irregular words only" bold={false} />
-            </Row>
-          </List>
-        </View>
-      ) : null}
-      <View style={{ marginBottom: 18 }}>
-        <SectionLabel>Words from</SectionLabel>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-          <Chip testID="words-mine" on={!chapters.length} label="Your words"
-                onPress={() => onChange({ ...prefs, chapters: [] })} />
-          {STAGES.map((s, k) => (
-            <Chip key={s.core.id} testID={`words-ch${k + 1}`} on={chapters.includes(k)}
-                  label={`Ch ${k + 1}`} onPress={() => toggleChapter(k)} />
-          ))}
-        </View>
-      </View>
-      <View style={{ marginBottom: 6 }}>
-        <SectionLabel>Answers</SectionLabel>
-        <Choice testID="drill-answers" value={typed ? "written" : "chosen"}
-                options={[{ id: "written", name: "Written" }, { id: "chosen", name: "Multiple choice" }]}
-                onPick={(id) => update((p) => ({ ...p, typedDrills: id === "written" }))} />
-      </View>
+      <List>
+        {main.length > 1 ? (
+          <OptionRow testID="focus" title="Ask about" multi minOne value={on.filter((id) => main.some((o) => o.id === id))}
+                     options={main} onPick={pickFrom(main)} />
+        ) : null}
+        {stem.length > 1 ? (
+          <OptionRow testID="stem" title="Stem" multi minOne value={on.filter((id) => stem.some((o) => o.id === id))}
+                     options={stem} onPick={pickFrom(stem)} />
+        ) : null}
+        {/* The words that break the rules, on their own (the owner, 2026-09-29:
+            "have options to drill them specifically"). Only where the drill's
+            words have any: verbs for conjugation and aspect, nouns for cases. */}
+        {IRREGULAR_DRILLS.includes(type) ? (
+          <ToggleRow testID="irregular-only" title="Irregular words only" value={!!prefs.irregular}
+                     onValueChange={(v) => onChange({ ...prefs, irregular: v })} />
+        ) : null}
+        <WordSourceRows prefix="drill" chapters={chapters} onChange={(c) => onChange({ ...prefs, chapters: c })} />
+        <OptionRow testID="drill-answers" title="Answers" value={typed ? "written" : "chosen"}
+                   options={[{ id: "written", name: "Written" }, { id: "chosen", name: "Multiple choice" }]}
+                   onPick={(id) => update((p) => ({ ...p, typedDrills: id === "written" }))} />
+      </List>
     </Sheet>
   );
 }

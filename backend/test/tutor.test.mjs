@@ -6,7 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateTutor, tutorMessage, SYSTEM_TUTOR, NOTE_WORDS, RU_WORDS, EN_WORDS, REMEMBER_WORDS,
-         MAX_HISTORY, MAX_CHOICES, CHOICE_WORDS } from "../src/tutor.js";
+         MAX_HISTORY, MAX_CHOICES, CHOICE_WORDS, MARK_WORDS } from "../src/tutor.js";
 import { handle } from "../src/index.js";
 
 const TOKEN = "test-app-token-0123456789";
@@ -135,6 +135,30 @@ test("choices are capped and trimmed rather than refused, and the prompt says wh
   assert.match(SYSTEM_TUTOR, /Offer them whenever you are not sure what they want/);
   // And the tutor is told the learner may arrive in either language.
   assert.match(SYSTEM_TUTOR, /may be in English or in Russian, and may mix the two/);
+});
+
+/* An answer marked is a mark, not a sentence (the owner, 2026-11-19). */
+test("a mark is {ok, yours, right}, short, with the right form owed on a miss; the note is one sentence", () => {
+  const miss = validateTutor({ note: "Feminine nouns take -у.", mark: { ok: false, yours: "книга", right: "книгу" } });
+  assert.equal(miss.ok, true);
+  assert.deepEqual(miss.value.mark, { ok: false, yours: "книга", right: "книгу" });
+  const hit = validateTutor({ ru: "Отлично! Теперь скажи «я вижу дом».", en: "Great! Now say «I see the house».",
+                              mark: { ok: true, yours: "", right: "книгу" } });
+  assert.equal(hit.ok, true);
+  assert.equal(hit.value.mark.ok, true);
+  // A mark alone is a turn.
+  assert.equal(validateTutor({ mark: { ok: true, right: "книгу" } }).ok, true);
+  // A miss has to name the right form; nothing to learn from otherwise.
+  assert.match(validateTutor({ note: "x", mark: { ok: false, yours: "книга" } }).errors.join(" "), /needs the right one/);
+  assert.match(validateTutor({ note: "x", mark: { ok: "yes", right: "книгу" } }).errors.join(" "), /mark: not/);
+  assert.match(validateTutor({ note: "x", mark: { ok: false, yours: "a", right: new Array(MARK_WORDS + 1).fill("w").join(" ") } })
+    .errors.join(" "), /mark: over/);
+  // Null and absent are no mark.
+  assert.equal(validateTutor({ note: "ok", mark: null }).value.mark, null);
+  assert.equal(validateTutor({ note: "ok" }).value.mark, null);
+  assert.equal(NOTE_WORDS, 26);
+  assert.match(SYSTEM_TUTOR, /The marking goes in "mark", never in "note"/);
+  assert.match(SYSTEM_TUTOR, /\*\*One sentence\*\*/);
 });
 
 test("POST /v1/tutor: 401 without a token, 400 without text, the reply through, counted as talk", async () => {

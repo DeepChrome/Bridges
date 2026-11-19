@@ -63,8 +63,10 @@ describe("a front switched part-way", () => {
     await press("grade-3");
     // Switch the front to English in the options.
     await global.__openOptions();
-    await press("flash-produce");
-    await press("flash-recognise");
+    await press("flash");
+    await press("flash-opt-produce");
+    await press("flash-opt-recognise");
+    await press("flash-sheet-done");
     await act(async () => { fireEvent.press(await screen.findByText("Done")); });
     // The pile starts again at the first card, now with the meaning in front…
     expect(await screen.findByTestId("card-produce")).toBeTruthy();

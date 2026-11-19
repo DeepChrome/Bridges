@@ -7,7 +7,7 @@ import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, type as T } from "../theme";
 import { setAppearance, useScheme } from "../appearance";
-import { List, Row, Btn, Muted, Avatar, Choice, Sheet, Text, Stepper, RowText, ToggleRow } from "../ui";
+import { List, Row, Btn, Muted, Avatar, Sheet, Text, Stepper, RowText, ToggleRow, OptionRow } from "../ui";
 import { CharacterPicker } from "./Gate";
 import { STATS } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
@@ -267,11 +267,6 @@ export function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedbac
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: T.body }}>Daily reminder</Text>
-                  {Number.isFinite(st.remind) ? (
-                    <Choice testID="remind-at" value={st.remind} style={{ marginTop: 8 }}
-                            options={REMIND_TIMES}
-                            onPick={(id) => update((p) => ({ ...p, remind: id }))} />
-                  ) : null}
                   {/* One of rule 20.7's three reasons: without it the switch
                       springs back to off and nothing says why. */}
                   {remindDenied ? <Muted>{`Notifications are off for ${APP_NAME} in Android settings`}</Muted> : null}
@@ -291,40 +286,27 @@ export function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedbac
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
+              {/* The choices are rows opening their options (ui.js OptionRow,
+                  2026-11-19), not chips under a title: the time, the speed,
+                  the skip, the two sounds. */}
+              {Number.isFinite(st.remind) ? (
+                <OptionRow testID="remind-at" title="Reminder time" value={st.remind} options={REMIND_TIMES}
+                           onPick={(id) => update((p) => ({ ...p, remind: id }))} />
+              ) : null}
               {/* "Audio for offline" sat here until 2026-09-19. Every word and
                   sentence a lesson plays is bundled in the app now, so there
                   was nothing left for it to download. */}
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: T.body }}>Reading speed</Text>
-                  <Muted>Press a speaker twice for slower</Muted>
-                  <Choice testID="speed-choice" options={SPEEDS} value={st.speed || "normal"} style={{ marginTop: 8 }}
-                          onPick={(id) => update((p) => ({ ...p, speed: id }))} />
-                </View>
-              </Row>
+              <OptionRow testID="speed-choice" title="Reading speed" sub="Press a speaker twice for slower"
+                         value={st.speed || "normal"} options={SPEEDS}
+                         onPick={(id) => update((p) => ({ ...p, speed: id }))} />
               {/* How far a video skips: the overlay's buttons, a double tap on
                   the picture, a headset's skip keys (video.js skipMsOf). */}
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: T.body }}>Video skip</Text>
-                  <Choice testID="skip-choice" options={SKIP_OPTIONS} value={skipSeconds(st)} style={{ marginTop: 8 }}
-                          onPick={(id) => update((p) => ({ ...p, skip: id }))} />
-                </View>
-              </Row>
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: T.body }}>Right-answer sound</Text>
-                  <Choice testID="cue-choice" options={CUE_NAMES} value={rightCueOf(st.cue)} style={{ marginTop: 8 }}
-                          onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
-                </View>
-              </Row>
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: T.body }}>Wrong-answer sound</Text>
-                  <Choice testID="wrong-cue-choice" options={WRONG_NAMES} value={wrongCueOf(st.wrongCue)} style={{ marginTop: 8 }}
-                          onPick={(id) => { previewCue(id); update((p) => ({ ...p, wrongCue: id })); }} />
-                </View>
-              </Row>
+              <OptionRow testID="skip-choice" title="Video skip" value={skipSeconds(st)} options={SKIP_OPTIONS}
+                         onPick={(id) => update((p) => ({ ...p, skip: id }))} />
+              <OptionRow testID="cue-choice" title="Right-answer sound" value={rightCueOf(st.cue)} options={CUE_NAMES}
+                         onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
+              <OptionRow testID="wrong-cue-choice" title="Wrong-answer sound" value={wrongCueOf(st.wrongCue)} options={WRONG_NAMES}
+                         onPick={(id) => { previewCue(id); update((p) => ({ ...p, wrongCue: id })); }} />
               {/* An obligation, not a feature (rule 20.10): OpenRussian,
                   Tatoeba and Wiktionary each require the credit to travel with
                   the material, and the native app carried none of it until

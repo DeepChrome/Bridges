@@ -60,8 +60,22 @@ import { plain } from "./schema.js";
    to a line), so the cap and the rendering are pulling the same way now. */
 export const RU_WORDS = 30;
 export const EN_WORDS = 40;
-export const NOTE_WORDS = 32;
+/* 32 until 2026-11-19 (the owner: *"waaaaay too much text on the screen…
+   things are getting buried in a wall of text in narrative format"*): the
+   marking of an answer left the note for its own field (`mark` below), so
+   what is left for the note is one sentence. */
+export const NOTE_WORDS = 26;
 export const REMEMBER_WORDS = 20;
+/* **An answer marked is a mark, not a sentence** (the owner, 2026-11-19: *"if
+   it's looking for a specific word and the user gives an incorrect answer,
+   maybe some sort of specific coloration/bold format for the incorrect
+   answer and a more positive connotation formatting for the correct/expected
+   answer… format it as something like incorrect / You: / Correct:"*). `mark`
+   is `{ ok, yours, right }`: whether the learner's last answer was right, what
+   they put, and the right form — each a few words, drawn by the app as two
+   labelled lines in red and green. The note then says only why, in one
+   sentence, or nothing. Null when the turn marks nothing. */
+export const MARK_WORDS = 12;
 /* Things the learner could ask for next, offered when the tutor does not
    know what they want (the owner, 2026-09-26: *"have it prompt options when
    it's unsure what to do with input where it will recommend 3 things based
@@ -90,7 +104,7 @@ You receive JSON with:
 **Build your memory of them.** Use "remember" freely for what the data cannot say: how they like to work, a confusion that recurs across words, a goal, what went well in a drill you ran. One line a turn at most, never a repeat.
 
 What you can do, when asked or when it plainly helps:
-- Run a drill one question at a time: ask one thing, wait, mark the answer in your next turn (right, or the right form and why in one sentence), then ask the next. Draw on "trouble" and "misses" unless told otherwise. The question itself goes in "ru" when it is Russian to be read or answered, the marking in "note".
+- Run a drill one question at a time: ask one thing, wait, mark the answer in your next turn, then ask the next. Draw on "trouble" and "misses" unless told otherwise. The question itself goes in "ru" when it is Russian to be read or answered. **The marking goes in "mark", never in "note"**: {"ok": true or false, "yours": what they put (a few words, as they said it), "right": the right form or sentence}. With "ok" true, "right" is the form they got right and "yours" may be "". The "note" then says in one short sentence why it is right or wrong, or is "" when the mark says it all. Never restate the answer in the note.
 - Say what to study next, from the profile, in two sentences of "note" at most.
 - Play a role in a scene the learner sets: your character speaks in "ru", and any correction of their mistakes goes in "note", brief, without breaking the scene for long.
 - Explain a point of grammar in "note", with one or two short examples in Russian inside it in «guillemets».
@@ -98,16 +112,17 @@ What you can do, when asked or when it plainly helps:
 Rules:
 - "ru": what you say in Russian this turn, at most ${RU_WORDS} words, or "" when there is nothing to say in Russian. Cyrillic only, no stress marks. Prefer the "studied" words.
 - "en": the natural English translation of "ru", at most ${EN_WORDS} words. "" when "ru" is "". Never empty when "ru" is not.
-- "note": what you say in English, at most ${NOTE_WORDS} words, or "" when the Russian says it all. **Two sentences is the ceiling**, and one is usually right: a tutor in conversation speaks in short turns and asks one thing at a time. Never a list of points, never a paragraph.
+- "note": what you say in English, at most ${NOTE_WORDS} words, or "" when the Russian or the mark says it all. **One sentence**: a tutor in conversation speaks in short turns and asks one thing at a time. Never a list of points, never a paragraph, never narrative.
+- "mark": null, or {"ok","yours","right"} as above, each string at most ${MARK_WORDS} words. Only when the learner's last message answered a question you asked.
 - Write every Russian form inside «guillemets» wherever it appears in "note", like «книги». The app sets those apart for the learner.
-- At least one of "ru" and "note" must be non-empty.
+- At least one of "ru", "note" and "mark" must be non-empty.
 - **Never ask a question the learner can answer with «да» or «нет», or with one word they already know.** There is nothing to learn from saying yes. Ask for a sentence, a form, a choice between two things they must name, or something about themselves.
 - "choices": up to ${MAX_CHOICES} things the learner could ask for next, each at most ${CHOICE_WORDS} words, written as the learner would say them ("Drill me on the genitive", "Practise the words I keep missing"). **Offer them whenever you are not sure what they want** — an unclear message, a one word answer, or a question you cannot act on. Draw them from "trouble", "misses" and where they are on the course, so they are what this learner should work on rather than a menu. Empty [] when the conversation is flowing and you know what to do next: answer them instead.
 - "remember": one fact about this learner worth keeping for future conversations (a preference, a recurring confusion, a goal), at most ${REMEMBER_WORDS} words, or "" when there is nothing new. Never repeat a note already in "notes".
 - Be direct and warm, never gushing. No lists of options unless asked. No emoji. Never use dashes.
 
 Reply with JSON only, no prose around it:
-{"ru":"...","en":"...","note":"...","choices":["..."],"remember":"..."}`;
+{"ru":"...","en":"...","note":"...","mark":null,"choices":["..."],"remember":"..."}`;
 
 const strList = (a, n) => (Array.isArray(a) ? a.filter(isStr).map((s) => s.trim()).filter(Boolean).slice(0, n) : []);
 
@@ -169,7 +184,22 @@ export function validateTutor(raw) {
   }
   if (errors.length) return { ok: false, errors };
   const ru = raw.ru.trim(), en = raw.en.trim(), note = raw.note.trim();
-  if (!ru && !note) errors.push("ru and note: both empty");
+  /* The mark: an object with a boolean and two short strings, or nothing. A
+     mark that says wrong must name the right form, or there is nothing to
+     learn from it. */
+  let mark = null;
+  if (raw.mark !== undefined && raw.mark !== null && raw.mark !== "") {
+    const m = raw.mark;
+    if (typeof m !== "object" || Array.isArray(m) || typeof m.ok !== "boolean") errors.push("mark: not {ok,yours,right}");
+    else {
+      const yours = isStr(m.yours) ? plain(m.yours).trim() : "";
+      const right = isStr(m.right) ? plain(m.right).trim() : "";
+      if (countWords(yours) > MARK_WORDS || countWords(right) > MARK_WORDS) errors.push(`mark: over ${MARK_WORDS} words`);
+      else if (!m.ok && !right) errors.push("mark: a wrong answer needs the right one");
+      else if (yours || right) mark = { ok: m.ok, yours, right };
+    }
+  }
+  if (!ru && !note && !mark) errors.push("ru and note: both empty");
   if (ru && !CYRILLIC.test(ru)) errors.push("ru: not in Cyrillic");
   else if (countWords(ru) > RU_WORDS) errors.push(`ru: over ${RU_WORDS} words`);
   /* The English of the Russian is owed whenever there is Russian: the learner
@@ -189,6 +219,6 @@ export function validateTutor(raw) {
     }
   }
   if (errors.length) return { ok: false, errors };
-  return { ok: true, value: { ru: unstress(plain(ru)), en: ru ? plain(en) : "", note: plain(note),
+  return { ok: true, value: { ru: unstress(plain(ru)), en: ru ? plain(en) : "", note: plain(note), mark,
                               choices, remember: plain(raw.remember) } };
 }

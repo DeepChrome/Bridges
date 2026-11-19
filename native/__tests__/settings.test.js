@@ -83,9 +83,14 @@ describe("audio preferences", () => {
   it("offers the speed and the sound in settings, and remembers the choice", async () => {
     await withProfile(<You navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByText("Settings")); });
-    await act(async () => { fireEvent.press(screen.getByText("Slowest")); });
-    await act(async () => { fireEvent.press(screen.getByText("Rise 1")); });
-    await act(async () => { fireEvent.press(screen.getByText("Low 2")); });
+    // Each a row opening its choices (ui.js OptionRow, 2026-11-19).
+    const pick = async (row, opt) => {
+      await act(async () => { fireEvent.press(await screen.findByTestId(row)); });
+      await act(async () => { fireEvent.press(await screen.findByTestId(`${row}-opt-${opt}`)); });
+    };
+    await pick("speed-choice", "slowest");
+    await pick("cue-choice", "rise1");
+    await pick("wrong-cue-choice", "wrong2");
     const st = await saved();
     expect(st.speed).toBe("slowest");
     expect(st.cue).toBe("rise1");

@@ -149,11 +149,14 @@ describe("flashcards from a deck", () => {
     const st = await saved();
     expect(st.seen[word].recognise.reps).toBe(1);
     await global.__openOptions();
-    expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(1);  // the picker's row
+    // A deck ticked is a Custom review; the Decks row names it and opens it.
+    expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(1);
+    await act(async () => { fireEvent.press(await screen.findByTestId("set-decks")); });
+    expect(await screen.findByTestId("set-decks-opt-k1")).toBeTruthy();
     // Importing moved to Settings and exporting is gone (§30ap); the picker
     // lists the deck so it can be ticked, and offers a way to remove it.
     expect(screen.queryByText("Import")).toBeNull();
     expect(screen.queryByText(/Export/)).toBeNull();
-    expect(screen.getByText("Remove")).toBeTruthy();
+    expect(screen.getByTestId("deck-remove-k1")).toBeTruthy();
   });
 });

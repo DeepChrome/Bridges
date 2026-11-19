@@ -146,7 +146,8 @@ it("keeps its options", async () => {
   await seed();
   await render(<SessionProvider><DriveList navigation={nav} /></SessionProvider>);
   await global.__openOptions();
-  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-direction")).getByText("Understand it")); });
+  await act(async () => { fireEvent.press(await screen.findByTestId("drive-opt-direction")); });
+  await act(async () => { fireEvent.press(await screen.findByTestId("drive-opt-direction-opt-hear")); });
   await act(async () => { fireEvent.press(screen.getByTestId("drive-opt-next")); });
   await flushState();
   const saved = await global.__db.saved("p1");

@@ -52,6 +52,14 @@ test("the screen's question card and the earlier turns go to the model", () => {
   assert.match(t.about.text, /Монька: Где ключ/);
   assert.equal(JSON.parse(askMessage({ question: "x", about: { text: "а".repeat(5000) } })).about.text.length, 1500);
   assert.match(SYSTEM_ASK, /"text"/);
+  /* Spoken and hands-free (2026-11-19): the question may come in either
+     language, and in conversation mode the model may ask back. */
+  assert.equal(JSON.parse(askMessage({ question: "x" })).converse, false);
+  assert.equal(JSON.parse(askMessage({ question: "x", converse: true })).converse, true);
+  assert.equal(JSON.parse(askMessage({ question: "x", converse: "yes" })).converse, false);
+  assert.match(SYSTEM_ASK, /may be in English or in Russian, or mix the two/);
+  assert.match(SYSTEM_ASK, /"converse": true when the learner is talking hands-free/);
+  assert.match(SYSTEM_ASK, /Outside "converse", do not end with a question/);
 });
 
 test("a flashcard's meanings and examples ride along, numbered as shown, and cut to the cap", () => {

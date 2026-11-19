@@ -71,8 +71,8 @@ describe("the review's order", () => {
       list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
     await AsyncStorage.setItem("rb.state.p1", JSON.stringify(base));
     await render(<SessionProvider><SetPicker visible onClose={() => {}} /></SessionProvider>);
-    expect(await screen.findByTestId("review-order")).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByText("From the start")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("review-order")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("review-order-opt-path")); });
     await flushState();
     expect((await global.__db.saved("p1")).reviewOrder).toBe("path");
   });

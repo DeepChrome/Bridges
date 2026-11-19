@@ -6,10 +6,12 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, List, Row, Btn, Pill, Muted, SearchField, SectionLabel, Sheet, Dropdown, Text } from "../ui";
-import { videos, videoById, videoWatched, unitById, CHANNELS } from "../data";
+import { videos, videoById, videoWatched, unitById, CHANNELS, routePosition, rankOf, KNOWN_AT } from "../data";
 import { libraryState, setLibraryState, watchHistory } from "../immerse";
 import { today } from "@core/util";
-import { short, minutes, clock, isFave, toggleFave, VIDEO_SORTS, searchVideos, channelsOf } from "../video";
+import { familiarity, cardFor } from "@core/scheduler";
+import { talkLevelFor } from "./Talk";
+import { short, minutes, clock, isFave, toggleFave, VIDEO_SORTS, searchVideos, channelsOf, suggestVideos } from "../video";
 
 /* ------------------------------------------------------------- immerse */
 
@@ -216,6 +218,14 @@ export function Immerse({ navigation }) {
      a note the learner left the screen under comes back next time. */
   const noteDue = !(st.notices || {}).immerse;
   const sawNote = () => update((p) => ({ ...p, notices: { ...(p.notices || {}), immerse: today() } }));
+  /* The suggestions: three at a time, "Show others" the next three. Read off
+     the learner's own cards — a word is known at KNOWN_AT, the drills' bar. */
+  const [suggest, setSuggest] = useState(false);
+  const [skip, setSkip] = useState(0);
+  const picks = useMemo(() => (suggest ? suggestVideos(all, {
+    known: (w) => (familiarity(cardFor((st.seen || {})[w]), rankOf(w)) || 0) >= KNOWN_AT,
+    stage: routePosition(st).stage, level: talkLevelFor(st), watched: (v) => videoWatched(st, v), skip,
+  }) : []), [suggest, skip, st.seen, st.watched, st.unit]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* "2 of 321 watched" sat above the search (the owner, 2026-09-28: "Remove
      the 2 of 321 watched. Leave the search bar"). The watched filter says the
@@ -238,6 +248,19 @@ export function Immerse({ navigation }) {
                   onPick={setChannel} style={{ flexShrink: 1 }} />
         <Dropdown testID="video-sort" sheetTestID="sort-sheet" optionPrefix="sort-"
                   title="Sort" label="Sort" value={sort} options={VIDEO_SORTS} onPick={setSort} />
+        {/* A few videos for this learner (video.js suggestVideos; the owner,
+            2026-11-19): a sparkle-free star, the same pill shape, opening a
+            sheet of three with why each. */}
+        <Pressable testID="video-suggest" accessibilityRole="button" accessibilityLabel="For you"
+                   onPress={() => { setSkip(0); setSuggest(true); }} hitSlop={6}
+                   style={({ pressed }) => ({ minHeight: 36, minWidth: 40, paddingHorizontal: 9,
+                     alignItems: "center", justifyContent: "center", borderRadius: 99,
+                     backgroundColor: t.brandBg, opacity: pressed ? 0.6 : 1 })}>
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={t.brandInk}
+               strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" />
+          </Svg>
+        </Pressable>
         {/* History beside the filters, the same shape, opened on a press
             rather than shown above the library (the owner, 2026-10-01). A
             clock, YouTube's own mark for it: the word squeezed the channel
@@ -300,6 +323,32 @@ export function Immerse({ navigation }) {
 
       {noteDue || credits ? (
         <CreatorsNote onClose={() => { setCredits(false); if (noteDue) sawNote(); }} />
+      ) : null}
+      {suggest ? (
+        <Sheet testID="suggest-sheet" title="For you" onClose={() => setSuggest(false)}
+               footer={(
+                 <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+                   <Btn kind="plain" testID="suggest-more" label="Show others" style={{ flex: 1 }}
+                        onPress={() => setSkip(skip + 3)} />
+                   <Btn kind="pri" label="Done" style={{ flex: 1 }} onPress={() => setSuggest(false)} />
+                 </View>
+               )}>
+          {picks.length ? (
+            <List>
+              {picks.map(({ v, held, total }) => (
+                <Row key={v.id} testID={`suggest-${v.id}`}
+                     onPress={() => { setSuggest(false); navigation.navigate("VideoSummary", { videoId: v.id }); }}>
+                  <VideoThumb id={v.id} done={false} />
+                  <View style={{ flex: 1 }}>
+                    <Text numberOfLines={2} style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>{short(v.title)}</Text>
+                    {/* Why: how much of it they already hold, and how long it is. */}
+                    <Muted>{[`${held} of ${total} words known`, minutes(v.dur)].filter(Boolean).join(" · ")}</Muted>
+                  </View>
+                </Row>
+              ))}
+            </List>
+          ) : <Muted testID="suggest-empty" style={{ textAlign: "center" }}>Nothing left to suggest</Muted>}
+        </Sheet>
       ) : null}
     </Screen>
   );

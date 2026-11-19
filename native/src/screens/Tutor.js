@@ -35,7 +35,7 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, BulbButton, Sheet,
-         List, Row, SectionLabel, Choice, Tick, RowText, IconButton, ChatTurn, TypingTurn } from "../ui";
+         List, Row, SectionLabel, Choice, RowText, IconButton, ChatTurn, TypingTurn, OptionRow, ToggleRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { Linked } from "../words";
 import { L, STAGES, studiedFor, routePosition, rankOf, lessonCount, lessonsDone } from "../data";
@@ -45,6 +45,7 @@ import { speakLine, stop, voiceFor } from "../audio";
 import { GUIDE_ID, castById } from "@core/cast";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
+import { LangToggle, ConverseToggle } from "../mic";
 import { failureText, talkLevelFor, TALK_LEVELS } from "./Talk";
 import { troubleWords, familiarity, cardFor, skillScores, workedOn, dayOf } from "@core/scheduler";
 import { isResting } from "@core/queue";
@@ -188,9 +189,11 @@ export const remember = (notes, line) => {
 
 const CYR = /[Ѐ-ӿ]/;
 
-/* A turn as one string, for the history the Worker is sent. */
+/* A turn as one string, for the history the Worker is sent — a mark reads
+   back as the words it drew, so the model reads its own past marking. */
 export const turnText = (x) => (x.who === "learner" ? String(x.text || "")
-  : [x.ru, x.note].filter(Boolean).join(" "));
+  : [x.mark ? (x.mark.ok ? `Right: ${x.mark.right}` : `You: ${x.mark.yours}. Correct: ${x.mark.right}.`) : "",
+     x.ru, x.note].filter(Boolean).join(" "));
 
 /* The tutor's turn, in its parts: the Russian word-linked with a speaker, its
    English under it in the quiet face (off with the same switch as Talk's,
@@ -247,6 +250,8 @@ function TutorBubble({ turn, en }) {
                   <Note testID="tutor-note" text={turn.note} size={15} color={t.ink2} gap={4} />
                 </View>
               ) : null}>
+      {/* The mark first: it is what the learner is waiting to see. */}
+      <Mark mark={turn.mark} />
       {turn.ru ? (
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
           <View style={{ flexShrink: 1 }}><Linked text={turn.ru} size={18} testID="tutor-ru" /></View>
@@ -257,7 +262,7 @@ function TutorBubble({ turn, en }) {
         <Text testID="tutor-en" style={{ color: t.ink3, fontSize: 14, lineHeight: 20, marginTop: 4 }}>{turn.en}</Text>
       ) : null}
       {!turn.ru && turn.note ? (
-        <Note testID="tutor-note" text={turn.note} size={16} gap={6} />
+        <Note testID="tutor-note" text={turn.note} size={16} gap={6} style={turn.mark ? { marginTop: 8 } : null} />
       ) : null}
     </ChatTurn>
   );
@@ -289,36 +294,35 @@ function LearnerBubble({ turn, avatar }) {
   );
 }
 
-/* The microphone's language, one small toggle beside it: a request is as
-   likely to be "what should I study next" as «я хочу чай». */
-function LangToggle({ lang, onPress }) {
-  const t = useTheme();
-  const en = lang === LANG_EN;
-  return (
-    <IconButton testID="tutor-lang" size={44} onPress={onPress}
-                label={en ? "Microphone hears English" : "Microphone hears Russian"}>
-      <Text style={{ color: t.ink2, fontSize: 12, fontWeight: "700" }}>{en ? "EN" : "RU"}</Text>
-    </IconButton>
-  );
-}
-
 const SEND = "M4 12h14M12 5l7 7-7 7";
 
-/* Conversation mode, as one icon beside the microphone — the control the
-   owner described: *"think about Claude's own conversation mode with the
-   little icon by itself."* Four bars of a waveform, lit when the exchange is
-   running. It is the mode's only control and it is not a setting, so there is
-   nowhere else to look for it. */
-function ConverseToggle({ on, onPress }) {
+/* **An answer marked, as two lines and not a sentence** (the owner,
+   2026-11-19: *"if it's looking for a specific word and the user gives an
+   incorrect answer, maybe some sort of specific coloration/bold format for
+   the incorrect answer and a more positive connotation formatting for the
+   correct/expected answer… format it as something like incorrect / You: /
+   Correct:"*). The Worker's `mark` (backend/src/tutor.js): a wrong answer is
+   the learner's words in red beside "You" and the right form in green beside
+   "Correct", word-linked and with a speaker; a right one is the form alone,
+   ticked. The note under it is one sentence of why, where there is one. */
+function Mark({ mark }) {
   const t = useTheme();
+  if (!mark) return null;
+  const line = (label, text, colour, bg, testID) => (
+    <View testID={testID} style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 7,
+                                   paddingHorizontal: 10, borderRadius: radius.sm, backgroundColor: bg }}>
+      <Text style={{ color: colour, fontSize: 12, fontWeight: "700", minWidth: 56, letterSpacing: 0.3 }}>{label}</Text>
+      <View style={{ flex: 1 }}>
+        {CYR.test(text) ? <Linked text={text} size={17} /> : <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>{text}</Text>}
+      </View>
+      {CYR.test(text) ? <Replay text={text} /> : null}
+    </View>
+  );
   return (
-    <IconButton testID="tutor-converse" size={44} on={on} selected={on} onPress={onPress}
-                label={on ? "Leave conversation mode" : "Conversation mode"}>
-      <Svg width={22} height={22} viewBox="0 0 24 24" fill="none"
-           stroke={on ? t.brandInk : t.ink2} strokeWidth={2} strokeLinecap="round">
-        <Path d="M4 10v4M8.5 6v12M15.5 6v12M20 10v4" />
-      </Svg>
-    </IconButton>
+    <View testID="tutor-mark" style={{ gap: 6, marginTop: 4 }}>
+      {!mark.ok && mark.yours ? line("YOU", mark.yours, t.bad, t.badBg, "tutor-mark-yours") : null}
+      {mark.right ? line(mark.ok ? "RIGHT" : "CORRECT", mark.right, t.good, t.goodBg, "tutor-mark-right") : null}
+    </View>
   );
 }
 
@@ -332,26 +336,21 @@ function ConverseToggle({ on, onPress }) {
    the two tutors cannot end up pitched differently. */
 function TutorOptions({ onClose, onRestart }) {
   const { st, update } = useSession();
-  const t = useTheme();
   const level = talkLevelFor(st);
   const en = st.talkEn !== false;
   return (
-    <Sheet onClose={onClose} testID="tutor-options"
+    <Sheet onClose={onClose} testID="tutor-options" title="Tutor options"
            footer={<Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />}>
-      <View style={{ marginBottom: 18 }}>
-        <SectionLabel>Level</SectionLabel>
-        <Choice testID="tutor-level" options={TALK_LEVELS} value={level}
-                onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
-      </View>
-      <View style={{ marginBottom: 18 }}>
-        <List>
-          <Row testID="tutor-en-row" onPress={() => update((p) => ({ ...p, talkEn: !en }))}>
-            <Tick on={en} />
-            <RowText title="English under the Russian" bold={false} />
-          </Row>
-        </List>
-      </View>
-      <Btn kind="plain" testID="tutor-restart" label="Start over" onPress={onRestart} />
+      <List>
+        <OptionRow testID="tutor-level" title="Level" value={level}
+                   options={TALK_LEVELS.map((l) => ({ id: l.id, name: l.name, sub: l.blurb }))}
+                   onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
+        <ToggleRow testID="tutor-en-row" title="English under the Russian" value={en}
+                   onValueChange={(v) => update((p) => ({ ...p, talkEn: v }))} />
+        <Row testID="tutor-restart" onPress={onRestart}>
+          <RowText title="Start over" bold={false} />
+        </Row>
+      </List>
     </Sheet>
   );
 }
@@ -480,10 +479,13 @@ export default function Tutor({ navigation, route }) {
        turn once it has happened CHOICES_AFTER times in a row. */
     const suggested = Array.isArray(reply.choices) ? reply.choices : [];
     unsure.current = suggested.length ? unsure.current + 1 : 0;
+    const mark = reply.mark && typeof reply.mark === "object" && typeof reply.mark.ok === "boolean"
+      ? { ok: reply.mark.ok, yours: String(reply.mark.yours || ""), right: String(reply.mark.right || "") } : null;
     const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "",
+                   mark: mark && (mark.yours || mark.right) ? mark : null,
                    choices: unsure.current >= CHOICES_AFTER ? suggested : [] };
     // The Worker refuses a turn with nothing in it; this is the app refusing too.
-    if (!turn.ru && !turn.note) { fail({ ok: false, reason: "parse", errors: ["empty turn"] }); return; }
+    if (!turn.ru && !turn.note && !turn.mark) { fail({ ok: false, reason: "parse", errors: ["empty turn"] }); return; }
     setTurns((prev) => prev.concat([turn]));
     if (reply.remember) {
       update((prev) => ({ ...prev, tutorNotes: remember(prev.tutorNotes, reply.remember) }));
@@ -683,7 +685,7 @@ export default function Tutor({ navigation, route }) {
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 10 }}>
               {/* The whole of conversation mode: one icon, on or off. */}
-              <ConverseToggle on={going} onPress={toggleLoop} />
+              <ConverseToggle testID="tutor-converse" on={going} onPress={toggleLoop} />
               {/* On, the hold is replaced by what the exchange is doing —
                   listening, thinking, speaking — and pressing it also ends the
                   conversation, because the thing under your thumb should be
@@ -711,7 +713,7 @@ export default function Tutor({ navigation, route }) {
                   conversation mode both are live, so a control that chooses
                   between them would be a control that does nothing. */}
               {going ? <View style={{ width: 44 }} />
-                : <LangToggle lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />}
+                : <LangToggle testID="tutor-lang" lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />}
             </View>
             <Text testID="tutor-live"
                   style={{ color: t.ink, fontSize: T.body, minHeight: 20, textAlign: "center", marginTop: 4 }}>

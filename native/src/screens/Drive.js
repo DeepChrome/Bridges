@@ -41,8 +41,8 @@ import { View, Pressable, AppState } from "react-native";
 import Svg, { Path, Line } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, type as T, radius } from "../theme";
-import { Screen, Text, Muted, Btn, Sheet, Choice, SectionLabel, List,
-         ToggleRow, Row, RowText, Thumb, Lift, Bubble, MicNote } from "../ui";
+import { Screen, Text, Muted, Btn, Sheet, SectionLabel, List,
+         ToggleRow, Row, RowText, Thumb, Lift, Bubble, MicNote, OptionRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { L, IX, SPEECH, STAGES, rankOf } from "../data";
 import { troubleWords } from "../studycards";
@@ -140,6 +140,8 @@ export function playlistOf(st, id) {
 const withSentences = (groups) =>
   groups.map((g) => ({ ...g, sentences: g.sentences || sentencesFor(g.unit, g.idxs) }));
 
+/* One list: the three choices as rows opening their options (ui.js
+   OptionRow), the switches under them. */
 function DriveOptions({ prefs, onChange, onClose }) {
   const o = drivePrefs(prefs);
   const set = (k) => (v) => onChange({ ...o, [k]: v });
@@ -151,14 +153,10 @@ function DriveOptions({ prefs, onChange, onClose }) {
   return (
     <Sheet onClose={onClose} testID="drive-options" title="Drive options" maxHeight="88%"
            footer={<Btn block kind="pri" testID="drive-apply" label="Done" style={{ marginTop: 8 }} onPress={onClose} />}>
-      {rows.map(([label, key, options], k) => (
-        <View key={key}>
-          <SectionLabel gap={k > 0}>{label}</SectionLabel>
-          <Choice testID={`drive-opt-${key}`} options={options} value={o[key]} onPick={set(key)} />
-        </View>
-      ))}
-      <SectionLabel gap>Also</SectionLabel>
       <List>
+        {rows.map(([label, key, options]) => (
+          <OptionRow key={key} testID={`drive-opt-${key}`} title={label} options={options} value={o[key]} onPick={set(key)} />
+        ))}
         <ToggleRow title="Voice commands" value={o.voice} onValueChange={set("voice")} testID="drive-opt-voice" />
         <ToggleRow title="Play the next episode" value={o.next} onValueChange={set("next")} testID="drive-opt-next" />
         <ToggleRow title="Russian twice" value={o.twice} onValueChange={set("twice")} testID="drive-opt-twice" />

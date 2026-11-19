@@ -1,7 +1,7 @@
 /* The video library's pure helpers — how it is ordered, searched and read by
    channel — and the small formatters every video screen shares. No React. */
 
-import { UN } from "./data";
+import { UN, STAGES } from "./data";
 import { fold, today } from "@core/util";
 
 export const short = (title) => title.split(" | ")[0].trim();
@@ -61,6 +61,40 @@ export function libraryOrder(videos, sort = "level") {
       return cefrRank(a) - cefrRank(b) || byEase(a, b);
     };
   return videos.slice().sort(cmp);
+}
+
+/* **A few videos for this learner** (the owner, 2026-11-19: *"In immerse let's
+   add a small little suggest a video feature where the learner's context will
+   be used to select a few options"*). Scored off what the app already knows,
+   no model: how many of the words the video says the learner holds (the
+   sweet spot is most but not all of them — comprehensible input, a step up),
+   whether it is a unit's episode near where they are on the path, its CEFR
+   code against their level, and its length. Watched videos are out.
+   `skip` passes over the first picks, for "Show others". Pure, for the test. */
+const LEVEL_CEFR = { beginner: ["A1", "A2"], intermediate: ["B1", "B1+"], advanced: ["B2", "C1", "C2"] };
+export const KNOWN_SWEET = 0.65;
+export function suggestVideos(list, { seen = {}, known = () => false, stage = 0, level = "beginner", watched = () => false,
+                                       n = 3, skip = 0 } = {}) {
+  const unitStage = {};
+  STAGES.forEach((s, k) => { unitStage[s.core.id] = k; s.branches.forEach((u) => { unitStage[u.id] = k; }); });
+  const scored = [];
+  for (const v of list) {
+    if (watched(v)) continue;
+    const words = Object.keys(v.words || {});
+    if (!words.length) continue;
+    const held = words.filter((w) => known(w)).length;
+    const share = held / words.length;
+    // Nothing known is noise; everything known is nothing to learn.
+    const fit = 1 - Math.min(1, Math.abs(share - KNOWN_SWEET) / KNOWN_SWEET);
+    const us = v.unit && unitStage[v.unit] !== undefined ? unitStage[v.unit] : null;
+    const near = us === null ? 0 : us === stage ? 1 : Math.abs(us - stage) === 1 ? 0.6 : 0;
+    const levelFit = (LEVEL_CEFR[level] || []).includes(v.cefr) ? 1 : v.cefr ? 0.3 : 0.5;
+    const shortish = v.dur ? Math.max(0, 1 - Math.max(0, v.dur - 300) / 900) : 0.5;
+    const score = 3 * fit + 2 * near + 1.5 * levelFit + 0.5 * shortish;
+    scored.push({ v, score, held, total: words.length });
+  }
+  scored.sort((a, b) => b.score - a.score || (b.v.ease || 0) - (a.v.ease || 0));
+  return scored.slice(skip, skip + n);
 }
 
 /* A CEFR code typed as a search term ("b1", "B1+", "a2") filters on the video's

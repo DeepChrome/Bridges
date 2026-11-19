@@ -31,6 +31,9 @@ import { ask, config, isCap, capNotice } from "./lib/feedback";
 import { talkLevelFor } from "./screens/Talk";
 import { screenAbout } from "./about";
 import { GuidePop } from "./guide";
+import { useConverse } from "./converse";
+import { LangToggle, ConverseToggle } from "./mic";
+import { HoldButton, Blocked } from "./activities/Say";
 
 export const aiOffered = () => !!config("/v1/ask");
 
@@ -70,6 +73,8 @@ export function useAskThread({ mode = "russian", guide } = {}) {
   const [failed, setFailed] = useState(null);
   const key = useRef(null);
   const about = useRef(null);
+  const threadRef = useRef(thread);
+  threadRef.current = thread;
 
   const open = () => {
     const a = screenAbout();
@@ -82,28 +87,34 @@ export function useAskThread({ mode = "russian", guide } = {}) {
   /* The question leaves the box the moment it is sent and sits in the thread
      with Teddy typing under it; a reply that never comes takes it out of the
      thread and puts the words back in the box, so they can be sent again
-     (the owner, 2026-11-10: "the text just pauses and stays there"). */
-  const send = async () => {
-    const question = text.trim();
-    if (!question || busy) return;
+     (the owner, 2026-11-10: "the text just pauses and stays there").
+     `sendText(question, { converse })` is a spoken question (converse.js):
+     the words were never in the box, so a failure puts them there; the
+     answer comes back to the caller to be read aloud. */
+  const sendText = async (question, { converse = false } = {}) => {
+    question = String(question || "").trim();
+    if (!question || busy) return null;
     setBusy(true); setFailed(null); setText("");
+    const history = threadRef.current;
     setThread((h) => [...h, { q: question, a: null }]);
     const a = about.current || screenAbout();
     const r = await ask(mode === "app"
-      ? { mode, question, screen: a.title || a.screen, guide: guide ? guide(a) : "", history: thread }
+      ? { mode, question, screen: a.title || a.screen, guide: guide ? guide(a) : "", history }
       : { question, screen: a.screen, about: aboutForAsk(a), level: talkLevelFor(st),
-          chapter: routePosition(st).stage + 1, history: thread });
+          chapter: routePosition(st).stage + 1, history, converse });
     setBusy(false);
     if (r && r.ok === true && typeof r.answer === "string") {
       setThread((h) => h.map((x) => (x.q === question && x.a === null ? { q: question, a: r.answer } : x)));
-    } else {
-      setThread((h) => h.filter((x) => x.a !== null));
-      setText(question);
-      setFailed(failureLine(r));
+      return r.answer;
     }
+    setThread((h) => h.filter((x) => x.a !== null));
+    setText(question);
+    setFailed(failureLine(r));
+    return null;
   };
+  const send = () => sendText(text);
 
-  return { thread, text, setText, busy, failed, open, send };
+  return { thread, text, setText, busy, failed, open, send, sendText };
 }
 
 /* The turns, newest last, drawn as a text conversation like the tutor's
@@ -134,12 +145,44 @@ export function AskTurns({ thread, busy, prefix = "ask" }) {
   );
 }
 
-/* The box and its button, for a sheet's footer, so the keyboard lifts it. */
-export function AskInput({ th, placeholder, prefix = "ask", autoFocus }) {
+/* The box and its button, for a sheet's footer, so the keyboard lifts it.
+   `voice` (converse.js useConverse) adds the row under it: conversation mode,
+   hold to speak, and the language the microphone hears (the owner,
+   2026-11-19). */
+export function AskInput({ th, placeholder, prefix = "ask", autoFocus, voice }) {
   const t = useTheme();
   return (
     <View style={{ marginTop: 10, gap: 8 }}>
       {th.failed ? <Muted testID={`${prefix}-failed`} style={{ color: t.bad }}>{th.failed}</Muted> : null}
+      {voice ? (
+        voice.rec.block ? (
+          <Blocked block={voice.rec.block} onGetModel={voice.rec.getModel} onSkip={voice.rec.clearBlock} skipLabel="Type instead" />
+        ) : (
+          <View style={{ alignItems: "center", gap: 4 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 14 }}>
+              <ConverseToggle testID={`${prefix}-converse`} on={voice.going} onPress={voice.toggle} />
+              {voice.going ? (
+                <Pressable testID={`${prefix}-loop`} accessibilityRole="button" accessibilityLabel="Stop the conversation"
+                           onPress={voice.toggle} hitSlop={8}
+                           style={({ pressed }) => ({ width: 56, height: 56, borderRadius: 28, alignItems: "center",
+                             justifyContent: "center", borderWidth: 1, borderColor: t.brand,
+                             backgroundColor: voice.rec.phase === "listening" ? t.brand : t.brandBg, opacity: pressed ? 0.7 : 1 })}>
+                  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+                       stroke={voice.rec.phase === "listening" ? t.brandOn : t.brandInk} strokeWidth={2}
+                       strokeLinecap="round" strokeLinejoin="round"><Path d="M7 7h10v10H7z" /></Svg>
+                </Pressable>
+              ) : (
+                <HoldButton testID={`${prefix}-hold`} phase={voice.rec.phase} size={56}
+                            onIn={voice.hold} onOut={voice.release} />
+              )}
+              {voice.going ? <View style={{ width: 44 }} />
+                : <LangToggle testID={`${prefix}-lang`} lang={voice.lang} onPress={voice.flipLang} />}
+            </View>
+            <Text testID={`${prefix}-live`} numberOfLines={1}
+                  style={{ color: t.ink2, fontSize: 13, minHeight: 18, textAlign: "center" }}>{voice.status}</Text>
+          </View>
+        )
+      ) : null}
       <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-end" }}>
         {/* Enter sends (the owner, 2026-11-10); the box still wraps a long
             question. `submitBehavior` is what lets a multiline field submit
@@ -167,6 +210,13 @@ export function AskButton() {
   const t = useTheme();
   const th = useAskThread();
   const [open, setOpen] = useState(false);
+  /* Spoken questions and the hands-free exchange (converse.js): a turn is
+     sent as a question of this screen with `converse` set, so the model may
+     answer with a question of its own about what is on it. */
+  const voice = useConverse({
+    enabled: open,
+    onTurn: (text) => th.sendText(text, { converse: true }),
+  });
   if (!aiOffered()) return null;
   return (
     <>
@@ -186,7 +236,7 @@ export function AskButton() {
         /* Tall: a conversation, not a glance. It opened at the height of its
            first line and the owner read it as "subtle on the bottom fifth of
            the screen" (2026-10-13). */
-        <Sheet testID="ask-sheet" onClose={() => setOpen(false)} tall
+        <Sheet testID="ask-sheet" onClose={() => { if (voice.going) voice.toggle(); setOpen(false); }} tall
                header={(
                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 }}>
                    <GuidePop pose="wave" size={64} />
@@ -195,7 +245,7 @@ export function AskButton() {
                    </Text>
                  </View>
                )}
-               footer={<AskInput th={th} placeholder="Why is it «книгу» here?" autoFocus />}>
+               footer={<AskInput th={th} placeholder="Why is it «книгу» here?" voice={voice} />}>
           <AskTurns thread={th.thread} busy={th.busy} />
         </Sheet>
       ) : null}

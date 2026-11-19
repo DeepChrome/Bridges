@@ -25,9 +25,42 @@ import React, { useEffect } from "react";
 import { Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
-import { useRecognizer, LANG } from "./speech";
+import { Text, IconButton } from "./ui";
+import { useRecognizer, LANG, LANG_EN } from "./speech";
 import { stop as stopAudio } from "./audio";
 import { ACTIVITY_ICONS } from "@core/icons";
+
+/* The microphone's language, one small toggle beside it: a request is as
+   likely to be "what should I study next" as «я хочу чай». The tutor's and the
+   sparkle's (the owner, 2026-11-19: "make sure we have the option for the AI
+   to receive input in Russian or English from the user"). */
+export function LangToggle({ lang, onPress, testID = "mic-lang" }) {
+  const t = useTheme();
+  const en = lang === LANG_EN;
+  return (
+    <IconButton testID={testID} size={44} onPress={onPress}
+                label={en ? "Microphone hears English" : "Microphone hears Russian"}>
+      <Text style={{ color: t.ink2, fontSize: 12, fontWeight: "700" }}>{en ? "EN" : "RU"}</Text>
+    </IconButton>
+  );
+}
+
+/* Conversation mode, as one icon beside the microphone — the control the
+   owner described: *"think about Claude's own conversation mode with the
+   little icon by itself."* Four bars of a waveform, lit when the exchange is
+   running. It is the mode's only control and it is not a setting. */
+export function ConverseToggle({ on, onPress, testID = "converse" }) {
+  const t = useTheme();
+  return (
+    <IconButton testID={testID} size={44} on={on} selected={on} onPress={onPress}
+                label={on ? "Leave conversation mode" : "Conversation mode"}>
+      <Svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+           stroke={on ? t.brandInk : t.ink2} strokeWidth={2} strokeLinecap="round">
+        <Path d="M4 10v4M8.5 6v12M15.5 6v12M20 10v4" />
+      </Svg>
+    </IconButton>
+  );
+}
 
 /* `onNote(text, action)`: what the caller should say under its field, and —
    when the Russian model is what is missing — the one thing the learner can

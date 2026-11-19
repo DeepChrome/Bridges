@@ -39,7 +39,7 @@ export function formClip(text) {
    settled, so that cost is never paid inside a render. */
 export const warmForms = () => { formClip("а"); };
 import { sexOf } from "@core/names";
-import { castById } from "@core/cast";
+import { castById, GUIDE_ID } from "@core/cast";
 import { knownVoiceSex, rankVoice, isSilentVoice } from "@core/voices";
 
 /* When nothing could play — the stream failed and there is no Russian voice —
@@ -539,6 +539,36 @@ export function speakLine(text, opts = {}) {
       finish(false);
     }
   });
+}
+
+/* English about Russian, read aloud (2026-11-19, the sparkle's conversation
+   mode): the Russian inside «guillemets» in Teddy's own voice, the English
+   around it in the phone's English — one after another, each awaited. Where a
+   reply carries no guillemets, the Cyrillic runs are the Russian (the same
+   fallback `splitMarked` draws by). Resolves when the whole line is done. */
+const MARKED_RE = /«([^»]+)»/g;
+const CYR_RUN_RE = /[Ѐ-ӿ][Ѐ-ӿ\s,.!?;:'-]*[Ѐ-ӿ!?.]|[Ѐ-ӿ]+/g;
+export function splitSpoken(text) {
+  const s = text == null ? "" : String(text);
+  const re = new RegExp(MARKED_RE.test(s) ? MARKED_RE.source : CYR_RUN_RE.source, "g");
+  const out = [];
+  let last = 0, m;
+  while ((m = re.exec(s))) {
+    if (m.index > last) out.push({ text: s.slice(last, m.index), ru: false });
+    out.push({ text: m[1] === undefined ? m[0] : m[1], ru: true });
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) out.push({ text: s.slice(last), ru: false });
+  return out.map((p) => ({ ...p, text: p.text.replace(/\s+/g, " ").trim() })).filter((p) => /\w|[Ѐ-ӿ]/.test(p.text));
+}
+export async function speakMixed(text, opts = {}) {
+  const voice = voiceFor(GUIDE_ID);
+  for (const part of splitSpoken(text)) {
+    const ok = part.ru ? await speakLine(part.text, { ...voice, asked: opts.asked })
+      : await speakLine(part.text, { lang: "en", asked: opts.asked });
+    if (ok === false && opts.asked && here() !== opts.asked) return false;
+  }
+  return true;
 }
 
 /* One scenario, played as one file (§30l).

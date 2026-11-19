@@ -180,16 +180,18 @@ describe("the options live where a session starts", () => {
   it("offers the three fronts, and keeps the last one ticked", async () => {
     await withProfile({ sets: [], flash: ["recognise"] });
     await global.__openOptions();
-    for (const [id] of FRONTS) expect(await screen.findByTestId(`flash-${id}`)).toBeTruthy();
     /* Each press inside `act`, so the save effect has run before the row is
        read back — a bare press followed by `saved()` reads the state as it was
-       (anki.test.js drives the picker the same way). */
-    const press = async (id) => { await act(async () => { fireEvent.press(screen.getByTestId(id)); }); };
-    await press("flash-recognise");
+       (anki.test.js drives the picker the same way). The fronts are a row
+       opening its three choices (ui.js OptionRow, 2026-11-19). */
+    const press = async (id) => { await act(async () => { fireEvent.press(await screen.findByTestId(id)); }); };
+    await press("flash");
+    for (const [id] of FRONTS) expect(await screen.findByTestId(`flash-opt-${id}`)).toBeTruthy();
+    await press("flash-opt-recognise");
     expect((await saved()).flash).toEqual(["recognise"]);
-    await press("flash-produce");
+    await press("flash-opt-produce");
     expect((await saved()).flash).toEqual(["recognise", "produce"]);
-    await press("flash-recognise");
+    await press("flash-opt-recognise");
     expect((await saved()).flash).toEqual(["produce"]);
   });
 
@@ -200,6 +202,7 @@ describe("the options live where a session starts", () => {
     expect(QUEUE_DEFAULTS.newPerDay).toBe(5);
     await withProfile({ sets: [], newPerDay: undefined });
     await global.__openOptions();
+    await act(async () => { fireEvent.press(await screen.findByTestId("new-per-day-row")); });
     expect((await screen.findByTestId("new-per-day-value")).props.value).toBe("5");
 
     await act(async () => { fireEvent.press(screen.getByTestId("new-per-day-plus")); });
@@ -252,6 +255,7 @@ describe("the options live where a session starts", () => {
   it("clamps the new-word ration rather than letting it go negative", async () => {
     await withProfile({ sets: [], newPerDay: 0 });
     await global.__openOptions();
+    await act(async () => { fireEvent.press(await screen.findByTestId("new-per-day-row")); });
     const minus = await screen.findByTestId("new-per-day-minus");
     expect(minus.props.accessibilityState).toMatchObject({ disabled: true });
     await act(async () => { fireEvent.changeText(screen.getByTestId("new-per-day-value"), "-4"); });
@@ -283,8 +287,9 @@ describe("the card reads itself once", () => {
     await screen.findByTestId("card-recognise");
     const first = global.__players.length + global.__spoke.length;
     await global.__openOptions();
-    await act(async () => { fireEvent.press(await screen.findByTestId("flash-produce")); });
-    await act(async () => { fireEvent.press(screen.getByTestId("flash-listen")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("flash")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("flash-opt-produce")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("flash-opt-listen")); });
     expect(global.__players.length + global.__spoke.length).toBe(first);
   });
 

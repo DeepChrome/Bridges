@@ -7970,6 +7970,21 @@ rules each left:
   desktop and the review site. Settings → Audio lists the packs. R2 is not
   enabled on the Cloudflare account, so the packs live in KV (25 MiB a
   value; `more` is cut to parts).
+  **A dealt pile asks for its packs at the deal** (`warmClips` in audio.js,
+  called by Study's `deal` and the Runner on mount): Study's sentence pool
+  widens to 400 along the route, so a fresh learner's first sentence card
+  («Не за что.») lived in the chapter-3 pack and read in the device voice on
+  the emulator walkthrough; looking every dealt text up once, last to first,
+  starts the first card's pack first. A new source of cards or questions
+  should call it with its texts.
+- **Read off the same walkthrough**: the month calendar is one cell shape —
+  a studied day filled brand with its time, today ringed, a day not yet come
+  faint, the topic in the sheet a tap opens — where past days had been tall
+  grey boxes with 9 px topics beside bare future numbers; and the flashcard
+  sits in the middle of what is left above the grade buttons (`card-well`,
+  `Screen fill`) rather than pinned under the bar with the screen empty
+  beneath. The emulator needs the universal build, which overwrites the
+  arm64 APK of the same commit; adb cannot type Cyrillic into a flow.
 
 ## 31. Verification
 

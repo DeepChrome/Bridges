@@ -156,8 +156,11 @@ export function Intro({ onDone }) {
   /* The card slides in from the right as the next one replaces it; a hard cut
      read as one card whose words changed (motion.js useSwap). */
   const swap = useSwap(at);
+  /* `safeTop`: the tour is shown outside the navigator, so no header takes
+     the status-bar inset, and the progress line ran under the clock (the
+     sweep walkthrough, 2026-11-19). */
   return (
-    <Screen fill>
+    <Screen fill safeTop>
       <View style={{ flexDirection: "row", gap: 6, marginBottom: 22 }}>
         {PAGES.map((p, k) => (
           <View key={p.key} style={{ flex: 1, height: 4, borderRadius: 2,

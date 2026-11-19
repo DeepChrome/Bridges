@@ -739,6 +739,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      back at a different position, and a learner who has just been handed the
      same word again should see it arrive rather than find it already there. */
   const questionIn = useSwap(`${at}:${q.kind}:${q.prompt}`);
+  // A question with a prompt, or one whose speaker is the prompt.
+  const headed = !!q.prompt || q.kind === "listen";
   const answerIn = useSwap(`${at}:answer`, { distance: 22 });
 
   return (
@@ -786,8 +788,13 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           top… move the question up a little"): flush with the answers it left
           the top half of the screen empty. Centred in the room above them now,
           the slack split between above and below. */}
+      {/* A listen-and-choose has no prompt text, but the speaker *is* its
+          question: left with the no-prompt rule it sat under the caption at
+          the top with seven hundred pixels between it and the options (the
+          lesson walkthrough, 2026-11-19). It is headed like a prompted
+          question, so the speaker floats in the room above the answers. */}
       <Animated.View testID="question-block"
-                     style={[questionIn, { flexGrow: hasInput(q) || !q.prompt ? 0 : 1,
+                     style={[questionIn, { flexGrow: hasInput(q) || !headed ? 0 : 1,
                                            justifyContent: "center",
                                            alignItems: "center", marginBottom: 20 }]}>
         <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", marginBottom: 12,
@@ -865,7 +872,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           between. A first cut sent this case to the *top* instead, which put
           the two kinds of screen at opposite ends — read off the shots. */}
       <Animated.View key={at} testID="answer-block"
-                     style={[answerIn, !q.prompt && !hasInput(q)
+                     style={[answerIn, !headed && !hasInput(q)
                        ? { flexGrow: 1, justifyContent: "flex-end", paddingBottom: 8 } : null]}>
         {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint: helped, back, next }) : null}
       </Animated.View>

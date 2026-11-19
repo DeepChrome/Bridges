@@ -7985,6 +7985,13 @@ rules each left:
   `Screen fill`) rather than pinned under the bar with the screen empty
   beneath. The emulator needs the universal build, which overwrites the
   arm64 APK of the same commit; adb cannot type Cyrillic into a flow.
+- **And off a lesson walked on the emulator**: a listen-and-choose question
+  is `headed` like a prompted one (Run.js) — its speaker is the question, and
+  under the no-prompt rule it sat at the top with the options far below; a
+  unit's own video lines (`u.v.lines`) are assigned to the unit's chapter in
+  `build_word_assets.mjs`, since «Спасибо и пока-пока.» plays on a chapter-1
+  word card and had been packed in `more`; the tour's Screen takes `safeTop`
+  (it is shown outside the navigator, so no header took the inset).
 
 ## 31. Verification
 

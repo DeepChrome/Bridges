@@ -83,6 +83,15 @@ describe("where the question block sits", () => {
     expect(flat(screen.getByTestId("question-block").props.style).flexGrow).toBe(1);
   });
 
+  /* A listen-and-choose has no prompt text; its speaker is the question and
+     floats above the options like a prompt would, rather than sitting under
+     the caption at the top with the options far below (2026-11-19). */
+  it("takes the slack above the options of a listen question too", async () => {
+    await withRunner([{ ...choice, kind: "listen", prompt: "", say: "книга" }]);
+    await screen.findByTestId("question-block");
+    expect(flat(screen.getByTestId("question-block").props.style).flexGrow).toBe(1);
+  });
+
   /* The bug: with the keyboard up the window shrinks, a growing block centres
      itself in what is left, and the input and Check are below the fold. */
   it("does not take it above a text input, so the keyboard cannot hide the answer", async () => {

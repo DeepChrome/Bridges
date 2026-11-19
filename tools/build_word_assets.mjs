@@ -204,6 +204,12 @@ for (const pool of ["speak", "listen"]) {
     for (const k of idxs) { const row = D.speech.rows[k]; if (row) noteSentence(row[0], chapterOfUnit[unit]); }
   }
 }
+// A unit's own video lines (`u.v.lines`: [row, ms]) play on its lesson's
+// word cards whether or not a pool took them — «Спасибо и пока-пока.» is
+// chapter 1's and was in `more` (the lesson walkthrough, 2026-11-19).
+for (const u of D.units) {
+  for (const [r] of (u.v && u.v.lines) || []) { const row = D.speech.rows[r]; if (row) noteSentence(row[0], chapterOfUnit[u.id]); }
+}
 // The dictionary's and the senses' examples: the word's chapter.
 D.lemmas.forEach((l, i) => {
   const c = lemmaChapter(i);

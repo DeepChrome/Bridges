@@ -963,9 +963,9 @@ export function Tile({ icon, tone, title, caption, onPress, testID, style }) {
     </Lift>
   );
 }
-export function TileGrid({ children, testID }) {
+export function TileGrid({ children, testID, style }) {
   return (
-    <View testID={testID} style={{ flexDirection: "row", flexWrap: "wrap", gap: space.gap }}>{children}</View>
+    <View testID={testID} style={[{ flexDirection: "row", flexWrap: "wrap", gap: space.gap }, style]}>{children}</View>
   );
 }
 
@@ -1105,6 +1105,106 @@ export function Stepper({ value, onChange, min = 0, max = 999, step = 1, testID,
       />
       {btn("+", clamp(value + step), "plus")}
     </View>
+  );
+}
+
+/* Two or three tabs at the top of a screen, one lit: a segmented control in a
+   track, the chosen segment raised on the surface (Practice: Drills · Grammar,
+   the owner, 2026-11-19). Not a route: the screen keeps the choice. */
+export function SegmentTabs({ options, value, onPick, testID }) {
+  const t = useTheme();
+  return (
+    <View testID={testID} accessibilityRole="tablist"
+          style={{ flexDirection: "row", backgroundColor: t.surface2, borderRadius: radius.md, padding: 3 }}>
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <Pressable key={o.id} testID={testID ? `${testID}-${o.id}` : undefined} accessibilityRole="tab"
+                     accessibilityState={{ selected: on }} onPress={() => onPick(o.id)}
+                     style={{ flex: 1, minHeight: 40, alignItems: "center", justifyContent: "center",
+                              borderRadius: radius.md - 2, backgroundColor: on ? t.surface : "transparent" }}>
+            <Text selectable={false}
+                  style={{ color: on ? t.ink : t.ink2, fontSize: type.body, fontWeight: on ? "600" : "500" }}>
+              {o.name}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/* **An options sheet is a list of categories, each opening its own choices**
+ * (the owner, 2026-11-19: *"All of our options menus are ugly… a more
+ * standard form where the user selects the category they want to customize
+ * and then a submenu pops out with the options. Similar to an Excel filter"*).
+ *
+ * `OptionRow` is one category: its name, what it is set to (`value`, quiet,
+ * on the right) and a chevron; pressing it opens `PickSheet` over the options
+ * with the choices ticked. The sheet's state lives *in the row*, not in the
+ * options sheet above it — RN's Modal in the test renderer does not redraw
+ * its children when the component owning it changes state (§30be), and a
+ * sheet over a sheet is exactly that.
+ *
+ *   options   [{ id, name, sub? }]
+ *   value     the chosen id, or an array of ids with `multi`
+ *   minOne    with `multi`, the last tick cannot be removed (§30ac's rule)
+ *   onPick    the new id, or the new array with `multi`
+ *   children  instead of options: the row opens a sheet holding whatever is
+ *             given (a Stepper, a list of its own)
+ */
+export function OptionRow({ title, value, valueText, options, multi, minOne, onPick, testID, children, sheetTitle,
+                            last, at, sub }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  const chosen = multi ? (Array.isArray(value) ? value : []) : [value];
+  const shown = valueText !== undefined ? valueText
+    : (options || []).filter((o) => chosen.includes(o.id)).map((o) => o.name).join(", ");
+  const toggle = (id) => {
+    if (!multi) { onPick(id); setOpen(false); return; }
+    if (chosen.includes(id)) { if (minOne && chosen.length === 1) return; onPick(chosen.filter((x) => x !== id)); }
+    else onPick((options || []).map((o) => o.id).filter((x) => x === id || chosen.includes(x)));
+  };
+  return (
+    <>
+      <Row testID={testID} onPress={() => setOpen(true)} last={last} at={at}>
+        <RowText title={title} sub={sub} bold={false} />
+        <Text testID={testID ? `${testID}-value` : undefined} numberOfLines={1}
+              style={{ color: t.ink3, fontSize: type.body, maxWidth: "50%" }}>{shown}</Text>
+        <Text style={{ color: t.ink3, fontSize: 18, marginLeft: 2 }}>›</Text>
+      </Row>
+      {open ? (
+        <PickSheet testID={testID ? `${testID}-sheet` : undefined} title={sheetTitle || title}
+                   options={options} chosen={chosen} multi={multi} onToggle={toggle}
+                   onClose={() => setOpen(false)} optionPrefix={testID ? `${testID}-opt-` : "opt-"}>
+          {children}
+        </PickSheet>
+      ) : null}
+    </>
+  );
+}
+
+/* The choices of one category, as a sheet: a tick per option; a single
+   choice closes on the pick, several stay open until Done. */
+export function PickSheet({ title, options, chosen = [], multi, onToggle, onClose, testID, optionPrefix = "opt-",
+                            children }) {
+  return (
+    <Sheet testID={testID} title={title} onClose={onClose}
+           footer={<Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose}
+                        testID={testID ? `${testID}-done` : undefined} />}>
+      {children}
+      {options && options.length ? (
+        <List>
+          {options.map((o) => (
+            <Row key={o.id} testID={`${optionPrefix}${o.id}`} onPress={() => onToggle(o.id)}>
+              <Tick on={chosen.includes(o.id)} />
+              <RowText title={o.name} sub={o.sub} bold={false} />
+              {o.note !== undefined ? <Muted>{String(o.note)}</Muted> : null}
+            </Row>
+          ))}
+        </List>
+      ) : null}
+    </Sheet>
   );
 }
 

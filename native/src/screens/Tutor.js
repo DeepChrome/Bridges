@@ -34,8 +34,9 @@ import { View, Pressable, ScrollView, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
-import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
+import { Screen, Btn, Muted, Text, TextInput, Marked, Note, BulbButton, Sheet,
          List, Row, SectionLabel, Choice, Tick, RowText, IconButton, ChatTurn, TypingTurn } from "../ui";
+import { useHeaderOptions } from "../headermenu";
 import { Linked } from "../words";
 import { L, STAGES, studiedFor, routePosition, rankOf, lessonCount, lessonsDone } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
@@ -393,6 +394,7 @@ export default function Tutor({ navigation, route }) {
   const [draft, setDraft] = useState("");
   const [lang, setLang] = useState(LANG);
   const [cog, setCog] = useState(false);
+  useHeaderOptions(route, () => setCog(true), "Tutor options");
   /* Conversation mode: the microphone opens itself after each of the tutor's
      turns and closes when the learner stops speaking (the owner, 2026-09-26:
      *"conversation mode where it just goes back and forth and you dont have
@@ -611,8 +613,8 @@ export default function Tutor({ navigation, route }) {
             The tutor is not available in this build.
           </Muted>
         ) : null}
-        {/* The cog sits above the transcript, where the drills and Study put
-            theirs — options belong to the screen, not to the header. */}
+        {/* The options are in the header's menu (headermenu.js); the bulb
+            stays with the conversation. */}
         <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 8, marginBottom: 6 }}>
           {/* The rules, one tap away mid-conversation (the owner, 2026-09-27:
               a lightbulb wherever a skill is being asked for). A conversation
@@ -621,7 +623,6 @@ export default function Tutor({ navigation, route }) {
               the reference itself. */}
           <BulbButton testID="tutor-bulb" label="The rules"
                       onPress={() => navigation.navigate("Grammar")} />
-          <CogButton testID="tutor-cog" label="Tutor options" onPress={() => setCog(true)} />
         </View>
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}
                     keyboardShouldPersistTaps="handled">

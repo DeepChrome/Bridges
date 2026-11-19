@@ -25,8 +25,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text, Muted, Sheet, CogButton, Loading,
+import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text, Muted, Sheet, Loading,
          RowText, Lift, toneOf, Speaker, Pill } from "../ui";
+import { useHeaderOptions } from "../headermenu";
 import { Table } from "../rules";
 import { Done, useAudioStopOnLeave } from "../screens/Run";
 import { Q, DRILL_TYPES } from "../questions";
@@ -145,7 +146,7 @@ function FormCard({ q, shown, onShow }) {
   );
 }
 
-export function FormCardsFlow({ navigation }) {
+export function FormCardsFlow({ navigation, route }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
   const prefs = (st.drillPrefs || {}).formcards || {};
@@ -170,6 +171,7 @@ export function FormCardsFlow({ navigation }) {
 
   const before = useRef(JSON.stringify(prefs));
   const openCog = () => { before.current = JSON.stringify(prefs); setCog(true); };
+  useHeaderOptions(route, openCog, "Form card options");
   const closeCog = () => {
     setCog(false);
     if (JSON.stringify(prefs) !== before.current) { setAt(0); setShown(false); setHeld(0); setSeed(seed + 1); }
@@ -233,10 +235,7 @@ export function FormCardsFlow({ navigation }) {
   return (
     <>
       <Screen footer={controls}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <RowText testID="formcards-progress" title={`${at + 1} / ${deck.length}`} bold={false} />
-          <CogButton testID="formcards-cog" onPress={openCog} label="Form card options" />
-        </View>
+        <RowText testID="formcards-progress" title={`${at + 1} / ${deck.length}`} bold={false} />
         <FormCard key={`${seed}:${at}`} q={q} shown={shown} onShow={() => setShown(true)} />
         <Muted size={T.tiny} style={{ marginTop: 10, textAlign: "center" }}>{`${held} known`}</Muted>
       </Screen>

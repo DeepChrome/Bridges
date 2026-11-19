@@ -47,21 +47,24 @@ describe("which cards a set holds", () => {
   /* …and since 2026-10-05 the pile is the day's goal: what is due and new
      first, then the learner's own met cards to make the goal up — so «город»,
      not due, comes after them rather than not at all. */
-  it("deals everything due first with nothing ticked, then the learner's own cards toward the goal", () => {
+  /* The chunk is shuffled since 2026-11-19 (the owner: "not sequential"), so
+     what is asserted is which cards are in it and why, not their order. */
+  it("deals everything due with nothing ticked, and the learner's own cards toward the goal", () => {
     expect(cardsIn(st, [])).toEqual([]);
-    // Words only, so the order under test is not shared with new sentences.
+    // Words only, so the set under test is not shared with new sentences.
     const s = sessionFor({ ...st, sets: [], cardKinds: ["words"] });
-    const first = s.items.slice(0, 3).map((x) => x.word).sort();
-    expect(first).toEqual(["дом", "не", "я"]);
+    const words = s.items.map((x) => x.word);
+    for (const w of ["дом", "не", "я", "город"]) expect(words).toContain(w);
     expect(s.items.find((x) => x.word === "дом").kind).toBe("new");
-    expect(s.items.findIndex((x) => x.word === "город")).toBe(3);
     expect(s.items.find((x) => x.word === "город").extra).toBe(true);
+    expect(s.items.filter((x) => !x.extra).map((x) => x.word).sort()).toEqual(["дом", "не", "я"]);
     expect(s.due).toBe(2);
   });
 
   it("deals the due cards even when only the trouble words were ticked", () => {
     const s = sessionFor({ ...st, sets: ["__trouble__"], cardKinds: ["words"] });
-    expect(s.items.slice(0, 3).map((x) => x.word).sort()).toEqual(["дом", "не", "я"]);
+    const words = s.items.map((x) => x.word);
+    for (const w of ["дом", "не", "я"]) expect(words).toContain(w);
   });
 
   /* Words, sentences, or both — for the due cards as well as the new ones, and

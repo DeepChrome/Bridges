@@ -161,7 +161,7 @@ describe("tutor", () => {
     await open();
     await screen.findByTestId("tutor-turn");
     expect(screen.queryByTestId("tutor-options")).toBeNull();
-    await act(async () => { fireEvent.press(screen.getByTestId("tutor-cog")); });
+    await global.__openOptions();
     expect(await screen.findByTestId("tutor-options")).toBeTruthy();
     expect(screen.getByTestId("tutor-level")).toBeTruthy();
     expect(screen.getByTestId("tutor-restart")).toBeTruthy();

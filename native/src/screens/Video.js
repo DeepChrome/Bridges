@@ -10,7 +10,9 @@ import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
 import { Screen, List, Row, Btn, Pill, Muted, Title, Sheet, Text, COG_PATH, RowText, ToggleRow } from "../ui";
-import { markComponent, videoById, videoWatched, unitById, transcriptOf, transcriptEnOf, nextRoute } from "../data";
+import { markComponent, videoById, videoWatched, unitById, transcriptOf, transcriptEnOf, nextRoute, idxOfWord,
+         goalOpts } from "../data";
+import { tackOn } from "@core/queue";
 import { StackActions } from "@react-navigation/native";
 import { Transcript } from "../transcript";
 import { useWords } from "../words";
@@ -18,7 +20,7 @@ import { libraryState, setLibraryState, openedVideo, setVideoPosition, videoPosi
 import { releaseAudio } from "../audio";
 import { useRemote } from "../remote";
 import { today } from "@core/util";
-import { newCard } from "@core/scheduler";
+import { newCard, cardFor } from "@core/scheduler";
 import { short, minutes, clock, isFave, toggleFave, skipMsOf, DEFAULT_SKIP } from "../video";
 import { Heart } from "./Immerse";
 
@@ -449,7 +451,15 @@ export function Video({ route, navigation }) {
        is read, so it is read off the same value. */
     const own = unit && unit.v && unit.v.id === v.id;
     const marked = (s) => {
-      const next = { ...s, watched: { ...(s.watched || {}), [v.id]: today() } };
+      let next = { ...s, watched: { ...(s.watched || {}), [v.id]: today() } };
+      /* The words this video says that the learner has not met join today's
+         pile (core/queue.js tackOn; the owner, 2026-11-19: "any time a user
+         gets exposed to new words in an immersion video, that can become part
+         of their main stack… flag those words as eligible for the person's
+         general review stack"). The cards before the video (VideoSummary's
+         list round) are a separate thing and unchanged. */
+      const fresh = Object.keys(v.words || {}).filter((w) => idxOfWord(w) >= 0 && !cardFor((s.seen || {})[w]));
+      next = tackOn(next, fresh, Date.now(), goalOpts(next));
       return own ? markComponent(next, unit, params.index || 0, "video") : next;
     };
     update(marked);

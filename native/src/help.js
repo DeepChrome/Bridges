@@ -1,6 +1,7 @@
-/* The question mark in a screen's corner (the owner, 2026-10-02: "each module
- * will have a little question mark on it in the corner… if they click that,
- * that will orient them to all the features of that page").
+/* How to use this screen (the owner, 2026-10-02: "each module will have a
+ * little question mark on it in the corner… if they click that, that will
+ * orient them to all the features of that page"; since 2026-11-19 a row of
+ * the header menu rather than a corner of its own).
  *
  * One sheet a screen, each line a control on that screen and what it is for,
  * in the app's own words. Not coach marks over the live screen — a sheet can
@@ -14,9 +15,8 @@
  * `APP_GUIDE` and this screen's lines (askai.js). With the AI the "?" is on
  * every screen; without it, only on screens that have lines. */
 
-import React, { useState } from "react";
-import { View, Pressable } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import React, { useEffect } from "react";
+import { View } from "react-native";
 import { useTheme, radius } from "./theme";
 import { Sheet, Text, Muted, Btn } from "./ui";
 import { navRef } from "./words";
@@ -131,56 +131,42 @@ HELP.CustomQuiz = HELP.Quiz;
 HELP.Vocab = HELP.Lesson;
 HELP.CaseRun = HELP.Drill;
 
-export function HelpButton({ route }) {
+/* The sheet itself. Since 2026-11-19 it opens from the header menu's "How to
+   use this screen" row (headermenu.js), not from a "?" of its own — every
+   header is the same three buttons now. */
+export function HelpSheet({ route, onClose }) {
   const t = useTheme();
-  const [open, setOpen] = useState(false);
+  const help = HELP[route];
   const th = useAskThread({ mode: "app",
     guide: () => APP_GUIDE + (help ? `\nThis screen (${help.title}): ${help.lines.map(([w, d]) => `${w}: ${d}`).join("; ")}.` : "") });
-  const help = HELP[route];
   const ai = aiOffered();
-  /* With the AI there is always something to ask, so the "?" is on every
-     screen; without it, only where there are lines to read. */
-  if (!help && !ai) return null;
+  useEffect(() => { th.open(); }, []);   // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <>
-      <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={8} testID="help-button"
-                 accessibilityRole="button" accessibilityLabel="What is on this screen"
-                 style={{ marginRight: 12, width: 30, height: 30, alignItems: "center",
-                          justifyContent: "center" }}>
-        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
-             strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
-          <Path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01" />
-        </Svg>
-      </Pressable>
-      {open ? (
-        <Sheet testID="help-sheet" title={help ? help.title : "How do I…"} onClose={() => setOpen(false)}
-               footer={(
-                 <>
-                   {ai ? <AskInput th={th} prefix="help" placeholder="How do I…" /> : null}
-                   {/* The way to tell the owner something is wrong, from the
-                       screen it is wrong on — the screen's name rides along. */}
-                   <Btn kind="ghost" testID="help-feedback" label="Send feedback" style={{ marginTop: 6 }}
-                        onPress={() => {
-                          setOpen(false);
-                          if (navRef.isReady()) navRef.navigate("Feedback", { from: route });
-                        }} />
-                 </>
-               )}>
-          <View style={{ gap: 12, paddingBottom: 6 }}>
-            {(help ? help.lines : []).map(([what, does]) => (
-              <View key={what} style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
-                <View style={{ minWidth: 92, paddingVertical: 3, paddingHorizontal: 8, borderRadius: radius.sm,
-                               backgroundColor: t.brandBg, alignItems: "center" }}>
-                  <Text style={{ color: t.brandInk, fontSize: 13, fontWeight: "700" }}>{what}</Text>
-                </View>
-                <Muted style={{ flex: 1, paddingTop: 3 }}>{does}</Muted>
-              </View>
-            ))}
-            <AskTurns thread={th.thread} busy={th.busy} prefix="help" />
+    <Sheet testID="help-sheet" title={help ? help.title : "How do I…"} onClose={onClose}
+           footer={(
+             <>
+               {ai ? <AskInput th={th} prefix="help" placeholder="How do I…" /> : null}
+               {/* The way to tell the owner something is wrong, from the
+                   screen it is wrong on — the screen's name rides along. */}
+               <Btn kind="ghost" testID="help-feedback" label="Send feedback" style={{ marginTop: 6 }}
+                    onPress={() => {
+                      onClose();
+                      if (navRef.isReady()) navRef.navigate("Feedback", { from: route });
+                    }} />
+             </>
+           )}>
+      <View style={{ gap: 12, paddingBottom: 6 }}>
+        {(help ? help.lines : []).map(([what, does]) => (
+          <View key={what} style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
+            <View style={{ minWidth: 92, paddingVertical: 3, paddingHorizontal: 8, borderRadius: radius.sm,
+                           backgroundColor: t.brandBg, alignItems: "center" }}>
+              <Text style={{ color: t.brandInk, fontSize: 13, fontWeight: "700" }}>{what}</Text>
+            </View>
+            <Muted style={{ flex: 1, paddingTop: 3 }}>{does}</Muted>
           </View>
-        </Sheet>
-      ) : null}
-    </>
+        ))}
+        <AskTurns thread={th.thread} busy={th.busy} prefix="help" />
+      </View>
+    </Sheet>
   );
 }

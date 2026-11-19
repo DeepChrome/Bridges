@@ -1,8 +1,9 @@
-/* The two faces of a flashcard after its first turn (the owner, 2026-10-31):
+/* The two faces of a flashcard after its first turn:
  *
- *   - "when a card is flipped for the first time, flipping back should give
- *     the full card on the other side… fully detailed cards after the initial
- *     flip";
+ *   - the front stays the front (the owner, 2026-11-19: "keep the front side
+ *     of the flash card clean when flipped over. Keep it to the original card
+ *     (pre flipped)") — from 2026-10-31 to then both sides were the full card
+ *     after the first turn;
  *   - "put the drills and the more buttons near the top of the entry";
  *   - "the words and definitions for English to Russian don't always match
  *     the key definitions from the Russian to English".
@@ -46,16 +47,21 @@ beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.cl
 afterEach(async () => { await flushState(); });
 
 describe("the card after its first turn", () => {
-  it("shows nothing but the word before Show, and the full card on both sides after", async () => {
+  it("shows nothing but the word before Show, the full card on the back, and the clean front again when turned back", async () => {
     const view = await withProfile();
     expect(screen.queryByTestId("sense-list")).toBeNull();
     expect(screen.queryByTestId("card-actions")).toBeNull();
     await show();
     expect(await screen.findByTestId("sense-list")).toBeTruthy();
-    // Turned back: still the full card, not the bare word.
-    await turn();
-    expect(screen.getByTestId("sense-list")).toBeTruthy();
     expect(screen.getByTestId("card-actions")).toBeTruthy();
+    // Turned back: the original front — the word and its speaker, nothing else.
+    await turn();
+    expect(screen.queryByTestId("sense-list")).toBeNull();
+    expect(screen.queryByTestId("card-actions")).toBeNull();
+    expect(screen.getByTestId("card-hint")).toBeTruthy();          // the front's own partial hint
+    // …and over again: the full card.
+    await turn();
+    expect(await screen.findByTestId("sense-list")).toBeTruthy();
     void view;
   });
 
@@ -93,12 +99,16 @@ describe("the card after its first turn", () => {
     expect(senses && senses.length).toBeTruthy();
     expect(screen.getByTestId("card-meaning-front").props.children).toBe(senses[0].g);
     await show();
-    // Turned back after the first turn, the Russian side is the full card
-    // and its first sense is the same text.
-    await turn();
+    // The back of a produce card: the meaning on top, the Russian answer under
+    // it, and the actions; its first sense is the same text.
     const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    expect(within(screen.getByTestId("sense-list")).getAllByText(new RegExp(esc(senses[0].g))).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(new RegExp(esc(senses[0].g))).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("card-russian")).toBeTruthy();
     expect(screen.getByTestId("card-actions")).toBeTruthy();
+    // Turned back: the English front alone again.
+    await turn();
+    expect(screen.queryByTestId("card-russian")).toBeNull();
+    expect(screen.getByTestId("card-meaning-front").props.children).toBe(senses[0].g);
   });
 
   /* A card shows translations, never Wiktionary's explanation (the owner,
@@ -110,19 +120,27 @@ describe("the card after its first turn", () => {
   it("cuts a card's meaning to its translation, or falls back to the gloss", async () => {
     const po = exactIdx("по");
     expect(sensesOf(po)[0].g.length).toBeGreaterThan(60);
-    await withProfile({ seen: { "по": { recognise: due() } }, flash: ["produce"] });
-    expect(screen.getByTestId("card-meaning-front").props.children).toBe(L[po].e.split(";")[0].trim());
+    await withProfile({ seen: { "по": { recognise: due() } }, flash: ["recognise"] });
     await show();
-    await turn();
     expect(screen.queryByTestId("sense-list")).toBeNull();
     expect(screen.getByTestId("senses")).toBeTruthy();
+    expect(screen.queryByText(/used broadly/)).toBeNull();
+    void po;
   });
 
   it("shows «такой» as \"such\", not its definition", async () => {
     await withProfile({ seen: { "такой": { recognise: due() } }, flash: ["produce"] });
     expect(screen.getByTestId("card-meaning-front").props.children).toBe("such");
     await show();
-    await turn();   // the Russian-headed side carries the sense list
+    // The back of a recognise card carries the sense list; a produce card's
+    // back has the meaning as its head. Deal it from the Russian for the list.
+    await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
+    await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, seen: { "такой": { recognise: due() } }, flash: ["recognise"] }));
+  });
+
+  it("…and its back lists \"such\" first", async () => {
+    await withProfile({ seen: { "такой": { recognise: due() } }, flash: ["recognise"] });
+    await show();
     expect(within(await screen.findByTestId("sense-list")).getByTestId("sense-primary")).toHaveTextContent("such");
     // The definition's wording is gone; a later sense's real translation
     // ("a kind/sort/type of") may stay.

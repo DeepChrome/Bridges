@@ -159,13 +159,22 @@ describe("flashcards", () => {
     await global.__startStudy();
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("flag-new")).toBeTruthy();
-    expect(screen.getByTestId("study-cog")).toBeTruthy();
+    expect(require("../src/headermenu").optionsFor(null)).toBeTruthy();   // the options, in the header's menu
     // New cards come from the lessons reached — a fresh profile's is the first
     // lesson of the first unit — commonest first, and the lemma index is the
-    // frequency order (rank is read, never keyed on: rule 20.4).
+    // frequency order (rank is read, never keyed on: rule 20.4). The chunk is
+    // shuffled (2026-11-19), so the pile is read rather than the card on top.
     const { L, UN, lessonWords } = require("../src/data");
+    const { sessionFor } = require("../src/studycards");
     const first = Math.min(...lessonWords(UN[0], 0));
-    expect(screen.getAllByText(L[first].w).length).toBeGreaterThan(0);
+    await require("../src/store").flushState();
+    const st = await global.__db.saved("p1");
+    const s = sessionFor(st, { rng: () => 0.5 });
+    // The words dealt (a pool sentence rides along with the path, a third share).
+    const dealt = s.items.filter((x) => x.kind === "new" && !/\s/.test(x.word)).map((x) => x.word);
+    expect(dealt).toContain(L[first].b);
+    const lesson = new Set(lessonWords(UN[0], 0).map((i) => L[i].b));
+    expect(dealt.every((w) => lesson.has(w))).toBe(true);
   });
 });
 

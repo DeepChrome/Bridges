@@ -23,7 +23,8 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
-         Marked, BULB_PATH, Sheet, CogButton, RowText, IconButton, ChatTurn } from "../ui";
+         Marked, BULB_PATH, Sheet, RowText, IconButton, ChatTurn, OptionRow } from "../ui";
+import { useHeaderOptions } from "../headermenu";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, studiedFor, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config, capNotice } from "../lib/feedback";
@@ -306,29 +307,21 @@ function LearnerBubble({ turn, avatar }) {
   );
 }
 
-/* The cog on the picker, and the sheet it opens: the tutor's level, with what
-   that level means, and how fast it is read. Its own component holding its own
-   open state, so the sheet redraws (§30be). */
-function TalkOptionsButton({ level, speed, update }) {
-  const [open, setOpen] = useState(false);
+/* The picker's options, from the header menu (headermenu.js): the tutor's
+   level, with what that level means, and how fast it is read — each a row
+   opening its choices (ui.js OptionRow). */
+function TalkOptions({ level, speed, update, onClose }) {
   return (
-    <>
-      <CogButton testID="talk-cog" label="Talk options" onPress={() => setOpen(true)} />
-      {open ? (
-        <Sheet testID="talk-options" onClose={() => setOpen(false)}
-               footer={<Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={() => setOpen(false)} />}>
-          <View style={{ marginBottom: 18 }}>
-            <SectionLabel>Level</SectionLabel>
-            <Choice testID="talk-level" options={TALK_LEVELS} value={level}
-                    onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
-            <Muted style={{ marginTop: 6 }}>{TALK_LEVELS.find((l) => l.id === level).blurb}</Muted>
-          </View>
-          <SectionLabel>Reading speed</SectionLabel>
-          <Choice testID="talk-speed" options={SPEEDS} value={speed}
-                  onPick={(id) => update((p) => ({ ...p, talkSpeed: id }))} />
-        </Sheet>
-      ) : null}
-    </>
+    <Sheet testID="talk-options" title="Talk options" onClose={onClose}
+           footer={<Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />}>
+      <List>
+        <OptionRow testID="talk-level" title="Level" value={level}
+                   options={TALK_LEVELS.map((l) => ({ id: l.id, name: l.name, sub: l.blurb }))}
+                   onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
+        <OptionRow testID="talk-speed" title="Reading speed" value={speed} options={SPEEDS}
+                   onPick={(id) => update((p) => ({ ...p, talkSpeed: id }))} />
+      </List>
+    </Sheet>
   );
 }
 
@@ -358,6 +351,8 @@ export default function Talk({ navigation, route }) {
   const [ended, setEnded] = useState(false);
   const [failure, setFailure] = useState(null);     // the Worker could not answer
   const [hint, setHint] = useState(null);           // { pending } | { ru, en } | null
+  const [options, setOptions] = useState(false);
+  useHeaderOptions(route, () => setOptions(true), "Talk options");
   const en = st.talkEn !== false;
   const learnerTurns = turns.filter((x) => x.who === "learner" && !x.pending).length;
   const scrollRef = useRef(null);
@@ -556,13 +551,11 @@ export default function Talk({ navigation, route }) {
           </Muted>
         ) : null}
         {/* The situations are the screen; the tutor's level and pace are
-            options, behind the cog every other run screen has (§30aw). They sat
-            above the list with a caption each — "How fast the tutor is read
-            out" — which is the app narrating itself (rule 20.7; the
-            walkthrough, 2026-09-30). */}
-        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 10 }}>
-          <TalkOptionsButton level={level} speed={speed} update={update} />
-        </View>
+            options, in the header's menu (headermenu.js). They sat above the
+            list with a caption each — "How fast the tutor is read out" — which
+            is the app narrating itself (rule 20.7; the walkthrough,
+            2026-09-30). */}
+        {options ? <TalkOptions level={level} speed={speed} update={update} onClose={() => setOptions(false)} /> : null}
         <List>
           {SCENARIOS.map((s) => {
             const u = UN.find((x) => x.id === s.unit);

@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { FormCardsFlow, formDeck, askLabel, FORM_CARD_KINDS } from "../src/flows/FormCards";
-import { DrillList } from "../src/screens/Practice";
+import { Practice } from "../src/screens/Practice";
 import { L, chapterWords } from "../src/data";
 import { REVIEW, DAY } from "@core/scheduler";
 
@@ -39,10 +39,11 @@ beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.cl
 afterEach(async () => { await flushState(); });
 
 describe("form cards", () => {
-  it("is a row in Practice's grammar section", async () => {
-    await withProfile(<DrillList navigation={nav} />);
+  it("is a tile on Practice's Grammar tab", async () => {
+    await withProfile(<Practice navigation={nav} />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("practice-tabs-grammar")); });
     await act(async () => { fireEvent.press(await screen.findByTestId("drill-formcards")); });
-    expect(nav.navigate).toHaveBeenCalledWith("FormCards");
+    expect(nav.navigate).toHaveBeenCalledWith("FormCards", undefined);
   });
 
   it("builds its deck from the drills' written questions, mixed, and names the cell asked", () => {

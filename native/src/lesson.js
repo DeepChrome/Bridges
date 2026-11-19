@@ -35,7 +35,6 @@ import { ScoreRing } from "./skills";
 import { useSession } from "./session";
 import { familiarity, cardFor } from "@core/scheduler";
 import { Guide } from "./guide";
-import { RunTools } from "./askai";
 import { useEnter } from "./motion";
 import { L, linesWith, rankOf } from "./data";
 import { pictureOf, Photo } from "./pictures";
@@ -56,13 +55,10 @@ const bandSize = (word) => {
 /* Where you are in the lesson. One row, and the bar now fills rather than
    jumping — the step you just finished is the thing it is reporting. */
 export function StepBar({ at, total }) {
-  /* A lesson's cards carry Teddy's help and the report flag here, as its
-     questions do under the prompt (askai.js RunTools). */
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 16 }}>
       <View style={{ flex: 1 }}><Bar value={total ? at / total : 0} animate /></View>
       <Pill tone="brand">{`${at + 1}/${total}`}</Pill>
-      <RunTools />
     </View>
   );
 }

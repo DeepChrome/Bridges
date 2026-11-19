@@ -41,8 +41,9 @@ import { View, Pressable, AppState } from "react-native";
 import Svg, { Path, Line } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, type as T, radius } from "../theme";
-import { Screen, Text, Muted, Btn, CogButton, Sheet, Choice, SectionLabel, List,
+import { Screen, Text, Muted, Btn, Sheet, Choice, SectionLabel, List,
          ToggleRow, Row, RowText, Thumb, Lift, Bubble, MicNote } from "../ui";
+import { useHeaderOptions } from "../headermenu";
 import { L, IX, SPEECH, STAGES, rankOf } from "../data";
 import { troubleWords } from "../studycards";
 import { say, speakLine, stop, whenIdle, hasRealAudio, startCarrier, pauseCarrier,
@@ -178,10 +179,12 @@ const minutesOf = (groups, prefs) => {
 };
 
 /* The playlist: your own two, then each chapter's episodes. */
-export function DriveList({ navigation }) {
+export function DriveList({ navigation, route }) {
   const { st, ready, update } = useSession();
   const prefs = drivePrefs(st.drivePrefs);
   const [cog, setCog] = useState(false);
+  // The header menu's "Drive options" row (headermenu.js).
+  useHeaderOptions(route, () => setCog(true), "Drive options");
   const eps = useMemo(() => episodes(), []);
   const own = useMemo(() => (ready ? {
     studied: ownPlaylist(st, "studied"), trouble: ownPlaylist(st, "trouble"),
@@ -204,10 +207,7 @@ export function DriveList({ navigation }) {
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <SectionLabel>Your playlists</SectionLabel>
-        <CogButton testID="drive-cog" label="Drive options" onPress={() => setCog(true)} />
-      </View>
+      <SectionLabel>Your playlists</SectionLabel>
       <List>
         <Row testID="drive-own-studied" onPress={own.studied.length ? () => open("studied") : undefined}
              disabled={!own.studied.length}>

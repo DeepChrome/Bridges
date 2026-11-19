@@ -13,7 +13,6 @@ import { useTheme, radius, type as T } from "../theme";
 import Svg, { Path } from "react-native-svg";
 import { markOutOfFive } from "../appearance";
 import { Screen, Btn, Bar, Pill, Speaker, Muted, Lift, Text, BulbButton } from "../ui";
-import { RunTools } from "../askai";
 import { Reference, hasReference } from "../rules";
 import { isIrregular } from "@core/facts";
 import { GuidePop } from "../guide";
@@ -33,13 +32,20 @@ import { Scene } from "../activities/Scene";
 import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { Build } from "../activities/Build";
-import { L, PASS_MARK } from "../data";
-import { gradeFor, applyGrade, gradeSkill, skillOfKind, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
+import { L, PASS_MARK, goalOpts } from "../data";
+import { gradeFor, applyGrade, gradeSkill, skillOfKind, reviewRows, directionOfKind, schedulerOpts, gradesCard,
+         cardFor } from "@core/scheduler";
+import { tackOn } from "@core/queue";
 import { fold, firstSense } from "@core/util";
 import { partialFor, hintSteps, hintMask } from "@core/hint";
 import { PartialHintButton, PartialHintLine } from "../hint";
 
-/* The row of round tools under a question — speaker, bulb, Teddy, flag. */
+/* The spoken steps that move on by themselves after a clean pass, and the
+   beat after the verdict's reading before they do (`record`). */
+export const AUTO_NEXT_KINDS = new Set(["say", "shadow", "buildup"]);
+export const AUTO_NEXT_MS = 900;
+
+/* The row of round tools under a question — speaker, bulb, partial hint. */
 export const TOOL_SIZE = 48;
 const TOOL_GAP = 20;
 
@@ -393,13 +399,11 @@ export function useAudioStopOnLeave() {
    only, so the retake is practice, not a second chance at the mark; the retake
    is still a review for the scheduler. Off for the placement and section tests,
    which measure rather than teach, and for the one-question vocabulary runner. */
-/* `tools`: a control beside the progress — the drill's cog (Flows.js).
-
-   `save`: `{ key, route, params, title }` keeps the run as it goes (resume.js),
+/* `save`: `{ key, route, params, title }` keeps the run as it goes (resume.js),
    after every answer, so it can be picked up where it was left; finishing
    clears it. `restore` is such a saved run to start from instead of `steps`. */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
-                         allowBack = false, stepBack = false, navigation, tools, save, restore, onAnswered }) {
+                         allowBack = false, stepBack = false, navigation, save, restore, onAnswered }) {
   const { st, update } = useSession();
   const t = useTheme();
   /* A saved run is only started from while it is still saved: once that run
@@ -461,6 +465,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const sayTimer = useRef(null);
   const atRef = useRef(0);
   const alive = useRef(true);
+  // Whether this question has been answered, read synchronously (`record`).
+  const answeredRef = useRef(false);
+  // The self-advance after a clean spoken answer, and `next` for it to call.
+  const autoTimer = useRef(null);
+  const nextRef = useRef(() => {});
   /* How far the run has been: a question before this was answered and marked
      already, so one stepped back to (`stepBack`) is practice — it can be
      answered again, and nothing is tallied or graded a second time. */
@@ -470,6 +479,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
   const q = queue[at];
   guard.current = at > 0 && !finished.current;
+  // A lesson's run: its new words are today's exposure (tackOn in `record`).
+  const tacks = !!(save && /^(quiz|vocab):/.test(save.key));
   /* What the bulb has behind it for this question. Reading it always counts
      as a hint — see referenceFor. */
   const ref = q ? referenceFor(q) : { tables: [] };
@@ -496,6 +507,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   useEffect(() => () => {
     alive.current = false;
     if (sayTimer.current) clearTimeout(sayTimer.current);
+    if (autoTimer.current) clearTimeout(autoTimer.current);
   }, []);
 
   if (!q) return null;
@@ -529,6 +541,14 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      (0–1, default 1 or 0 from `correct`) is partial credit for the score, with
      `extra.note` saying why ("3 of 4 words"). */
   const record = (correct, words, grade, extra) => {
+    /* **One answer a question.** An activity that keeps its own button on
+       screen after it has answered (word building's "Next word", 2026-11-19)
+       used to reach here again on each press: the cue rang out again, the
+       tally counted the step twice and the run was saved twice. The owner,
+       of the repeat exercises: *"if you click the next button it just keeps
+       making a ringing noise."* The second call is simply nothing. */
+    if (answeredRef.current) return;
+    answeredRef.current = true;
     if (revisit) {
       const c = extra && typeof extra.credit === "number" ? extra.credit : (correct ? 1 : 0);
       setAnswered(true);
@@ -587,6 +607,26 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     const recycled = recycle && credit < 1 && !q.retry && !q.assess;
     if (recycled) setQueue((prev) => prev.concat([{ ...q, retry: true }]));
     keep(recycled ? queue.concat([{ ...q, retry: true }]) : queue);
+    /* **A clean spoken answer moves on by itself** (the owner, 2026-11-19:
+       *"the transition from the user saying the right thing to the next item
+       is clunky and glitchy"*). Saying a sentence back right and then having
+       to find Continue under it is the clunk: once the verdict's reading has
+       finished, a beat, and the next question comes. Continue is still there
+       for a learner who is quicker than the beat, and a miss, a partial or a
+       revisit waits as before — those are the ones worth reading. */
+    if (!revisit && correct && credit >= 1 && AUTO_NEXT_KINDS.has(q.kind)) {
+      const mine = at;
+      const armed = setTimeout(() => {
+        whenIdle().then(() => {
+          if (!alive.current || atRef.current !== mine || !answeredRef.current) return;
+          autoTimer.current = setTimeout(() => {
+            if (alive.current && atRef.current === mine && answeredRef.current) nextRef.current();
+          }, AUTO_NEXT_MS);
+        });
+      }, 500);                                   // after the reading has been asked for (420 ms)
+      autoTimer.current = armed;
+    }
+
     // A form drill grades no card: the card is the word's meaning (gradesCard).
     // It grades the word's "Cases & forms" score, which is what it measures.
     if (gradeWords) {
@@ -600,9 +640,18 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           .filter((e) => typeof e.i === "number" && L[e.i])
           .map((e) => ({ word: L[e.i].b, direction: dir, grade: e.grade }));
         const rows = reviewRows(st.seen, list, now, q.kind, schedulerOpts(st));
-        update((prev) => entries.reduce((acc, e) => (
-          typeof e === "number" ? gradeInto(acc, e, g, dir, now, q.kind) : gradeInto(acc, e.i, e.grade, dir, now, q.kind)
-        ), prev), rows);
+        update((prev) => {
+          /* A lesson's words join today's pile the moment their cards are
+             made (core/queue.js tackOn; the owner, 2026-11-19: a chapter
+             covered today is "tacked on" to the day's review, outside the
+             baseline). Only a lesson's own runs — the vocabulary walk and the
+             quiz — count as exposure; a Practice drill does not. */
+          const fresh = tacks ? list.map((x) => x.word).filter((w) => !cardFor((prev.seen || {})[w])) : [];
+          const graded = entries.reduce((acc, e) => (
+            typeof e === "number" ? gradeInto(acc, e, g, dir, now, q.kind) : gradeInto(acc, e.i, e.grade, dir, now, q.kind)
+          ), prev);
+          return fresh.length ? tackOn(graded, fresh, now, goalOpts(graded)) : graded;
+        }, rows);
       } else if (entries.length && skillOfKind(q.kind)) {
         const g = grade || gradeFor(correct, helped);
         const sk = skillOfKind(q.kind), now = Date.now();
@@ -616,6 +665,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   /* A step that could not be attempted. Not a wrong answer: it is left out of the
      total, so a phone with the microphone off scores the same quiz as one without. */
   const skip = () => {
+    if (answeredRef.current) return;
+    answeredRef.current = true;
     setAnswered(true);
     setVerdict({ right: null, credit: 0, note: null });
     if (revisit) return;
@@ -630,6 +681,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     // Moving on cancels a reading that has not started yet; one already playing
     // is left to finish — the next question's audio waits for it.
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
+    if (autoTimer.current) { clearTimeout(autoTimer.current); autoTimer.current = null; }
+    answeredRef.current = false;
     reached.current = Math.max(reached.current, at + 1);
     if (at + 1 >= queue.length) {
       finished.current = true;
@@ -661,6 +714,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
    * mark. */
   const goBack = () => {
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
+    if (autoTimer.current) { clearTimeout(autoTimer.current); autoTimer.current = null; }
+    answeredRef.current = false;
     // Leaving an answered question behind: it counts as reached.
     if (answered) reached.current = Math.max(reached.current, at + 1);
     setAt(at - 1);
@@ -671,6 +726,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setPartial(0);
   };
   stepBackRef.current = goBack;
+  nextRef.current = next;
   const back = !allowBack || at === 0 ? undefined : goBack;
 
   /* Keyed on the question rather than on the index: a recycled question comes
@@ -689,7 +745,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         <Pill tone="brand">
           {progress ? `${progress.at + 1}/${progress.total}` : `${at + 1}/${queue.length}`}
         </Pill>
-        {tools || null}
       </View>
 
       {/* The question takes the space above the answers rather than sitting on
@@ -758,10 +813,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         {/* The two things to do with the word on screen — hear it, look it up
             — in one row under it, rather than a speaker here and a text link
             adrift in the middle of the screen. */}
-        {/* …and, beside them, Teddy's help and the report flag (askai.js):
-            asking about the question is part of the question, so it sits
-            here rather than in the header (the owner, 2026-10-08). They stay
-            after the answer, which is when "why?" is most often asked. */}
+        {/* Teddy's help and the report flag sat here too from 2026-10-08
+            until the header became the same on every screen (2026-11-19,
+            headermenu.js); the sparkle is in the header above. */}
         {/* 48 dp and spaced wide (the owner, 2026-10-09: "too small. Make
             them larger and space them out a little bit more horizontally"). */}
         <View style={{ marginTop: 14, flexDirection: "row", gap: TOOL_GAP, justifyContent: "center" }}>
@@ -777,7 +831,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             <BulbButton testID="bulb" on={hintOpen} label="Reference" size={TOOL_SIZE}
                         onPress={() => { setUsedHint(true); setHintOpen(true); }} />
           ) : null}
-          <RunTools size={TOOL_SIZE} />
         </View>
         {!answered ? <PartialHintLine mask={partMask} style={{ marginTop: 12 }} /> : null}
       </Animated.View>

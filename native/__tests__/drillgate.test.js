@@ -2,12 +2,12 @@
    (the owner, 2026-09-10). Own file, per the timeout note in screens.test.js. */
 
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
+import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { DrillList } from "../src/screens/Practice";
+import { Practice } from "../src/screens/Practice";
 import { STAGES, lessonCount, knownPool, KNOWN_AT } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
@@ -33,7 +33,10 @@ async function withState(state) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
   await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, ...state }));
-  return await render(<SessionProvider><DrillList navigation={nav} /></SessionProvider>);
+  const view = await render(<SessionProvider><Practice navigation={nav} /></SessionProvider>);
+  // The drills are on the Grammar tab (2026-11-19).
+  await act(async () => { fireEvent.press(await screen.findByTestId("practice-tabs-grammar")); });
+  return view;
 }
 
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });

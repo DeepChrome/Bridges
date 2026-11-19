@@ -22,8 +22,8 @@ import { palette, fontFiles, faceFor } from "./src/theme";
 import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
-import { HelpButton } from "./src/help";
-import { AskButton, ReportButton, INLINE_TOOLS } from "./src/askai";
+import { AskButton } from "./src/askai";
+import { HeaderTools } from "./src/headermenu";
 import { DRILL_TYPES, wordDrillSpec } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
@@ -62,7 +62,7 @@ import { warmToken } from "./src/lib/feedback";
 import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
 import { startSync } from "./src/sync";
-import { DrillList } from "./src/screens/Practice";
+import { Practice } from "./src/screens/Practice";
 import { VocabFlow, QuizFlow } from "./src/flows/Lesson";
 import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow, WordDrillFlow } from "./src/flows/Drills";
 import { FormCardsFlow } from "./src/flows/FormCards";
@@ -162,40 +162,13 @@ function HomeButton() {
   );
 }
 
-function MeButton({ navigation }) {
-  const { account } = useSession();
-  if (!account) return null;
-  return (
-    /* The profile is on every tab's stack but not on the Root stack, where a
-       video opened from a dictionary entry lives — and React Navigation drops
-       a navigate to a route it does not have, so the avatar there did nothing
-       (§23; the review, 2026-10-01). From there it is the Learn tab's. */
-    <Pressable onPress={() => {
-                 const names = navigation.getState ? (navigation.getState() || {}).routeNames || [] : [];
-                 if (names.includes("You")) navigation.navigate("You");
-                 else navRef.navigate("Tabs", { screen: "Learn", params: { screen: "You" } });
-               }} hitSlop={8}
-               accessibilityRole="button" accessibilityLabel={`${account.name}, your profile`}
-               style={{ marginRight: 4 }}>
-      <Avatar id={account.avatar} size={30} />
-    </Pressable>
-  );
-}
-
-function HeaderRight({ navigation, route, help = true }) {
-  const home = !route || route.name !== "Path";
-  /* The report flag and the AI sparkle (askai.js); on an exercise they sit in
-     the exercise beside the speaker and the bulb instead (`INLINE_TOOLS`). */
-  const inline = !!route && INLINE_TOOLS.has(route.name);
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
-      {inline ? null : <ReportButton />}
-      {inline ? null : <AskButton />}
-      {help ? <HelpButton route={route && route.name} /> : null}
-      {home ? <HomeButton /> : null}
-      <MeButton navigation={navigation} />
-    </View>
-  );
+/* The same three on every screen — the sparkle, Home, and the menu holding
+   the profile, the screen's options, its help and the report flag
+   (headermenu.js; the owner, 2026-11-19: "the top menu items… should be the
+   same for every slide. Looks too chaotic that they're always changing
+   around"). */
+function HeaderRight({ navigation, route }) {
+  return <HeaderTools navigation={navigation} route={route} AskButton={AskButton} HomeButton={HomeButton} />;
 }
 
 /* Every stack shares one transition, set here rather than left to whatever each
@@ -302,7 +275,7 @@ function LearnStack() {
 function PracticeStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
-      <Stack.Screen name="Drills" component={DrillList} options={{ title: "Practice" }} />
+      <Stack.Screen name="Drills" component={Practice} options={{ title: "Practice" }} />
       <Stack.Screen name="Talk" component={Talk} options={{ title: "Talk" }} />
       {/* The free conversation with a tutor who knows the learner (2026-09-26). */}
       <Stack.Screen name="Tutor" component={Tutor} options={{ title: "Tutor" }} />
@@ -487,11 +460,8 @@ const wordTitled = ({ navigation, route }) => {
     /* The same header as every other screen — the sparkle included (the
        owner, 2026-11-18: "the user should be able to pull up the AI helper
        pretty much constantly… when I'm browsing the detailed word
-       definitions"). It carried only the flag and Home before. Without the
-       app-guide "?": a word under a centred title and five buttons pushed
-       the title off centre on the emulator, and on an entry the sparkle is
-       the help that matters. */
-    headerRight: () => <HeaderRight navigation={navigation} route={route} help={false} />,
+       definitions"). It carried only the flag and Home before. */
+    headerRight: () => <HeaderRight navigation={navigation} route={route} />,
     headerTitle: () => (
       <HeaderTitle title={w ? w.w : "Word"} sub={w && w.p ? w.p : "Dictionary"} />
     ),

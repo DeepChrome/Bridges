@@ -16,12 +16,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, CogButton, Unselectable, toneOf,
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, Unselectable, toneOf,
          Familiarity, familiarityColor, RowText, ActionChip } from "../ui";
 import { PartialHintButton, PartialHintLine } from "../hint";
 import { hintSteps, hintMask } from "@core/hint";
 import { cardSenses } from "@core/util";
-import { RunTools } from "../askai";
+import { useHeaderOptions } from "../headermenu";
 import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf, lowPriority } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout, cardAbout } from "../about";
@@ -31,7 +31,7 @@ import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, cardFor } from "@core/scheduler";
 import { requeue, dailyFor, kindsOf, rollGoal, spendGoal, isStudyDay, noteAnswer, againGap, frontFor,
-         REST_DAYS } from "@core/queue";
+         REST_DAYS, untack } from "@core/queue";
 import { DEFAULT_FRONTS } from "@core/scheduler";
 import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, sittingTally, masteryOf,
          sessionFor, replacementFor } from "../studycards";
@@ -224,6 +224,8 @@ export default function Study({ navigation, route }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
   const [picker, setPicker] = useState(false);
+  // The header menu's "Study options" row opens the picker (headermenu.js).
+  useHeaderOptions(route, () => setPicker(true), "Study options");
   const [session, setSession] = useState(null);   // core/queue.js buildSession
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);
@@ -543,8 +545,9 @@ export default function Study({ navigation, route }) {
         /* A card, not a press: a re-queued Again and a new card's first grade
            do not spend the day's reviews (the review, 2026-10-02 — fifteen
            Agains used to end the day at thirty-five cards). */
-        daily: { ...daily, reviews: daily.reviews + (item.again || item.kind === "new" ? 0 : 1),
-                 new: daily.new + (item.kind === "new" && !item.again ? 1 : 0) },
+        // …and a word tacked on today (core/queue.js tackOn) is off the list once answered here.
+        daily: untack({ ...daily, reviews: daily.reviews + (item.again || item.kind === "new" ? 0 : 1),
+                        new: daily.new + (item.kind === "new" && !item.again ? 1 : 0) }, word),
         /* One off the day's goal for every card answered, any round — the
            number on the tab is what the learner is fighting (2026-10-05). An
            Again coming round is the same card, not another. */
@@ -822,10 +825,8 @@ export default function Study({ navigation, route }) {
             where it says mastered and total cards… I just like the
             standalone system on the top right"). The tally beside the bar
             counts the sitting; the start panel and the tab badge carry the
-            day's goal. */}
+            day's goal. The options are in the header's menu (headermenu.js). */}
         <RowText testID="study-heading" title={heading} bold={false} />
-        {started || session ? <RunTools /> : null}
-        <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
       </View>
 
       {!started && !session ? (
@@ -974,7 +975,7 @@ export default function Study({ navigation, route }) {
                   card as "buttons chaotically strewn about" (2026-11-10);
                   setting a card aside is a sitting's action and sits with
                   Undo and Skip below. */}
-              {revealed && !blank && idxOfWord(face.b) >= 0 ? (
+              {revealed && flip.face && !blank && idxOfWord(face.b) >= 0 ? (
                 <View testID="card-actions" style={{ flexDirection: "row", gap: 6, flexShrink: 1 }}>
                   <WordDrillsButton word={face.b}
                                     onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
@@ -1002,21 +1003,21 @@ export default function Study({ navigation, route }) {
               <Muted testID="card-blank" style={{ textAlign: "center" }}>
                 This card has no word on it
               </Muted>
-            ) : !revealed ? <Front key={`${dealt.current}:${at}:${item.word}`} face={face}
+            ) : !revealed || !flip.face ? <Front key={`${dealt.current}:${at}:${item.word}`} face={face}
                                    direction={item.direction} senses={senses} /> : (
               <>
                 {/* **Both sides on the back, the starting side on top** (the
                     owner, 2026-10-03: "both english and russian on the back,
                     and then whatever their starting point is on the front").
-                    The front shows only its own side until the first turn, so
-                    the answer is never on it. **After that first turn both
-                    sides are the full card** (the owner, 2026-10-31: "flipping
-                    back should give the full card on the other side… fully
-                    detailed cards after the initial flip"): the English-headed
-                    side of a produce card, and the Russian-headed side of
-                    every card, each with the meanings and examples under it.
-                    The Russian is word-linked here and can always be heard. */}
-                {item.direction === "produce" && flip.face ? (
+                    **The front stays the front** (the owner, 2026-11-19:
+                    "keep the front side of the flash card clean when flipped
+                    over. Keep it to the original card (pre flipped)"): turned
+                    back, the card shows exactly what it showed before Show,
+                    and the full card — meanings, examples, the actions — is
+                    the back alone. From 2026-10-31 to then both sides were the
+                    full card after the first turn. The Russian is word-linked
+                    here and can always be heard. */}
+                {item.direction === "produce" ? (
                   <>
                     <Meaning face={face} senses={senses} />
                     {/* The answer at the size the Russian has on any card
@@ -1046,7 +1047,7 @@ export default function Study({ navigation, route }) {
             )}
           </Unselectable>
           </Pressable>
-          {revealed && !blank ? (
+          {revealed && flip.face && !blank ? (
               <>
                 {/* Every meaning the word has, numbered as a dictionary
                     lays them (§30q), four at most — the full entry is one
@@ -1054,7 +1055,7 @@ export default function Study({ navigation, route }) {
                     curriculum, every deck card) the translation stands on
                     its own. A sentence's English is its answer, in ink. The
                     English-headed side already has the meaning as its head. */}
-                {item.direction === "produce" && flip.face ? null : face.sentence ? (
+                {item.direction === "produce" ? null : face.sentence ? (
                   <Text testID="card-meaning" selectable
                         style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
                     {face.e || "—"}

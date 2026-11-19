@@ -451,6 +451,15 @@ beforeEach(() => { require("./src/appearance").setAppearance("light"); });
    person clicks study, they'll encounter the options"); a suite about the
    cards presses Start, as the learner does. A no-op when the screen is
    already past it (a round handed in deals itself). */
+/* A screen's options open from the header menu (src/headermenu.js), which
+   no test mounts: this opens what the menu's row would. */
+global.__openOptions = async () => {
+  const { act } = require("@testing-library/react-native");
+  const { openScreenOptions } = require("./src/headermenu");
+  let opened = false;
+  await act(async () => { opened = openScreenOptions(); });
+  if (!opened) throw new Error("no screen has registered options with useHeaderOptions");
+};
 global.__startStudy = async () => {
   const { screen, fireEvent, act } = require("@testing-library/react-native");
   const go = await screen.findByTestId("study-go").catch(() => null);

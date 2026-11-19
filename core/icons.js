@@ -78,6 +78,11 @@ export const ACTIVITY_ICONS = {
      borrowed the conjugation table, which then marked two rows in one list,
      and the chapter's point is as often a case as a verb. */
   aim: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7.5a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9zM12 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2z",
+  /* The header menu's rows (native/src/headermenu.js): a screen's options,
+     how to use it, and the report flag. */
+  cog: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8",
+  help: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01",
+  flag: "M5 21V3M5 4h12l-3 4 3 4H5M3 21h4",
 };
 
 export const iconFor = (id) =>

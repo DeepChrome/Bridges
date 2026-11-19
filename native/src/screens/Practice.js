@@ -1,31 +1,30 @@
-/* The Practice tab: what to do with ten minutes, laid out by what it asks of
- * you (the owner, 2026-11-18: "I don't like the organization of the practice
- * screen. Take a creative stab at reorganizing it").
+/* The Practice tab: what to do with ten minutes, as two tabs of tiles (the
+ * owner, 2026-11-18: "I don't like the organization of the practice screen.
+ * Take a creative stab at reorganizing it"; 2026-11-19: "The tiles look good
+ * on practice. I think you can apply that to grammar too and maybe organize
+ * with two tabs at the top… One for drills one for grammar").
  *
- * It was six sections of fifteen identical rows — Quiz, Listening, Speaking,
- * Conversation, Letters & sounds, Grammar — and a learner scanning for
- * "something to do" read a settings page. Three groups now, each in the shape
- * that fits it:
+ * It was six sections of fifteen identical rows — a settings page — and a
+ * learner scanning for "something to do" could not. Now:
  *
- *   - **Activities** — a grid of tiles, two across: the quiz, the two ways of
+ *   - **Drills** — a grid of tiles, two across: the quiz, the two ways of
  *     listening, the two of speaking and the three of talking to the model.
  *     A tile is a button (ui.js Tile, pressed into its edge like every other
  *     control), its icon in the family colour §30ah gave the screen (taking
- *     Russian in: blue; putting it out: the brand), and one word under the name
- *     saying which kind it is. Eight things you *do*, seen at once.
- *   - **Grammar** — the rules and the drills, as rows: these are a list to
- *     choose from, not a set to glance at.
- *   - **Reference** — the alphabet and the word endings, things to look up.
+ *     Russian in: blue; putting it out: the brand), and one word under the
+ *     name saying which kind it is.
+ *   - **Grammar** — the same tiles: the chapter's point, the rules, the cases,
+ *     the form cards and the four form drills (green, the rules' colour), and
+ *     under them the two reference screens, the alphabet and the word
+ *     endings.
  *
  * Nothing on this screen is locked and nothing on it carries a score (the
- * owner, 2026-09-23). No row has a caption of its own: the chapter's grammar
- * row used to print its card's title under it ("Every noun has a gender"),
- * which read as a stray sentence (the owner, 2026-11-18). */
+ * owner, 2026-09-23). No tile has a caption of its own beyond its kind. */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
-import { Screen, List, Row, Thumb, SectionLabel, RowText, Tile, TileGrid } from "../ui";
+import { Screen, SectionLabel, Tile, TileGrid, SegmentTabs } from "../ui";
 import { DRILL_TYPES } from "../questions";
 import { currentGrammarUnit } from "../data";
 
@@ -42,73 +41,55 @@ const ACTIVITIES = [
   { id: "tutor", testID: "practice-tutor", name: "Tutor", kind: "Conversation", tone: "brand", route: "Tutor" },
 ];
 
-export function DrillList({ navigation }) {
+/* The grammar tiles: the reference and its practice, then each form drill.
+   Straight in; what a drill asks about is on its own cog (DrillOptions). */
+const GRAMMAR = [
+  { id: "rules", testID: "open-grammar", name: "The rules", kind: "Reference", route: "Grammar" },
+  { id: "cases", testID: "drill-cases", name: "Cases", kind: "Lessons and drills", route: "CaseHub" },
+  { id: "formcards", testID: "drill-formcards", name: "Form cards", kind: "Flashcards", route: "FormCards" },
+].concat(DRILL_TYPES.filter((d) => d.id !== "cases").map((d) => (
+  { id: d.icon, testID: `drill-${d.id}`, name: d.name, kind: "Drill", route: "Drill", params: { type: d.id } })));
+
+const REFERENCE = [
+  /* The letters and the mouth behind them (ROADMAP P10.2); open from the
+     first screen, since nothing else teaches the alphabet. */
+  { id: "letters", testID: "open-alphabet", name: "Alphabet", kind: "Reference", route: "Sounds" },
+  /* Its own tile beside Alphabet, not a section inside it (§30ab). */
+  { id: "endings", testID: "open-endings", name: "Word endings", kind: "Reference", route: "Endings" },
+];
+
+const TABS = [{ id: "drills", name: "Drills" }, { id: "grammar", name: "Grammar" }];
+
+export function Practice({ navigation }) {
   const { st } = useSession();
+  const [tab, setTab] = useState("drills");
   const grammarUnit = useMemo(() => currentGrammarUnit(st),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.unit, st.dev]);
+  const tiles = (list, tone) => list.map((a) => (
+    <Tile key={a.id} testID={a.testID} icon={a.id} tone={a.tone || tone} title={a.name} caption={a.kind}
+          onPress={() => navigation.navigate(a.route, a.params)} />
+  ));
   return (
     <Screen>
-      <SectionLabel>Activities</SectionLabel>
-      <TileGrid testID="practice-activities">
-        {ACTIVITIES.map((a) => (
-          <Tile key={a.id} testID={a.testID} icon={a.id} tone={a.tone} title={a.name} caption={a.kind}
-                onPress={() => navigation.navigate(a.route)} />
-        ))}
-      </TileGrid>
-
-      <SectionLabel gap>Grammar</SectionLabel>
-      <List>
-        {/* The grammar point of the chapter the learner is in, with its words
-            (GrammarFlow) — the unit's module, one tap from Practice. */}
-        {grammarUnit ? (
-          <Row testID="chapter-grammar"
-               onPress={() => navigation.navigate("GrammarRun", { unitId: grammarUnit.id })}>
-            <Thumb id="aim" tone="good" />
-            <RowText title="This chapter's grammar" />
-          </Row>
-        ) : null}
-        {/* The reference: the rules the drills below are drilling. Open from
-            the first screen, like the alphabet, and never scored. */}
-        <Row testID="open-grammar" onPress={() => navigation.navigate("Grammar")}>
-          <Thumb id="rules" tone="good" />
-          <RowText title="The rules" />
-        </Row>
-        {/* The cases, one at a time in the order they are taught, each with its
-            lesson and its drill (CaseHub; 2026-10-08). */}
-        <Row testID="drill-cases" onPress={() => navigation.navigate("CaseHub")}>
-          <Thumb id="cases" tone="good" />
-          <RowText title="Cases" />
-        </Row>
-        {/* Flashcards of forms (flows/FormCards.js, 2026-11-12). */}
-        <Row testID="drill-formcards" onPress={() => navigation.navigate("FormCards")}>
-          <Thumb id="formcards" tone="good" />
-          <RowText title="Form cards" />
-        </Row>
-        {DRILL_TYPES.filter((d) => d.id !== "cases").map((d) => (
-          /* Straight in; what a drill asks about is on its own cog (DrillOptions). */
-          <Row key={d.id} testID={`drill-${d.id}`}
-               onPress={() => navigation.navigate("Drill", { type: d.id })}>
-            <Thumb id={d.icon} tone="good" />
-            <RowText title={d.name} />
-          </Row>
-        ))}
-      </List>
-
-      <SectionLabel gap>Reference</SectionLabel>
-      <List>
-        {/* The letters and the mouth behind them (ROADMAP P10.2); open from
-            the first screen, since nothing else teaches the alphabet. */}
-        <Row testID="open-alphabet" onPress={() => navigation.navigate("Sounds")}>
-          <Thumb id="letters" tone="info" />
-          <RowText title="Alphabet" />
-        </Row>
-        {/* Its own row beside Alphabet, not a section inside it (§30ab). */}
-        <Row testID="open-endings" onPress={() => navigation.navigate("Endings")}>
-          <Thumb id="endings" tone="info" />
-          <RowText title="Word endings" />
-        </Row>
-      </List>
+      <SegmentTabs testID="practice-tabs" options={TABS} value={tab} onPick={setTab} />
+      {tab === "drills" ? (
+        <TileGrid testID="practice-activities" style={{ marginTop: 16 }}>{tiles(ACTIVITIES)}</TileGrid>
+      ) : (
+        <>
+          <TileGrid testID="practice-grammar" style={{ marginTop: 16 }}>
+            {/* The grammar point of the chapter the learner is in, with its
+                words (GrammarFlow) — the unit's module, one tap from Practice. */}
+            {grammarUnit ? (
+              <Tile testID="chapter-grammar" icon="aim" tone="good" title="This chapter's grammar" caption="Practice"
+                    onPress={() => navigation.navigate("GrammarRun", { unitId: grammarUnit.id })} />
+            ) : null}
+            {tiles(GRAMMAR, "good")}
+          </TileGrid>
+          <SectionLabel gap>Reference</SectionLabel>
+          <TileGrid testID="practice-reference">{tiles(REFERENCE, "info")}</TileGrid>
+        </>
+      )}
     </Screen>
   );
 }

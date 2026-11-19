@@ -6,7 +6,8 @@ import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
 import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text,
-         Sheet, Choice, CogButton, Loading, RowText } from "../ui";
+         Sheet, Choice, Loading, RowText } from "../ui";
+import { useHeaderOptions } from "../headermenu";
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { clearRun, savedRun, useResume } from "../resume";
 import { Q, DRILL_TYPES, wordDrillSpec } from "../questions";
@@ -348,7 +349,8 @@ export function DrillFlow({ route, navigation }) {
       setResult(null); setSeed(seed + 1);
     }
   };
-  const tools = <CogButton testID="drill-cog" onPress={openCog} label="Drill options" />;
+  // The header menu's "Drill options" row (headermenu.js) opens the cog.
+  useHeaderOptions(route, openCog, "Drill options");
   const sheet = cog ? <DrillOptions type={type} prefs={prefs} onChange={setPrefs} onClose={closeCog} /> : null;
 
   if (resume.prompt) return resume.prompt;
@@ -386,7 +388,6 @@ export function DrillFlow({ route, navigation }) {
         key={seed}
         steps={steps}
         navigation={navigation}
-        tools={tools}
         save={save}
         restore={resume.restore}
         onFinish={(r) => {

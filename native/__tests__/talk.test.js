@@ -199,10 +199,13 @@ describe("talk", () => {
     // Behind the cog, not above the list, and no caption narrating them.
     expect(screen.queryByText("Beginner")).toBeNull();
     expect(screen.queryByText(/How fast the tutor/)).toBeNull();
-    await act(async () => { fireEvent.press(screen.getByTestId("talk-cog")); });
-    await act(async () => { fireEvent.press(screen.getByText("Beginner")); });
-    await act(async () => { fireEvent.press(screen.getByText("Slowest")); });
-    await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });
+    await global.__openOptions();
+    // Each option is a row opening its choices (ui.js OptionRow, 2026-11-19).
+    await act(async () => { fireEvent.press(await screen.findByTestId("talk-level")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("talk-level-opt-beginner")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("talk-speed")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("talk-speed-opt-slowest")); });
+    for (const b of screen.queryAllByTestId("sheet-backdrop")) await act(async () => { fireEvent.press(b); });
     const st = await saved();
     expect(st.talkLevel).toBe("beginner");
     expect(st.talkSpeed).toBe("slowest");

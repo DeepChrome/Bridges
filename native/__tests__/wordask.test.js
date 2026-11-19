@@ -65,7 +65,6 @@ describe("the entry", () => {
     const src = readFileSync(join(__dirname, "..", "App.js"), "utf8");
     const m = src.match(/const wordTitled = [\s\S]*?\n\};/);
     expect(m).toBeTruthy();
-    // Without the app guide's "?", which pushed a centred title off centre.
-    expect(m[0]).toMatch(/<HeaderRight navigation=\{navigation\} route=\{route\} help=\{false\} \/>/);
+    expect(m[0]).toMatch(/<HeaderRight navigation=\{navigation\} route=\{route\} \/>/);
   });
 });

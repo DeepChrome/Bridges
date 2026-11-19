@@ -40,10 +40,12 @@ const due = (extra = {}) => ({ dueAt: now - DAY, lastAt: now - 2 * DAY, s: 1, d:
 const fresh = () => ({ dueAt: now, s: 0, d: 0, state: NEW, steps: 0, reps: 0, lapses: 0 });
 
 const base = {
-  // Schema 10 with no new-card source, so the pile is exactly the cards seeded.
+  // Schema 10 with no new-card source, so the pile is exactly the cards seeded
+  // — words only, since the sentence pool rides with an empty source list and
+  // the chunk is shuffled (2026-11-19), so a new sentence could lead it.
   v: 10, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
-  flash: ["recognise"], newPerDay: 5, reviewsPerDay: 200, learnAhead: 20,
+  flash: ["recognise"], newPerDay: 0, reviewsPerDay: 200, learnAhead: 20, cardKinds: ["words"],
 };
 async function withProfile(state = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -80,7 +82,7 @@ describe("the card says what it is", () => {
   });
 
   it("flags a new card", async () => {
-    await withProfile({ seen: { [WORD]: { recognise: fresh() } }, sets: ["__due__"] });
+    await withProfile({ seen: { [WORD]: { recognise: fresh() } }, sets: ["__due__"], newPerDay: 5 });
     await screen.findByText("Show");
     expect(screen.getByTestId("flag-new")).toBeTruthy();
     expect(screen.queryByTestId("flag-trouble")).toBeNull();
@@ -119,7 +121,7 @@ describe("the card says what it is", () => {
   });
 
   it("gives a new card no score, only the flag", async () => {
-    await withProfile({ seen: { [WORD]: { recognise: fresh() } }, sets: ["__due__"] });
+    await withProfile({ seen: { [WORD]: { recognise: fresh() } }, sets: ["__due__"], newPerDay: 5 });
     await screen.findByTestId("flag-new");
     expect(screen.queryByTestId("familiarity")).toBeNull();
   });
@@ -177,7 +179,7 @@ describe("the front never carries the answer", () => {
 describe("the options live where a session starts", () => {
   it("offers the three fronts, and keeps the last one ticked", async () => {
     await withProfile({ sets: [], flash: ["recognise"] });
-    fireEvent.press(await screen.findByTestId("study-cog"));
+    await global.__openOptions();
     for (const [id] of FRONTS) expect(await screen.findByTestId(`flash-${id}`)).toBeTruthy();
     /* Each press inside `act`, so the save effect has run before the row is
        read back — a bare press followed by `saved()` reads the state as it was
@@ -197,7 +199,7 @@ describe("the options live where a session starts", () => {
   it("defaults new words to five a day, and takes any number", async () => {
     expect(QUEUE_DEFAULTS.newPerDay).toBe(5);
     await withProfile({ sets: [], newPerDay: undefined });
-    fireEvent.press(await screen.findByTestId("study-cog"));
+    await global.__openOptions();
     expect((await screen.findByTestId("new-per-day-value")).props.value).toBe("5");
 
     await act(async () => { fireEvent.press(screen.getByTestId("new-per-day-plus")); });
@@ -249,7 +251,7 @@ describe("the options live where a session starts", () => {
   /* It never goes below nothing, whatever the finger does. */
   it("clamps the new-word ration rather than letting it go negative", async () => {
     await withProfile({ sets: [], newPerDay: 0 });
-    fireEvent.press(await screen.findByTestId("study-cog"));
+    await global.__openOptions();
     const minus = await screen.findByTestId("new-per-day-minus");
     expect(minus.props.accessibilityState).toMatchObject({ disabled: true });
     await act(async () => { fireEvent.changeText(screen.getByTestId("new-per-day-value"), "-4"); });
@@ -280,7 +282,7 @@ describe("the card reads itself once", () => {
     await withProfile({ seen: { [WORD]: { recognise: due() } } });
     await screen.findByTestId("card-recognise");
     const first = global.__players.length + global.__spoke.length;
-    await act(async () => { fireEvent.press(screen.getByTestId("study-cog")); });
+    await global.__openOptions();
     await act(async () => { fireEvent.press(await screen.findByTestId("flash-produce")); });
     await act(async () => { fireEvent.press(screen.getByTestId("flash-listen")); });
     expect(global.__players.length + global.__spoke.length).toBe(first);
@@ -341,9 +343,12 @@ describe("after the day's pile", () => {
     expect(dueCount(st)).toBe(0);
     expect(sessionFor(st).items).toHaveLength(0);
     const past = sessionFor(st, { beyond: true });
-    expect(past.items.slice(0, 2).map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
+    // The chunk is shuffled (2026-11-19): the two due cards are in it, and
+    // everything else is a new word with its face.
+    const dueOnes = past.items.filter((x) => x.kind !== "new");
+    expect(dueOnes.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
     expect(past.items.length).toBeGreaterThan(2);
-    expect(past.items.slice(2).every((x) => x.kind === "new" && past.faces[x.word])).toBe(true);
+    expect(past.items.filter((x) => x.kind === "new").every((x) => past.faces[x.word])).toBe(true);
   });
 
   /* The badge is the goal, never the due count: eighty due is still a day's

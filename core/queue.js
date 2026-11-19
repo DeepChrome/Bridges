@@ -504,7 +504,50 @@ export function drawKeys(list, weightOf, random) {
   }).sort((a, b) => b.key - a.key);
 }
 
-export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next, rare }) {
+/* ------------------------------------------------- what the day's new words add
+ *
+ * The owner, 2026-11-19: *"keep the daily review flashcards conceptually
+ * separate but in the same stack as the new content flashcards… the daily
+ * review is still using the current 25 card base format… but it will focus on
+ * curating words previously exposed to the learner… if the learner has
+ * covered a new chapter, these new words are not in that 25 quota… instead
+ * they are 'tacked on' to the pile. So if a learner did a ton of chapters in a
+ * single day, maybe they have 70 cards to review. But if they didn't do any
+ * chapters, they still have that baseline 25… These cards are integrated and
+ * shuffled randomly among themselves."*
+ *
+ * So the goal is two things in one number: the baseline (`rollGoal`: twenty
+ * plus the new-word setting a study day, carried when skipped) and the words
+ * the learner was exposed to today — a lesson's words as its quiz first makes
+ * their cards, a video's words when it is watched (Video.js). `tackOn` records
+ * them on the day (`daily.met`) and adds them to what is owed, uncapped; the
+ * session deals them beside the due cards whatever their schedule says
+ * (`goalSession` `tacked`), and a card answered in Study leaves the list
+ * (`untack`). Nothing of this touches the schedule: a lesson's card is still
+ * due when FSRS says, and today's look at it is one more review. */
+export function tackOn(state, words, now, opts) {
+  const daily = dailyFor(state.daily, now);
+  const have = new Set(daily.met || []);
+  const fresh = (words || []).filter((w) => w && !have.has(w));
+  if (!fresh.length) return state;
+  const goal = rollGoal(state.goal, now, opts);
+  return { ...state, daily: { ...daily, met: (daily.met || []).concat(fresh) },
+           goal: { ...goal, owed: (goal.owed || 0) + fresh.length } };
+}
+/* The words tacked on today and not yet answered in Study. */
+export const tackedToday = (daily, now) => dailyFor(daily, now).met || [];
+export const untack = (daily, word) =>
+  (daily && Array.isArray(daily.met) && daily.met.includes(word)
+    ? { ...daily, met: daily.met.filter((w) => w !== word) } : daily);
+
+/* `tacked`: today's new words (above), dealt in the chunk before the make-up
+ * fill and however the scheduler has them — new, in a learning step, or
+ * scheduled out. `shuffle`: the chunk dealt in random order rather than the
+ * scheduler's (the owner: *"not sequential… still use the formula though for
+ * the spaced repetition"*): the formula decides which cards are in the day,
+ * the shuffle decides nothing but the order they are met in. */
+export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next, rare,
+                              tacked, shuffle }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);
   for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
   const random = rng || Math.random;
@@ -512,6 +555,20 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
   const base = buildSession({ seen, words, dirs, now, daily, opts: { ...opts, reviewsPerDay: Infinity, sessionSize: want },
                               rng, beyond: true });
   const items = base.items.slice(0, want);
+  if (items.length < want && Array.isArray(tacked) && tacked.length) {
+    const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
+    if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
+    const have = new Set(items.map((x) => x.word));
+    for (const w of tacked) {
+      if (items.length >= want) break;
+      if (have.has(w)) continue;
+      have.add(w);
+      const entry = (seen && seen[w]) || {};
+      const card = cardFor(entry);
+      items.push({ word: w, direction: frontFor(card, fronts, entry), card: card || null, kind: kindOf(card),
+                   extra: true, why: { source: "tacked" } });
+    }
+  }
   if (items.length < want) {
     const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
     if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
@@ -571,7 +628,8 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
   const exhausted = items.length < want;
   // `remaining`: the goal past this chunk, so the sitting's counter spans the
   // day and not only the twenty dealt (Study.js sittingTally).
-  return { items, owed: owed || 0, due: base.due, newLeft: base.newLeft, goal: true, exhausted,
+  return { items: shuffle ? shuffled(items, random) : items, owed: owed || 0, due: base.due, newLeft: base.newLeft,
+           goal: true, exhausted,
            remaining: beyond || exhausted ? 0 : Math.max(0, (owed || 0) - items.length), newRemaining: 0 };
 }
 /* Familiarity at which a card counts as mastered — the Study header's count

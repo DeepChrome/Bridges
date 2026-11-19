@@ -10,7 +10,7 @@ import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, car
          isDue, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
 import { buildSession, practiceSession, QUEUE_DEFAULTS, cardKind, kindsOf,
-         goalSession, MASTERED_AT, isResting } from "@core/queue";
+         goalSession, MASTERED_AT, isResting, tackedToday } from "@core/queue";
 
 /* A word resting after a run of misses (core/queue.js noteAnswer) is out of
    the review until its days are up — and, like a card set aside, out of every
@@ -376,18 +376,30 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
   const next = !beyond ? undefined
     : personal ? (kinds.includes("words") ? upcomingWords(st) : [])
     : pool.filter((w) => !st.seen[w]);
+  /* Today's new words — a lesson's, a watched video's — ride on the day's
+     pile beside the due cards, outside the baseline (core/queue.js tackOn;
+     the owner, 2026-11-19). The personal review carries all of them; a review
+     pointed at chapters keeps to its chapters. */
+  const tacked = personal
+    ? tackedToday(st.daily, Date.now()).filter((w) => kinds.includes(cardKind(w)) && !outOfRotation(st, w)) : [];
   const s = goalSession({
     seen: st.seen, words: pool.concat(met), dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
-    rng, opts, owed: goalNow(st).owed, beyond, next, rare,
+    rng, opts, owed: goalNow(st).owed, beyond, next, rare, tacked,
     familiar: (w, card) => familiarity(card, rankOf(w)) || 0,
     // "From the start" walks the route from its first words (the owner,
     // 2026-11-02); the default is most faded first.
     order: st.reviewOrder === "path" ? pathRank(st) : undefined,
+    /* Met in random order (the owner, 2026-11-19: "integrated and shuffled
+       randomly among themselves… not sequential"); "From the start" keeps the
+       route's order, which is what that option is for. */
+    shuffle: st.reviewOrder !== "path",
   });
   /* A word from further along the route is in no ticked set, so the screen's
      face map does not know it: the session carries the faces of what it dealt.
-     So is a low-priority card the draw let through. */
-  const unknown = s.items.filter((x) => x.kind === "new" || rare.includes(x.word)).map((x) => x.word);
+     So is a low-priority card the draw let through, and a video's word tacked
+     on before any lesson taught it. */
+  const unknown = s.items.filter((x) => x.kind === "new" || rare.includes(x.word) || tacked.includes(x.word))
+    .map((x) => x.word);
   if (next || unknown.length) {
     const faces = {};
     for (const c of cardsIn(st, [], unknown)) faces[c.b] = c;

@@ -145,7 +145,7 @@ it("plays the English first, holds the lock screen, pauses everything, and lets 
 it("keeps its options", async () => {
   await seed();
   await render(<SessionProvider><DriveList navigation={nav} /></SessionProvider>);
-  await act(async () => { fireEvent.press(await screen.findByTestId("drive-cog")); });
+  await global.__openOptions();
   await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-direction")).getByText("Understand it")); });
   await act(async () => { fireEvent.press(screen.getByTestId("drive-opt-next")); });
   await flushState();

@@ -148,7 +148,7 @@ describe("flashcards from a deck", () => {
     await act(async () => { fireEvent.press(screen.getByText("Good")); });
     const st = await saved();
     expect(st.seen[word].recognise.reps).toBe(1);
-    await act(async () => { fireEvent.press(screen.getByTestId("study-cog")); });
+    await global.__openOptions();
     expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(1);  // the picker's row
     // Importing moved to Settings and exporting is gone (§30ap); the picker
     // lists the deck so it can be ticked, and offers a way to remove it.

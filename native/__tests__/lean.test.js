@@ -62,7 +62,7 @@ describe("a front switched part-way", () => {
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await press("grade-3");
     // Switch the front to English in the options.
-    await press("study-cog");
+    await global.__openOptions();
     await press("flash-produce");
     await press("flash-recognise");
     await act(async () => { fireEvent.press(await screen.findByText("Done")); });

@@ -23,14 +23,13 @@ import React, { useRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Sheet, Text, TextInput, Muted, Btn, Note, IconButton, ChatTurn, TypingTurn } from "./ui";
+import { Sheet, Text, TextInput, Muted, Btn, Note, ChatTurn, TypingTurn } from "./ui";
 import { GUIDE_ID, castById } from "@core/cast";
 import { useSession } from "./session";
 import { routePosition } from "./data";
 import { ask, config, isCap, capNotice } from "./lib/feedback";
 import { talkLevelFor } from "./screens/Talk";
 import { screenAbout } from "./about";
-import { navRef } from "./words";
 import { GuidePop } from "./guide";
 
 export const aiOffered = () => !!config("/v1/ask");
@@ -160,53 +159,26 @@ export function AskInput({ th, placeholder, prefix = "ask", autoFocus }) {
   );
 }
 
-/* Exercise screens carry the sparkle and the flag in the exercise, beside the
-   speaker and the bulb (the owner, 2026-10-08: "the AI button should be lower
-   so it looks like it's referenceable in the exercise… throw the flag down
-   there for reporting too"), so the header leaves them out there. Every other
-   screen keeps them in the header. `RunTools` is the pair. */
-export const INLINE_TOOLS = new Set(["Vocab", "Quiz", "GrammarRun", "CaseRun", "Recap", "VideoQuiz",
-  "Scenes", "TestOut", "Final", "Placement", "CustomQuiz", "SoundDrill", "BuildDrill", "Shadow", "Drill",
-  "WordDrill", "Cards", "ListCards"]);
-
-/* Header size, or a disc like the bulb's: `disc` true for 40 px, or the
-   size itself (an exercise's row is larger — Run.js TOOL_SIZE). */
-const discSize = (disc) => (disc === true ? 40 : typeof disc === "number" ? disc : 0);
-// The disc is ui.js's IconButton; a header glyph has no box.
-const iconBox = () => ({ marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" });
-
-/* The glyph in a disc (an exercise's row) or bare (a header). */
-function Disc({ disc, onPress, testID, label, children }) {
-  const t = useTheme();
-  if (disc) {
-    return (
-      <IconButton onPress={onPress} testID={testID} label={label} size={discSize(disc)}>{children}</IconButton>
-    );
-  }
-  return (
-    <Pressable onPress={onPress} hitSlop={8} testID={testID} accessibilityRole="button" accessibilityLabel={label}
-               style={iconBox(t, false)}>
-      {children}
-    </Pressable>
-  );
-}
-
-export function AskButton({ disc }) {
+/* The sparkle, in the header of every screen (the owner, 2026-11-19: "the top
+   menu items… should be the same for every slide"). From 2026-10-08 to then
+   an exercise carried it in its own row beside the speaker and the bulb
+   (`RunTools`), and the header changed shape from screen to screen. */
+export function AskButton() {
   const t = useTheme();
   const th = useAskThread();
   const [open, setOpen] = useState(false);
   if (!aiOffered()) return null;
-  const size = disc ? Math.round(discSize(disc) / 2) : 22;
   return (
     <>
-      <Disc disc={disc} onPress={() => { th.open(); setOpen(true); }} testID="ask-button"
-            label="Ask the AI about the Russian here">
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.brand}
+      <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={8} testID="ask-button"
+                 accessibilityRole="button" accessibilityLabel="Ask the AI about the Russian here"
+                 style={{ marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.brand}
              strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
           <Path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z" />
           <Path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
         </Svg>
-      </Disc>
+      </Pressable>
       {open ? (
         /* Teddy asks (the owner, 2026-10-08: "an avatar of teddy asking 'how
            can I help' and looking cute") — he is the voice of the app's help,
@@ -231,41 +203,3 @@ export function AskButton({ disc }) {
   );
 }
 
-/* The beta's report flag (the owner, 2026-10-05: "a feedback option for this
-   Beta… feedback on specific questions"). It captures what is on screen at
-   the moment it is pressed — the route, its title, and the question about.js
-   holds — and opens the report with that attached. */
-export function ReportButton({ disc }) {
-  const t = useTheme();
-  const open = () => {
-    const about = screenAbout();
-    if (navRef.isReady && navRef.isReady()) navRef.navigate("Feedback", { about, from: about.screen });
-  };
-  const size = disc ? Math.round(discSize(disc) * 0.48) : 21;
-  const glyph = (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
-         strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
-    </Svg>
-  );
-  if (disc) {
-    return <IconButton testID="report-button" onPress={open} label="Report a problem" size={discSize(disc)}>{glyph}</IconButton>;
-  }
-  return (
-    <Pressable testID="report-button" onPress={open} hitSlop={8}
-               accessibilityRole="button" accessibilityLabel="Report a problem"
-               style={{ marginRight: 12, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
-      {glyph}
-    </Pressable>
-  );
-}
-
-/* The two in an exercise's own row, at that row's size. */
-export function RunTools({ size = 40 }) {
-  return (
-    <>
-      <AskButton disc={size} />
-      <ReportButton disc={size} />
-    </>
-  );
-}

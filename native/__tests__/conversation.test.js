@@ -88,7 +88,7 @@ describe("conversation mode", () => {
     await waitFor(() => expect(global.__spoke).toEqual(["Привет!"]));
     expect(starts()).toBe(0);
     // …and it is not hidden in the cog.
-    await press("tutor-cog");
+    await global.__openOptions();
     expect(await screen.findByTestId("tutor-options")).toBeTruthy();
     expect(screen.queryByTestId("tutor-hands-row")).toBeNull();
   });

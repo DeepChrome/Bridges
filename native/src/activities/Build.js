@@ -263,20 +263,21 @@ export function Build({ q, r }) {
           ) : null}
 
           {/* On an assessed word the last step is the microphone: nothing to
-              press past it but the verdict's own Continue. */}
-          {assess && last ? null : (
+              press past it but the verdict's own Continue. And once the step
+              is answered nothing of this row stays: "Next word" left on the
+              screen under the verdict's Continue was pressed again and rang
+              the cue again (the owner, 2026-11-19). */}
+          {(assess && last) || r.answered ? null : (
             <Btn kind="pri" testID="build-next" style={{ marginTop: 18 }}
                  label={last ? "Next word" : "Add a syllable"}
                  onPress={advance} />
           )}
 
-          {assess ? (
+          {r.answered ? null : assess ? (
             /* In a lesson, always a way past without speaking — left out of
                the total, like a refused microphone (Say does the same). */
-            r.answered ? null : (
-              <Btn kind="ghost" label="Can't speak now" testID="build-skip"
-                   style={{ marginTop: 10 }} onPress={() => r.skip()} />
-            )
+            <Btn kind="ghost" label="Can't speak now" testID="build-skip"
+                 style={{ marginTop: 10 }} onPress={() => r.skip()} />
           ) : (
             /* The word before and the word after. A mouth drill is the one run
                where going back is the method rather than a way round the mark,

@@ -20,7 +20,7 @@ import { saveRun, clearRun, savedRun } from "../resume";
 import { Verdict, CYR } from "../verdict";
 import { usePop, useSwap } from "../motion";
 import { guideLine, poseFor, reactionFor, LINES } from "@core/guide";
-import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
+import { say, cue, answerAudioText, stop as stopAudio, whenIdle, warmClips } from "../audio";
 import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
@@ -415,6 +415,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const finished = useRef(false);
   // What the mark is out of: the deck as first dealt, before any recycling.
   const total = from ? from.total : steps.length;
+  /* The deck's audio packs start fetching at the deal, not at each question
+     (audio.js warmClips): every Russian a question will say, looked up once. */
+  useEffect(() => {
+    warmClips(queue.flatMap((q) => [q.prompt, q.say, q.target, q.ru, typeof q.answer === "string" ? q.answer : null]));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* The back arrow sits a thumb's width from Home, and one mis-tap used to throw
      a ten-minute placement away without a word. With `navigation` given, a run

@@ -26,7 +26,7 @@ import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf, lowPriorit
 import { Linked, GrammarLine } from "../words";
 import { useAbout, cardAbout } from "../about";
 import { IrregularTag } from "../rules";
-import { say } from "../audio";
+import { say, warmClips } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, cardFor } from "@core/scheduler";
@@ -318,6 +318,8 @@ export default function Study({ navigation, route }) {
       missed.current = {}; setNotice(null);
     }
     for (const it of next.items) sitting.current.add(it.word);
+    // The pile's audio packs start fetching now, not at each card (audio.js).
+    warmClips(next.items.map((it) => it.word));
     setSession(next);
     setAt(0);
     setShown(false); setRevealed(false);

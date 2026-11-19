@@ -47,6 +47,23 @@ export function formClip(text) {
    first ask loads ~9,600 entries. App.js calls this once the first screen has
    settled, so that cost is never paid inside a render. */
 export const warmForms = () => { formClip("а"); };
+
+/* **A pile asks for its packs when it is dealt, not card by card.** The
+   audio past chapter 2 comes in packs (audiopacks.js) and a clip looked up
+   before its pack has landed nudges that pack to the front of the fetch
+   queue — but a lookup only happens when a speaker is drawn, so the first
+   card of a shuffled Study pile from chapter 3 read in the device voice on
+   a fresh install (the emulator walkthrough, 2026-11-19: «Не за что.»).
+   Looking every dealt text up once, last to first so the first card's pack
+   is fetched first, starts the download while the learner is still on the
+   earlier cards. Cheap: a map read per text, no I/O. */
+export function warmClips(texts) {
+  const list = (texts || []).filter((x) => typeof x === "string" && CYRILLIC.test(x));
+  for (let k = list.length - 1; k >= 0; k--) {
+    const text = list[k];
+    if (!wordClip(fold(text))) formClip(text);
+  }
+}
 import { sexOf } from "@core/names";
 import { castById, GUIDE_ID } from "@core/cast";
 import { knownVoiceSex, rankVoice, isSilentVoice } from "@core/voices";

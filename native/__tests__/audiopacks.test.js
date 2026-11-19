@@ -13,6 +13,7 @@ import { wantedPacks, ensurePacks, installPack, resetPacks, packState, setPackDe
   from "../src/audiopacks";
 import { packedClip, setPackResolver } from "../src/packs";
 import { PACKS, WORD_CLIPS, wordClip } from "../src/wordaudio";
+import { warmClips } from "../src/audio";
 
 const fakePacks = [
   { id: "ch1-aaaaaaaaaa", label: "ch1", chapter: 1 }, { id: "ch3-bbbbbbbbbb", label: "ch3", chapter: 3 },
@@ -56,6 +57,19 @@ describe("installing", () => {
     expect(global.__fs.files.has(`file:///documents/audio/${first.id}/.ok`)).toBe(true);
     await removePack(first.id);
     expect(wordClip(packedKey)).toBeNull();
+  });
+
+  /* A dealt pile asks for its packs at once, the first card's first — a
+     chapter-1 learner's shuffled pile reaches chapter-3 sentences, and the
+     first such card read in the device voice on a fresh install (the
+     walkthrough, 2026-11-19). */
+  it("warmClips queues every pack a pile needs, the first card's pack first", async () => {
+    await bootPacks();
+    const keyIn = (p) => Object.keys(WORD_CLIPS).find((k) => Array.isArray(WORD_CLIPS[k]) && WORD_CLIPS[k][0] === p);
+    const a = keyIn(1), b = keyIn(0);
+    expect(a && b).toBeTruthy();
+    warmClips([a, "a word with no clip at all", b]);
+    expect(packState().queued.slice(0, 2)).toEqual([PACKS[1].id, PACKS[0].id]);
   });
 
   it("a failed fetch leaves nothing behind, throws nothing, and is not retried at once", async () => {

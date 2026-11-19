@@ -815,7 +815,7 @@ export default function Study({ navigation, route }) {
   );
 
   return (
-    <Screen footer={controls}>
+    <Screen footer={controls} fill>
       {/* A summary of what is ticked — so it only exists once something is.
           The empty state's button is the way in; this row is the way back. */}
       {/* What is ticked and what the pile holds, with the cog that changes
@@ -941,6 +941,12 @@ export default function Study({ navigation, route }) {
           ) : null}
           {whyOpen && st.dev ? <WhyCardSheet item={item} st={st} onClose={() => setWhyOpen(false)} /> : null}
 
+          {/* The card sits in the middle of what is left above the grade
+              buttons (2026-11-19): a short card pinned under the bar left
+              two thirds of the screen empty beneath it, read off the
+              walkthrough. A long back grows past the screen and scrolls as
+              before; `fill` on the Screen is what lets a short one centre. */}
+          <View testID="card-well" style={{ flexGrow: 1, justifyContent: "center" }}>
           <Animated.View style={flip.style}>
           <Card testID={`card-${item.direction}`} style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
           {/* Once revealed, a tap on the card's head — the word, its meaning,
@@ -1103,6 +1109,7 @@ export default function Study({ navigation, route }) {
           ) : null}
           </Card>
           </Animated.View>
+          </View>
         </>
       )}
 

@@ -18,7 +18,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
-import { useTheme, type as T } from "../theme";
+import { useTheme, type as T, radius } from "../theme";
 import { Screen, Muted, SectionLabel, Text, Familiarity, familiarityColor, Sheet, Bubble, List, Row, RowText, Thumb } from "../ui";
 import { readLog } from "../store";
 import { rankOf, dueCount, UN, exactIdx, grammarNoteOf } from "../data";
@@ -226,31 +226,36 @@ function MonthCal({ report, now, onDay }) {
           <Muted key={d} size={11} style={{ flex: 1, textAlign: "center" }}>{d[0]}</Muted>
         ))}
       </View>
+      {/* One cell shape for every day (2026-11-19). Past days used to be tall
+          grey boxes with the topic in 9 px type and future days bare numbers,
+          so the month read as a wall of empty cards with a torn edge. Now a
+          day is its number in a square: a studied day is filled brand and
+          carries its time, today is ringed, a day that has not come is
+          faint, and the topic belongs to the sheet a tap opens. The shape
+          every habit calendar on a phone uses. */}
       {weeks.map((w, k) => (
-        <View key={k} style={{ flexDirection: "row", gap: 3, marginTop: 3 }}>
+        <View key={k} style={{ flexDirection: "row", gap: 4, marginTop: 4 }}>
           {w.map((c, j) => {
             if (!c) return <View key={j} style={{ flex: 1 }} />;
             const d = report.get(c.day);
             const isToday = c.day === today;
+            const ahead = c.day > today;
             return (
               <Pressable key={j} testID={`cal-${c.day}`} disabled={!d} onPress={d ? () => onDay(c, d) : undefined}
                          accessibilityRole={d ? "button" : undefined}
                          accessibilityLabel={d ? `${MONTHS[at.getMonth()]} ${c.date}, ${d.topic || "studied"}, about ${fmtTime(d.minutes)}` : undefined}
-                         style={{ flex: 1, minHeight: 62, borderRadius: 6, padding: 3,
-                                  backgroundColor: d ? t.brandBg : c.day > today ? "transparent" : t.surface2,
-                                  borderWidth: isToday ? 1.5 : 0, borderColor: t.brand }}>
-                <Text style={{ color: d ? t.brandInk : t.ink3, fontSize: 11, fontWeight: isToday ? "700" : "500" }}>
+                         style={{ flex: 1, aspectRatio: 1, borderRadius: radius.sm, alignItems: "center", justifyContent: "center",
+                                  backgroundColor: d ? t.brand : "transparent",
+                                  borderWidth: isToday && !d ? 1.5 : 0, borderColor: t.brand,
+                                  opacity: ahead ? 0.35 : 1 }}>
+                <Text style={{ color: d ? t.brandOn : isToday ? t.brand : t.ink2, fontSize: 13,
+                               fontWeight: d || isToday ? "700" : "500" }}>
                   {c.date}
                 </Text>
                 {d ? (
-                  <>
-                    <Text numberOfLines={2} style={{ color: t.ink, fontSize: 9, lineHeight: 11, marginTop: 1 }}>
-                      {d.topic || "Review"}
-                    </Text>
-                    <Text style={{ color: t.brandInk, fontSize: 9, fontWeight: "700", marginTop: "auto" }}>
-                      {fmtTime(d.minutes)}
-                    </Text>
-                  </>
+                  <Text style={{ color: t.brandOn, fontSize: 9, fontWeight: "600", opacity: 0.85 }}>
+                    {fmtTime(d.minutes)}
+                  </Text>
                 ) : null}
               </Pressable>
             );

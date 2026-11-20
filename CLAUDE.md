@@ -471,7 +471,7 @@ bridges/                          (directory is still named russian-blocks on di
     lookup.py          <- CLI word panel, for checking data without a browser
     smoke.js           <- headless checks against the built page
     deploy.ps1         <- rebuild + Netlify deploy
-    dl/                <- the bridges-dl Worker: side-loaded builds and the latest-build record the app checks (§30cv)
+    dl/                <- the bridges-dl Worker: side-loaded builds, the latest-build record, the audio packs, the privacy page (§30cv, §30dc, §30dd)
     app/               <- WEB APP SOURCES (edit these, never site/); on hold since 2026-09-05
       shell.html       <- top bar, five <main> screens, bottom tab bar
       app.css          <- design tokens, both themes, layout
@@ -7993,6 +7993,56 @@ rules each left:
   word card and had been packed in `more`; the tour's Screen takes `safeTop`
   (it is shown outside the navigator, so no header took the inset).
 
+## 30dd. The Play build, and the post that goes with it (2026-11-19)
+
+The owner: *"lets pivot to deploying this app on the play store so I can post
+it for others to use. Draft a reddit post and select a couple target forums."*
+Everything in the repo's gift is done; what is his is listed at the foot of
+`docs/store-listing.md`, which was rewritten for Ya (it still said Bridges,
+168 lessons and 1,045 words).
+
+- **One switch makes the store build**: `.\native\tools\build.ps1 -Store`
+  runs `bundleRelease` over all four architectures, upload-signed, and lands
+  `Ya-<commit>-store.aab` with a sidecar marked `store`. It differs from the
+  beta build in exactly two things, both of which Play policy requires and
+  both set by the same switch so they cannot come apart: **no side-load
+  permission** — `-PyaStore=true` makes Gradle merge
+  `app/src/store/AndroidManifest.xml` (`tools:node="remove"` on
+  `REQUEST_INSTALL_PACKAGES`) over the release manifest, written and wired by
+  `plugins/withStoreBuild.js` and applied by hand to the generated tree like
+  the other two plugins — and **no update host**: `EXPO_PUBLIC_STORE_BUILD=1`
+  for Metro, which `update.js` reads as an empty `LATEST_URL`, and
+  `checkForUpdate` asks nothing of an empty address. **PowerShell deletes an
+  environment variable set to `""`**, which is why the flag is a value the
+  code tests for rather than an emptied URL. The build clears Metro's
+  transform cache every run: it does not key on `EXPO_PUBLIC_*` values, so a
+  store build after a beta build could reuse the other's inlined constant and
+  nothing would say so. `release_check.mjs --store --file <aab>` dumps the
+  bundle's manifest through bundletool and fails while the permission is in
+  it — the one place the overlay's effect can be seen.
+- **The privacy policy is a page on the bridges-dl Worker**, `/privacy`,
+  served from `dl:privacy`, which `tools/dl/upload_privacy.mjs` renders from
+  `docs/privacy.md` (headings, paragraphs, lists, bold, links — the four
+  constructs the file uses, nothing else). The policy now names what the app
+  has grown: the AI features by name, Sync (progress on the server only when
+  turned on, which is a Data Safety "collected" answer, optional), feedback
+  reports, the audio packs, the Wiktionary look-up. Re-run the tool after
+  editing the policy. The page answers only once the Worker is deployed.
+- **Where to post, and why not elsewhere** (`docs/store/reddit-post.md`):
+  r/russian, where the native speakers who will read the 20 conversations
+  are — the read Gate 3 never got — and r/languagelearning's stickied
+  monthly resources thread, the one place that sub allows promotion;
+  r/droidappshowcase optional. Not r/androidapps (removes developer posts)
+  and not a stand-alone post on r/languagelearning (a ban). Reddit refuses
+  scripts, so the rules came from third-party summaries; read each sidebar
+  once. The post needs the closed test's opt-in link before it can go up,
+  and the tester list has to be an open Google Group for that link to work
+  for a stranger. The post says plainly that no native speaker has read the
+  dialogues; that is half the reason to post it.
+- **The emulator's YouTube player is a black box** in a screenshot (no
+  frame rendered); the transcript under it is the picture. Retake the
+  player shot on a phone.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -8029,6 +8079,8 @@ node tools/yt_captions.mjs     # after touching youtube.js: the real player obey
 node tools/patch_expo_audio.mjs --check   # expo-audio hands media keys to the app, and is built from source (§30cy)
 node tools/design.mjs          # scale, rhythm and depth: the arithmetic of looking designed (§30ax)
 node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
+node tools/release_check.mjs --store --file native\build-out\Ya-<commit>-store.aab   # a Play bundle: no side-load permission (§30dd)
+node tools/dl/test.mjs         # the download Worker: latest, changelog, privacy page, audio packs
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/build_word_groups.mjs --check   # every unit's words in a group (§30bi)
@@ -8059,7 +8111,10 @@ after any change to a screen, and *look at the pictures*.
 the script stamps the build (§30cv), and an unstamped APK carries versionCode
 27, which the update check cannot tell from any other. Then
 `node tools/dl/upload.mjs native\build-out\Ya-<commit>.apk --notes "..."`
-publishes it and makes it the one the app offers.
+publishes it and makes it the one the app offers. **The Google Play bundle is
+`build.ps1 -Store`** (§30dd): the same build with no side-load permission and
+no update host, checked with `release_check.mjs --store`; it goes to the Play
+Console by hand, never to the dl host as the latest build.
 
 **After `build_word_assets.mjs`, upload the packs before the build ships**
 (§30dc): `node tools/dl/upload_audio.mjs` puts every pack in

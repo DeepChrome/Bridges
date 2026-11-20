@@ -1,74 +1,70 @@
-# Google Play listing — Bridges
+# Google Play listing — Ya
 
-*Written for the Play Console: the copy is what gets pasted in, the checklist is
-what has to be true before Send for review. Last measured against the app on
-2026-09-17.*
-
-Nothing here is submitted. The blockers are at the bottom, and all but one are
-the owner's.
+*Written for the Play Console: the copy is what gets pasted in, the checklist
+is what has to be true before Send for review. Rewritten against the app on
+2026-11-19 (it was Bridges, 168 lessons and 1,045 words before).*
 
 ---
 
 ## Name and one-liner
 
 Store title (30 characters, Play's limit; the keyword in the title is what
-search weighs, and "Bridges" alone is a dozen other apps — the owner,
-2026-09-19): **Bridges: Learn Russian**. The app's own label stays "Bridges".
+search weighs — the owner, 2026-09-19): **Ya: Learn Russian**. The app's own
+label stays "Ya".
 
 Short description (80 characters, Play's limit; "Beta" first, so nobody
-installs it thinking otherwise — the owner, 2026-09-19):
+installs it thinking otherwise):
 
-> Beta. Russian lessons, spaced repetition and native audio, on your own words.
+> Beta. Learn Russian towards real videos: lessons, flashcards, speaking, a tutor.
 
 ## Full description
 
-**Bridges is in beta.** It works end to end and it is still being shaped;
-things will move, and what breaks is worth telling us about (Settings → Send
-the details).
+**Ya is in beta.** It works end to end and it is still being shaped; what
+breaks is worth telling us about (Settings → Send feedback).
 
-Bridges is a Russian course built on a real vocabulary collection rather than a
-word list somebody invented.
+Every other app's finish line is the app. Ya's is a real video.
 
-**A path, not a pile.** Ten chapters, 168 lessons, 1,045 words chosen by how
-often they actually occur. Each chapter has a spine everyone walks and side
-quests — food, travel, work, medicine, law, science — you take or skip. A lesson
-teaches a handful of words, then asks for them in several ways: the meaning, the
-Russian, a gap in a real sentence, typing it, hearing a word, hearing a whole
-sentence, and saying one aloud.
+**A course built towards real Russian.** Ten chapters, 34 units, 185 lessons,
+about 1,300 words. Each unit is built from one actual YouTube episode —
+Easy Russian, Comprehensible Russian, Real Russian Club and others — and
+teaches the words that episode says. You learn them, drill them, review them,
+then watch the episode with every word tappable and the transcript following
+the sound, and answer five questions about it. The next unit's video is a
+little harder.
 
-**Spaced repetition that matches Anki.** FSRS-6 scheduling with learning steps,
-daily limits and undo. One card per word, asked the way you choose — Russian
-on the front, the meaning on the front, or sound only — and every lesson
-question, spoken turn and flashcard feeds the same memory. Import an Anki deck
-and it schedules alongside everything else.
+**Flashcards that match Anki.** FSRS-6 scheduling, one card per word, asked
+Russian-first, English-first or sound-only as you choose. Every lesson
+question and every flashcard feeds the same memory. Import your own Anki decks
+and they schedule alongside the course.
 
-**Listening that is actually at your level.** Thirty-two written conversations,
-two to three speakers each, thirty to forty-five seconds, with five questions
-about the situation — who is talking, what the problem is, how it ends. The
-questions are on screen before the audio starts, replays are unlimited, and you
-can drop back five seconds or slow it to three-quarter speed.
+**Every word is a link.** Tap any Russian word anywhere — a lesson, a card, a
+transcript — to see what it is and what form it is in; tap again for the full
+entry: every meaning, the complete tables with a recording in every cell, real
+example sentences, and the videos that say it. The dictionary holds 52,000
+words.
 
-**Speaking.** Say a sentence and it is checked word by word on the device.
-Repeat-after-me shadowing. A pronunciation drill on the pairs English speakers
-get wrong. A syllable-by-syllable builder for the long words. And Talk — a short
-conversation with a tutor on a situation you pick, where every sentence you say
-comes back corrected.
+**Grammar in the order it is taught.** The cases one at a time, prepositional
+first, each with a lesson on when it is used and drills on real sentences.
+Aspect pairs, agreement, conjugation and stress drills. A reference you can
+read in two minutes a topic.
 
-**An interpreter in your pocket.** Two microphones, one for Russian and one for
-English: whatever either person says comes back in the other language, on the
-screen and read aloud, with every Russian word tappable.
+**Speaking.** Say a sentence and it is checked word by word, on the phone.
+Shadow a native sentence. Build long words from the end so the ending comes
+out right. Talk through a situation with a character, and get your sentences
+corrected.
 
-**Every word is a link.** Tap any Russian anywhere in the app to see what it is
-and what form it is in; tap again for the full entry — every sense, the complete
-paradigm, example sentences, and the videos that say it. The dictionary holds
-46,000 words.
+**Hands-free.** Drive mode plays chapter-sized audio lessons — the English, a
+pause for you, the Russian — with voice commands and your headset's buttons.
+
+**A tutor and an interpreter.** Ask the tutor anything in English or Russian,
+by voice or by typing. A sparkle on every screen answers questions about the
+Russian in front of you. Translate turns the phone into a two-way interpreter.
 
 **Watch real Russian.** 321 captioned episodes from seven Russian-teaching
-channels, searchable by topic, grammar point or level, each listing only the
-words it genuinely says and jumping to the moment it says them.
+channels, by level, each listing the words it actually says.
 
-**No account. No adverts. No analytics.** Your progress lives on your phone and
-you can export it as a file whenever you want.
+**No sign-up. No adverts. No analytics.** Progress lives on your phone; speech
+recognition runs on the device. The AI features have daily limits.
 
 ---
 
@@ -76,15 +72,15 @@ you can export it as a file whenever you want.
 
 | Asset | File | Notes |
 |---|---|---|
-| Feature graphic | `docs/store/feature-graphic.png` | 1024×500, generated by `tools/make_feature_graphic.py` from the launcher icon's own geometry |
-| Icon | `native/assets/icon.png` | generated by `tools/make_app_icon.py` |
-| Screenshots | `docs/store/screenshots/1-path.png` … `8-progress.png` | 1080×2400 |
+| Feature graphic | `docs/store/feature-graphic.png` | 1024×500 — **redo for Ya** (`tools/make_feature_graphic.py` still draws the Bridges mark) |
+| Icon | `native/assets/icon.png` | `tools/make_app_icon.py` |
+| Screenshots | `docs/store/screenshots/1-word-card.png` … `8-tutor.png` (2026-11-19) | 1080×2400 |
 
-Screenshots, in order: the path · a lesson's steps · a vocabulary card · a
-question · the listening list · Practice · the video library · progress.
-
-**Retake on a real device before submitting.** These are from the emulator and
-its status bar is in shot.
+Screenshots in order: the word card with its video line · the episode with
+its transcript (**retake on the phone**: the emulator shows a black player) ·
+a flashcard's back · Practice · Drive mode · the library · the path · the
+tutor. Play takes two to eight phone screenshots. They were taken by
+`native/tools/walk.ps1` on the emulator, which puts its status bar in shot.
 
 ---
 
@@ -94,110 +90,90 @@ The answers, and what makes each one true:
 
 | Question | Answer | Why |
 |---|---|---|
-| Data collected | None | No account, no identifiers, no analytics SDK |
-| Data shared | Yes — "Other user-generated content" | The *text* of what you said or wrote, for the three tutor features |
+| Data collected | **App activity → "Other user-generated content"**, optional, only when the user turns on Sync | Settings → Sync stores the learner's progress on the Worker under a random account id (§30cr). Off by default. |
+| Data shared | Yes — "Other user-generated content", with a service provider | The *text* of what the learner said, typed or was looking at, for the AI features (feedback, tutor, Talk, Translate, Ask). Not stored. |
 | Voice or audio recordings | **No** | Recognition runs on the device; audio never leaves it |
-| Location, contacts, photos, files | No | Not requested; the manifest has no such permission |
+| Device or other IDs | No | The install's Worker token is random and made by the app; it is not a device id |
+| Location, contacts, photos, files | No | Not requested |
 | Encrypted in transit | Yes | HTTPS to the Worker and to Anthropic |
-| Users can request deletion | Nothing is stored to delete | The Worker keeps a per-day counter and a token count, nothing keyed to a person |
+| Users can request deletion | Yes | Removing the devices in Settings → Sync removes the account's data; nothing else is stored |
 | Data used for tracking | No | |
 
-Permissions in the manifest, and nothing else — `tools/release_check.mjs`
-asserts it:
+Permissions in the manifest — `tools/release_check.mjs --store` asserts the
+fourth is gone from the store bundle:
 
 - `RECORD_AUDIO` — the speaking exercises
 - `MODIFY_AUDIO_SETTINGS` — the audio session for playback
 - `POST_NOTIFICATIONS` — the optional daily reminder
+- ~~`REQUEST_INSTALL_PACKAGES`~~ — the beta's in-app updater; **not in a
+  store build** (`build.ps1 -Store`, §30cv)
+
+Also in the merged manifest from the libraries: `INTERNET`, `VIBRATE`,
+`WAKE_LOCK`, `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_MEDIA_PLAYBACK`
+(expo-audio's media session, which drive mode uses on the lock screen — a
+"media playback" foreground-service declaration in the console), and the two
+legacy storage permissions capped at SDK 32 (Anki import).
 
 Content rating: Everyone. No ads, no purchases, no user-to-user communication.
 
-Privacy policy: `docs/privacy-policy.md`, **needs hosting at a public URL**.
+**Privacy policy URL:** `https://bridges-dl.bridges-feedback.workers.dev/privacy`
+(docs/privacy.md, published by `tools/dl/upload_privacy.mjs`; the route needs
+the bridges-dl Worker deployed).
 
 ---
 
-## Signing (ROADMAP 13.41)
+## Signing
 
-Release builds are signed with the **debug key** by default — the Expo template's
-setting, fine for side-loading and refused by Play. `node tools/release_check.mjs`
-reads the signature off the built artifact and fails when it is the debug one.
-
-Creating the upload key is the owner's, because the password is his and because
-**losing it is unrecoverable** unless Play App Signing is enabled (turn it on;
-it is the default for new apps and it means Google holds the app signing key
-while this one only signs uploads).
-
-```
-keytool -genkeypair -v -keystore <somewhere outside the repo>/bridges-upload.jks \
-  -alias upload -keyalg RSA -keysize 4096 -validity 10000
-```
-
-Then in `~/.gradle/gradle.properties` — outside the repo, rule 20.11:
-
-```
-BRIDGES_UPLOAD_STORE=C:/path/outside/repo/bridges-upload.jks
-BRIDGES_UPLOAD_STORE_PASSWORD=…
-BRIDGES_UPLOAD_ALIAS=upload
-BRIDGES_UPLOAD_KEY_PASSWORD=…
-```
-
-`gradlew bundleRelease` then signs with it, and `release_check.mjs` says so.
-**Back the keystore up somewhere that is not this machine**, alongside
-`debug.keystore` (13.16).
+Release builds sign with the upload key when `BRIDGES_UPLOAD_*` are in
+`~/.gradle/gradle.properties` (they are, on the owner's machine; the keystore
+is in OneDrive — `plugins/withUploadSigning.js`). Turn **Play App Signing on**
+at the first upload: Google holds the app signing key, this one only signs
+uploads, and losing it is then recoverable.
 
 ---
 
 ## Build
 
 ```
-cd native/android && ./gradlew bundleRelease     # app-release.aab, ~110 MB with the bundled audio
-node tools/release_check.mjs                      # signature, size, permissions
+.\native\tools\build.ps1 -Store                               # Ya-<commit>-store.aab, ~40 min
+node tools/release_check.mjs --store --file native\build-out\Ya-<commit>-store.aab
 ```
 
-A bundle, not an APK: Play requires one for new apps, and it splits per device
-so the download is far smaller than the file uploaded. The version is
-`1.0.0-beta.7` / versionCode 7 (`app.json`; `npx expo prebuild --platform
-android` after changing it, since `android/` is generated); bump versionCode
-on every upload. **beta.6 is on the Internal testing track** (uploaded
-2026-09-23, the first). Before it: beta.1 (2026-09-19) was the first
-packaged, beta.2 (2026-09-20) carried the definitions read-through, beta.3
-(2026-09-23) the path gating, the recorded-audio trim and Translate, beta.4
-(2026-09-23) the interpreter, the drawn-empty path and the familiarity ring,
-beta.5 (2026-09-23) developer mode off by default, speakers everywhere, and
-the library's favorites, sort and creators' note, beta.6 (2026-09-23) one
-card per word and the native-speed passages removed, and beta.7 (2026-09-23)
-nothing locked and no scores on Practice.
+A bundle, not an APK: Play requires one and sends each phone its slice. The
+versionCode is the build minute (§30cv), so every upload is newer than the
+last and there is nothing to bump. The store build carries no update host
+and no side-load permission; everything else is the beta's build.
 
-**Upload path, since the account exists (2026-09-23).** *Internal testing*
-first: private to up to 100 testers by email, nothing on the store, no
-review clock — it proves signing, Play App Signing and the upload key while
-the app is still being shaped. *Closed testing* is what starts the
-fourteen-day, twelve-tester clock a personal account needs before production
-unlocks, so it should start as soon as the beta looks the way the owner
-wants, not after. The console asks for the Data safety form and the privacy
-policy URL before a testing track can be published; the answers are above.
+**Upload path.** *Internal testing* first (up to 100 testers by email,
+nothing on the store, no review clock): it proves the signing and the bundle.
+*Closed testing* is what starts the fourteen-day, twelve-tester clock a
+personal account needs before production unlocks — start it the same day.
+The console asks for the Data safety form, the content rating and the
+privacy policy URL before a testing track can be published.
 
 ---
 
 ## Before Send for review
 
-**Mine, and done:** licence file, privacy policy text, feature graphic, eight
-screenshots, permissions minimal and asserted, bundle builds, release check.
+**Done in the repo:** licence file, privacy policy (text and page), store
+copy above, permissions minimal and asserted, the store build and its check,
+screenshots.
 
-**His, and none of it is code:**
+**His, in the console or the shell:**
 
-1. **Play developer account, $25.** The long pole: a new personal account needs
-   roughly twelve testers opted in to a closed test for fourteen days before
-   production unlocks. The clock cannot start until the account exists, so this
-   is worth doing before anything else is ready.
-2. **The upload key**, above, and Play App Signing on.
-3. **Host the privacy policy** and put the URL in the listing.
-4. **A native speaker reads the authored Russian** — `review/content_v1.csv`,
-   2,353 rows (ROADMAP 13.29, Gate 3). This blocks release on its own: the
-   conversations are machine-checked for level and vocabulary, and nothing has
-   checked whether they are idiomatic.
-5. ~~**Deploy the Worker**~~ — done 2026-09-19. The build needs only
-   `EXPO_PUBLIC_FEEDBACK_URL` — **never `EXPO_PUBLIC_APP_TOKEN`** (commented
-   out in `native/.env`) — and each install registers for its own token
-   (13.39, `docs/play-preflight.md`). Verified from the emulator.
-6. **Audio licensing** — `build_audio.py --commercial` drops the 31 Tatoeba
-   recordings that are NC, ND or unstated (13.11, licensing.md).
+1. `cd tools/dl; npx wrangler deploy` — the privacy page and the audio packs
+   route. Without it the policy URL is a 404 and strangers past chapter 2
+   hear the device voice.
+2. `cd backend; npx wrangler deploy` — the tutor's two-line marks and the
+   sparkle's conversation mode.
+3. Create the app record ("Ya: Learn Russian", package `app.bridges.russian`),
+   upload the `-store.aab` to Internal testing with Play App Signing on, then
+   promote the same bundle to a Closed testing track; make the tester list a
+   Google Group with open membership so the opt-in link works for anyone.
+4. Data safety form (table above), content rating, privacy URL, the
+   foreground-service declaration (media playback).
+5. Feature graphic for Ya.
+6. Decide Free vs everyone-Premium for the beta (docs/BETA.md Phase E;
+   `BETA_PREMIUM` is on, so today everyone gets Premium's allowance).
+7. A native speaker's read of the 20 conversations (Gate 3) — or let the
+   r/russian post be that read, and fix what comes back.

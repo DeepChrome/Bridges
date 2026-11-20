@@ -13,10 +13,12 @@ before posting.
 Do not post it on r/androidapps or as a stand-alone post on r/languagelearning.
 
 **Before posting** you need the thing people tap: the Play closed-test opt-in
-link (Play Console → Testing → Closed testing → Testers → "Copy link"; make the
-tester list a Google Group with open membership, or the link only works for
-emails you added). Until that exists, the post has nowhere to send anyone.
-Replace `<PLAY LINK>` below.
+link (Play Console → Testing → Closed testing → Alpha → Testers → "Join on the
+web" → Copy link). It only works once Google has approved the closed-test
+release. The tester list is the open Google Group ya-russian-testers
+(groups.google.com/g/ya-russian-testers): joining it is what makes someone a
+tester. Replace `<PLAY LINK>` below. Post from u/YaLearnRussian after it has a
+few genuine comments, or the spam filter eats a new account's first post.
 
 Reply to every comment the first day. That is most of what the post is for.
 
@@ -49,7 +51,10 @@ Honest caveats, because this is a beta:
 - The AI features run through my own server and have daily limits, because I'm paying for them.
 - The first download is big (the bundled audio).
 
-Play Store link (it's a closed test, so you join from this link first): <PLAY LINK>
+How to get it (it's a closed test, so it's two taps instead of one):
+
+1. Join the tester group: https://groups.google.com/g/ya-russian-testers (it's just the guest list — nobody gets emailed).
+2. Then open this on your phone and install: <PLAY LINK>
 
 Screenshots in the comments. Happy to answer anything about how it's built.
 
@@ -63,7 +68,7 @@ Disclosure: this is mine.
 
 Caveat: the written dialogues haven't had a native-speaker read yet. If you are one and you try it, tell me what's off.
 
-<PLAY LINK>
+To install: join https://groups.google.com/g/ya-russian-testers, then <PLAY LINK>
 
 ---
 

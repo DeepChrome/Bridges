@@ -92,6 +92,13 @@ describe("asking the host", () => {
     expect(fetchFn.mock.calls[0][0]).toBe(LATEST_URL);
     expect(fetchFn.mock.calls[0][1].signal).toBeTruthy();                // the timeout is wired
   });
+  /* A store build (build.ps1 -Store) has no host address: Play carries its
+     updates and the side-load permission is gone from its manifest. */
+  it("does not ask at all from a store build, which has no address", async () => {
+    const fetchFn = jest.fn(okJson(LATEST));
+    expect(await checkForUpdate({ fetch: fetchFn, url: "" })).toBeNull();
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
   it("does not ask at all from a development build", async () => {
     global.__build = { code: null, name: null };
     const fetchFn = jest.fn(okJson(LATEST));

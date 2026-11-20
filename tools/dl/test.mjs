@@ -63,6 +63,14 @@ ok((await get(`/${file}`)).status === 404, "and the file is gone");
 kv.set("dl:latest", JSON.stringify({ code: 1 }));
 ok((await get("/latest.json")).status === 404, "a record naming no file is a 404");
 
+// The privacy policy: a page once uploaded, nothing before.
+ok((await get("/privacy")).status === 404, "no policy uploaded is a 404");
+kv.set("dl:privacy", "<!doctype html><title>Privacy</title><h1>Ya</h1>");
+const p = await get("/privacy");
+ok(p.status === 200 && (p.headers.get("content-type") || "").startsWith("text/html"), "the policy is a page");
+ok((await p.text()).includes("<h1>Ya</h1>"), "with its text");
+ok((await get("/privacy.html")).status === 200, "and answers with the extension too");
+
 // An audio pack: pieces streamed whole, cacheable, named by its contents.
 ok((await get("/audio/ch3-0123456789.zip")).status === 404, "a pack not uploaded is a 404");
 ok((await get("/audio/ch3.zip")).status === 404, "a pack name without its hash is nothing");

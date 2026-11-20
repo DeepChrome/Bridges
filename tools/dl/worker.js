@@ -11,6 +11,10 @@
 //                        address when there is one
 //   GET /changelog       every build's bullets, newest first (plain text), kept
 //                        in `dl:changelog` by upload.mjs
+//   GET /privacy         the privacy policy as a page (docs/privacy.md, put in
+//                        `dl:privacy` by upload_privacy.mjs) — the public URL
+//                        Google Play asks for
+//   GET /audio/<pack>.zip   an audio pack (below)
 //
 // Nothing else is served. The name of a file is random (upload.mjs), which is
 // the only thing standing between a URL and the file, so a name under sixteen
@@ -44,6 +48,14 @@ export default {
       if (!text) return new Response("not found", { status: 404 });
       return new Response(text, { headers: {
         "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+    }
+
+    if (name === "privacy" || name === "privacy.html") {
+      if (request.method !== "GET") return new Response("method", { status: 405 });
+      const html = await env.FILES.get("dl:privacy");
+      if (!html) return new Response("not found", { status: 404 });
+      return new Response(html, { headers: {
+        "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=3600" } });
     }
 
     /* The audio packs (2026-11-19, tools/build_word_assets.mjs): a zip a

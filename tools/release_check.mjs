@@ -11,6 +11,8 @@
  *
  *   node tools/release_check.mjs                  # the .aab, then the .apk
  *   node tools/release_check.mjs --file <path>
+ *   node tools/release_check.mjs --store --file <aab>   # a Google Play build: the
+ *                                                       # side-load permission must be gone
  */
 import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -36,6 +38,21 @@ const BUNDLETOOL = process.env.BUNDLETOOL || "C:/Android/bundletool.jar";
 const JAVA = process.env.JAVA_HOME
   ? join(process.env.JAVA_HOME, "bin", "java.exe")
   : "java";
+
+/* What the bundle's own manifest says, through the same tool. The permission
+   list in app.json is what the beta build carries; a store build drops the
+   side-load permission through a manifest overlay (plugins/withStoreBuild.js),
+   and the only place that can be seen is the built bundle. */
+function bundleManifest(aab) {
+  if (!existsSync(BUNDLETOOL)) return { error: `no bundletool at ${BUNDLETOOL} (set BUNDLETOOL)` };
+  try {
+    return { xml: execFileSync(JAVA, ["-jar", BUNDLETOOL, "dump", "manifest", `--bundle=${aab}`],
+                               { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) };
+  } catch (e) {
+    return { error: String(e.message || e).split("\n")[0] };
+  }
+}
+const SIDELOAD = "android.permission.REQUEST_INSTALL_PACKAGES";
 
 /* The largest download any device configuration gets, in bytes, or an error. */
 function downloadMax(aab) {
@@ -126,6 +143,17 @@ function check(path, kind) {
     if (d.error) note("could not measure the per-device download", d.error);
     else ok(d.max / 1e6 <= DOWNLOAD_MAX_MB, `largest device download under Play's ${DOWNLOAD_MAX_MB} MB`,
             `${(d.max / 1e6).toFixed(1)} MB`);
+    const m = bundleManifest(path);
+    if (m.error) {
+      if (store) ok(false, "the bundle's manifest could be read", m.error);
+      else note("could not read the bundle's manifest", m.error);
+    } else {
+      const carries = m.xml.includes(SIDELOAD);
+      if (store) ok(!carries, "no side-load install permission in the bundle (a Play build)",
+                    carries ? "built without -Store, or the overlay did not merge" : "REQUEST_INSTALL_PACKAGES absent");
+      else if (carries) note("carries the side-load install permission; a Play build must drop it", "build.ps1 -Store");
+      else console.log("  info  no side-load install permission in the bundle");
+    }
   }
 }
 
@@ -150,15 +178,15 @@ function manifest() {
   ]);
   /* The fourth is the beta's own: the in-app update installs a side-loaded APK
      (src/update.js, 2026-11-17). Play policy reserves it for app stores, so
-     a store build drops it along with LATEST_URL — a warning on every run
-     until then, not a pass. */
-  const SIDELOAD = "android.permission.REQUEST_INSTALL_PACKAGES";
+     a store build drops it along with LATEST_URL (build.ps1 -Store, checked
+     above on the bundle itself) — here it is a warning, not a pass. */
   const extra = perms.filter((p) => !allowed.has(p) && p !== SIDELOAD);
   ok(extra.length === 0, "no permission beyond the three the app can justify",
      extra.length ? extra.join(", ") : "mic, audio, notifications");
-  if (perms.includes(SIDELOAD)) note("carries the side-load install permission; a Play build must drop it", SIDELOAD);
+  if (perms.includes(SIDELOAD) && !store) note("app.json carries the side-load install permission; a Play build drops it", "build.ps1 -Store");
 }
 
+const store = process.argv.includes("--store");
 const k = process.argv.indexOf("--file");
 if (k >= 0) {
   check(process.argv[k + 1], process.argv[k + 1].endsWith(".aab") ? "aab" : "apk");

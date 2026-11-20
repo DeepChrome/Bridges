@@ -56,8 +56,15 @@ import { Sheet, Btn, Muted, Text, Bar } from "./ui";
 import { useTheme, radius, type as T } from "./theme";
 
 /* Where the record lives. The host is public and the record carries nothing
-   private: a version, a size, a one-line note and the file's own address. */
-export const LATEST_URL = "https://bridges-dl.bridges-feedback.workers.dev/latest.json";
+   private: a version, a size, a one-line note and the file's own address.
+
+   A store build has no address at all: Google Play carries its updates, and a
+   store build may neither offer a side-loaded APK nor hold the permission to
+   install one. `native/tools/build.ps1 -Store` sets EXPO_PUBLIC_STORE_BUILD
+   for Metro (babel inlines it) and `-PyaStore=true` for Gradle, which drops
+   the permission (plugins/withStoreBuild.js). An empty address asks nothing. */
+export const STORE_BUILD = process.env.EXPO_PUBLIC_STORE_BUILD === "1";
+export const LATEST_URL = STORE_BUILD ? "" : "https://bridges-dl.bridges-feedback.workers.dev/latest.json";
 /* A launch should never wait on this. The record is a few hundred bytes; a host
    that has not answered in five seconds is a host that is not going to. */
 export const CHECK_TIMEOUT_MS = 5000;
@@ -104,7 +111,7 @@ export function notesList(notes) {
 /* Ask the host. Resolves to the update or null, and never rejects. */
 export async function checkForUpdate({ fetch: fetchFn = globalThis.fetch, url = LATEST_URL,
                                       installed = installedBuild(), timeoutMs = CHECK_TIMEOUT_MS } = {}) {
-  if (!(installed.code > 0) || typeof fetchFn !== "function") return null;
+  if (!url || !(installed.code > 0) || typeof fetchFn !== "function") return null;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), timeoutMs);
   try {

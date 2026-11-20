@@ -19,10 +19,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from make_app_icon import Bridge, blend, png_bytes, INDIGO, INDIGO_DEEP, WHITE  # noqa: E402
+from make_app_icon import Ya, blend, png_bytes, CORAL, WHITE  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 W, H = 1024, 500
+CORAL_DEEP = (176, 58, 28)      # the brand coral, darker, for the gradient's far corner
 
 
 def draw(w=W, h=H):
@@ -33,11 +34,11 @@ def draw(w=W, h=H):
     and well inside the safe area rather than filling the frame.
     """
     # The mark is drawn in a square that is most of the height, set in from the
-    # left; `Bridge` works in a unit square scaled to one size, so the square is
+    # left; `Ya` works in a unit square scaled to one size, so the square is
     # sampled through an offset rather than the class being changed.
     side = int(h * 0.74)
     ox, oy = int(w * 0.085), (h - side) // 2
-    bridge = Bridge(side, 0.10)
+    mark = Ya(side, 0.10)
 
     rows = []
     for py in range(h):
@@ -46,9 +47,9 @@ def draw(w=W, h=H):
             # A diagonal blend rather than a vertical one: across 1024 px a
             # purely vertical gradient reads as a flat band.
             t = (px / w) * 0.45 + (py / h) * 0.55
-            bg = blend(INDIGO, INDIGO_DEEP, t)
+            bg = blend(CORAL, CORAL_DEEP, t)
             sx, sy = px - ox, py - oy
-            c = bridge.coverage(sx + 0.5, sy + 0.5) if 0 <= sx < side and 0 <= sy < side else 0.0
+            c = mark.coverage(sx + 0.5, sy + 0.5) if 0 <= sx < side and 0 <= sy < side else 0.0
             col = blend(bg, WHITE, c)
             row.append((col[0], col[1], col[2], 255))
         rows.append(row)

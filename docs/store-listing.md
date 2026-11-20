@@ -72,7 +72,7 @@ recognition runs on the device. The AI features have daily limits.
 
 | Asset | File | Notes |
 |---|---|---|
-| Feature graphic | `docs/store/feature-graphic.png` | 1024×500 — **redo for Ya** (`tools/make_feature_graphic.py` still draws the Bridges mark) |
+| Feature graphic | `docs/store/feature-graphic.png` | 1024×500, the Ya mark on the brand coral (`tools/make_feature_graphic.py`, 2026-11-19) |
 | Icon | `native/assets/icon.png` | `tools/make_app_icon.py` |
 | Screenshots | `docs/store/screenshots/1-word-card.png` … `8-tutor.png` (2026-11-19) | 1080×2400 |
 

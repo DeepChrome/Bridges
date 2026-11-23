@@ -2487,6 +2487,150 @@ group("a chapter's grammar run");
     ok(!repeats.length, "no sentence comes back before eighty others have", repeats.join(", "));
     ok(gaps > 0 && wrongCase === 0, `every gap's answer is that case and only that case (${gaps} gaps)`, String(wrongCase));
   }
+
+  /* Case cards (docs/case-cards.md): the trigger catalogue, the sentences
+     sorted under it, and the paths built from them. */
+  group("case cards");
+  {
+    const T = await import("../core/triggers.js");
+    const CC = await import("../core/casecards.js");
+    const shape = T.checkTriggers();
+    ok(!shape.length, "the catalogue: one id each, a real case, one way to recognise it, a short meaning, all in TEACH_ORDER",
+       shape.join("; "));
+    // The only Russian the catalogue holds is its trigger words: each a word
+    // the dictionary has (§30a), a verb a verb.
+    const unknown = [];
+    for (const x of T.TRIGGERS) {
+      for (const w of (x.words || []).concat(x.preds || [])) if (!IX[w] && !DEEP_BY_BARE.has(w)) unknown.push(`${x.id}: ${w}`);
+      for (const v of x.verbs || []) {
+        const d = (IX[v] && L[IX[v][0]]) || DEEP_BY_BARE.get(v + "|verb");
+        if (!d || d.p !== "verb") unknown.push(`${x.id}: ${v} (not a verb)`);
+      }
+    }
+    ok(!unknown.length, "every trigger word is in the dictionary, every trigger verb a verb", unknown.join(", "));
+    const sight = Q.triggerSightings();
+    const offered = CC.offered(sight);
+    ok(offered.length >= 40, `at least forty triggers have a path's worth of sentences (${offered.length})`);
+    ok(offered.length && offered[0].id === "v-where", "triggers are met in teaching order: «в» meaning where first");
+    // Every sighting's noun is in the trigger's case, read off its own table,
+    // and the form the card asks for is the form the sentence used.
+    const wrongCase = [], wrongForm = [], badTok = [];
+    const { CASES } = await import("../core/cases.js");
+    const rowOf = Object.fromEntries(CASES.map((c) => [c.id, c.row]));
+    for (const x of T.TRIGGERS) for (const s of sight[x.id]) {
+      const row = s.table.rows[s.at[0]];
+      if (row[0] !== rowOf[x.case]) wrongCase.push(`${x.id}: ${s.ru}`);
+      if (!(row[s.at[1]] || []).some((f) => fold(f) === fold(s.token))) wrongForm.push(`${x.id}: ${s.ru}`);
+      const toks = s.ru.match(TOKEN) || [];
+      if (toks[s.k] !== s.token || (s.j >= 0 && toks[s.j] !== s.gov)) badTok.push(`${x.id}: ${s.ru}`);
+      if (fold(s.said) !== fold(s.token)) wrongForm.push(`${x.id}: said ${s.said} for ${s.token}`);
+    }
+    ok(!wrongCase.length, "every sentence's noun is in its trigger's case", wrongCase.slice(0, 4).join(" | "));
+    ok(!wrongForm.length, "the form a card asks for is the cell the sentence used", wrongForm.slice(0, 4).join(" | "));
+    ok(!badTok.length, "the marked noun and trigger are the words they say they are", badTok.slice(0, 4).join(" | "));
+    // The traps the sorter was built against, each by a sentence that has it.
+    const filed = (ru) => T.TRIGGERS.filter((x) => sight[x.id].some((s) => s.ru === ru)).map((x) => x.id);
+    const anyRu = (pred) => { for (const x of T.TRIGGERS) for (const s of sight[x.id]) if (pred(s)) return s; return null; };
+    const toksOf = (s) => s.ru.match(TOKEN) || [];
+    ok(!anyRu((s) => s.trigger === "za-acc" && toksOf(s).slice(Math.max(0, s.j - 2), s.j).some((x) => fold(x) === "что")),
+       "«что за» is never «за» meaning for");
+    const spanText = (s) => {
+      const spans = [...s.ru.matchAll(TOKEN)];
+      const [a, b] = s.j < s.k ? [s.j, s.k] : [s.k, s.j];
+      return s.ru.slice(spans[a].index + spans[a][0].length, spans[b].index);
+    };
+    ok(!anyRu((s) => s.j >= 0 && /[\d,]/.test(spanText(s))),
+       "no trigger reaches its noun across a figure or a comma («к 2012 го́ду»)");
+    ok(!anyRu((s) => s.trigger === "u" && !s.pronoun && s.k - s.j > 1
+               && ["него", "нее", "них", "меня", "тебя", "нас", "вас"].includes(fold(toksOf(s)[s.j + 1]))),
+       "«у него́ си́льные ру́ки»: a noun after a personal pronoun is not «у»'s");
+    const mne = sight.nado.find((s) => /^мне$/i.test(s.token));
+    ok(!!mne && sight.pomogat.some((s) => s.pronoun), "pronouns count: «мне на́до», «помоги́ мне»");
+    ok(!filed("Мне надо ей сказать.").includes("govorit") || sight.govorit.some((s) => s.ru === "Мне надо ей сказать." && fold(s.token) === "ей"),
+       "«мне» in «Мне на́до ей сказа́ть» is «на́до»'s, «ей» is «сказа́ть»'s");
+    // Siblings: «за» has two, a verb none.
+    ok(T.siblingsOf(T.triggerById("za-instr")).map((x) => x.id).join() === "za-acc", "«за» behind and «за» for are siblings");
+    ok(!T.siblingsOf(T.triggerById("pomogat")).length, "a verb trigger has no sibling");
+
+    /* Paths. A seeded draw, so a failure names the same session each run. */
+    let seed = 7;
+    const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const fresh = CC.caseSession({ sightings: sight, rng });
+    ok(fresh.length === CC.SESSION_PATHS, `a first session is ${CC.SESSION_PATHS} paths (${fresh.length})`);
+    ok(fresh.filter((p) => p.template === "example").length === fresh.length, "a trigger never met starts example first");
+    const newOnes = new Set(fresh.map((p) => p.trigger));
+    ok(newOnes.size === fresh.length, "a session never runs one trigger twice");
+    const badPath = [], sharedRu = new Set(), dupRu = [];
+    const sessions = [fresh];
+    // A learner who has met everything offered: the other templates appear.
+    const now = Date.now();
+    const met = Object.fromEntries(offered.map((x, k) => [x.id, S.review(null, 3, now - (k + 2) * 86400000)]));
+    for (let r = 0; r < 12; r++) sessions.push(CC.caseSession({ sightings: sight, cards: met, rng, now }));
+    sessions.push(CC.caseSession({ sightings: sight, cards: met, rng, now, focus: "za-instr", n: 4 }));
+    const templates = new Set();
+    for (const sess of sessions) {
+      const ruHere = new Set();
+      for (const p of sess) {
+        templates.add(p.template);
+        const want = CC.TEMPLATES[p.template];
+        if (!want || p.cards.length !== want.length) badPath.push(`${p.trigger}: ${p.cards.length} cards for ${p.template}`);
+        if (p.cards.length < 3 || p.cards.length > 4) badPath.push(`${p.trigger}: ${p.cards.length} cards`);
+        const words = p.cards.filter((c) => c.trigger === p.trigger).map((c) => c.s.i);
+        if (new Set(words).size < Math.min(words.length, new Set(sight[p.trigger].map((s) => s.i)).size)) badPath.push(`${p.trigger}: a word twice`);
+        for (const c of p.cards) {
+          if (!CC.FACES[c.face]) badPath.push(`${p.trigger}: face ${c.face}`);
+          if (c.s.trigger !== c.trigger) badPath.push(`${p.trigger}: a ${c.s.trigger} sentence on a ${c.trigger} card`);
+          if (ruHere.has(c.s.ru)) dupRu.push(c.s.ru);
+          ruHere.add(c.s.ru);
+        }
+        if (p.template === "contrast") {
+          const sib = T.triggerById(p.sibling);
+          if (!sib || sib.case === T.triggerById(p.trigger).case) badPath.push(`${p.trigger}: contrast with ${p.sibling}`);
+        }
+      }
+      // Mixed by case: two paths of one case run together only when the
+      // session holds nothing else to put between them.
+      for (let k = 1; k < sess.length; k++) {
+        const a = T.triggerById(sess[k - 1].trigger).case, b = T.triggerById(sess[k].trigger).case;
+        const others = sess.slice(k).some((p) => T.triggerById(p.trigger).case !== a);
+        if (a === b && others && sess !== sessions[sessions.length - 1]) badPath.push(`two ${a} paths running`);
+      }
+    }
+    ok(!badPath.length, "every path is its template, 3–4 cards, a different word each, the right trigger's sentences",
+       [...new Set(badPath)].slice(0, 5).join("; "));
+    ok(!dupRu.length, "no sentence twice in a session", dupRu.slice(0, 3).join(" | "));
+    ok(["example", "rule", "contrast", "review"].every((t) => templates.has(t)) || (templates.has("example") && templates.has("rule") && templates.has("contrast")),
+       `the orders vary: ${[...templates].join(", ")}`);
+    const focused = sessions[sessions.length - 1];
+    ok(focused.length === 4 && focused.every((p) => p.trigger === "za-instr"), "one trigger on its own: four paths, all on it");
+    // A session on one case holds only that case's triggers.
+    const dat = CC.caseSession({ sightings: sight, cards: met, rng, now, cases: ["dative"] });
+    ok(dat.length && dat.every((p) => T.triggerById(p.trigger).case === "dative"), "a session narrowed to the dative is the dative");
+    const verbs = CC.caseSession({ sightings: sight, cards: met, rng, now, kinds: ["verb"] });
+    ok(verbs.length && verbs.every((p) => T.triggerKind(T.triggerById(p.trigger)) === "verb"), "a session narrowed to verbs is verbs");
+    // Due first: the most forgotten trigger opens the session.
+    const old = { ...met, "k": S.review(null, 1, now - 40 * 86400000) };
+    const dueFirst = CC.caseSession({ sightings: sight, cards: old, rng, now, n: 3 });
+    ok(dueFirst.some((p) => p.trigger === "k"), "a trigger due comes into the session");
+    // Grading a path.
+    const p = fresh[0];
+    const right = p.cards.map((c) => (CC.FACES[c.face].check === "case" ? { right: true } : { grade: 3 }));
+    ok(CC.pathGrades(p, right)[p.trigger] === 3, "all right is Good");
+    ok(CC.pathGrades(p, p.cards.map((c) => (CC.FACES[c.face].check === "case" ? { right: true } : { grade: 4 })))[p.trigger] === 4,
+       "every production card Easy is Easy");
+    const oneWrong = right.slice(); oneWrong[0] = CC.FACES[p.cards[0].face].check === "case" ? { right: false } : { grade: 1 };
+    ok(CC.pathGrades(p, oneWrong)[p.trigger] === 1, "one wrong case is Again");
+    const hard = right.map((r) => (r.grade ? { grade: 2 } : r));
+    ok(CC.pathGrades(p, hard)[p.trigger] === 2, "a Hard is Hard");
+    const graded = CC.gradeTriggers({}, { [p.trigger]: 3 }, now);
+    ok(graded[p.trigger] && graded[p.trigger].reps === 1, "a graded trigger gets its card");
+    ok(CC.keepRecent(["a", "b"], ["b", "c"]).join() === "a,b,c", "recent keeps the newest last, once");
+    // The recent list is honoured: a session drawn after one does not repeat it.
+    const shown = fresh.flatMap((x) => x.cards.map((c) => c.s.ru));
+    const next = CC.caseSession({ sightings: sight, rng, recent: shown });
+    const again = next.flatMap((x) => x.cards.map((c) => c.s.ru)).filter((ru) => shown.includes(ru));
+    ok(!again.length, "the next session draws sentences not just shown", again.slice(0, 3).join(" | "));
+  }
   ok(!strangers.length, "a form question only asks about a word the route has taught", strangers.slice(0, 6).join(", "));
   // A lesson with a verb to conjugate starts its run on it (a lesson of nouns
   // has nothing for a present-tense point and starts on the unit's verbs).

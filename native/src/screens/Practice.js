@@ -45,6 +45,7 @@ const ACTIVITIES = [
 const GRAMMAR = [
   { id: "rules", testID: "open-grammar", name: "The rules", kind: "Reference", route: "Grammar" },
   { id: "cases", testID: "drill-cases", name: "Cases", kind: "Lessons and drills", route: "CaseHub" },
+  { id: "casecards", testID: "drill-casecards", name: "Case cards", kind: "Flashcards", route: "CaseCards" },
   { id: "formcards", testID: "drill-formcards", name: "Form cards", kind: "Flashcards", route: "FormCards" },
 ].concat(DRILL_TYPES.filter((d) => d.id !== "cases").map((d) => (
   { id: d.icon, testID: `drill-${d.id}`, name: d.name, kind: "Drill", route: "Drill", params: { type: d.id } })));

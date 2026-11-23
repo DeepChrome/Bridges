@@ -51,6 +51,11 @@ export function CaseHub({ navigation }) {
           <Thumb id="cases" tone="good" />
           <RowText title="All the forms" />
         </Row>
+        {/* The words that decide the case, as flashcards (flows/CaseCards.js). */}
+        <Row testID="case-cards" onPress={() => navigation.navigate("CaseCards")}>
+          <Thumb id="casecards" tone="good" />
+          <RowText title="Case cards" />
+        </Row>
       </List>
     </Screen>
   );

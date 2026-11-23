@@ -44,6 +44,7 @@ export const RUNS = [
   "VideoQuiz",    // the episode's five questions
   "ListCards",    // a lesson's or a video's words as one flashcard round
   "FormCards",    // flashcards of forms, graded by the learner (flows/FormCards.js)
+  "CaseCardsRun", // paths of cards on the words that decide a case (flows/CaseCards.js)
 ];
 
 /* The profile and what opens from it. The avatar in every header pushes these
@@ -80,7 +81,7 @@ export function profileDepth(state) {
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson", "Summary",                 // Learn
   "Drills", "QuizSetup", "SceneList", "Drive", "Sounds", "Grammar", "Endings",  // Practice
-  "CaseHub", "CaseModule",
+  "CaseHub", "CaseModule", "CaseCards",
   "Episodes", "VideoHistory",                          // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search

@@ -15,6 +15,7 @@ import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
 import { buildupDrill, worthBuilding } from "./buildup.js";
 import { CASES, caseById, AS_VERBS, PREPOSITIONS, SET_PHRASES, TIME_NOUNS } from "./cases.js";
+import { TRIGGERS, TIME_WORDS } from "./triggers.js";
 import { irregularities, stemChange, conjugation } from "./facts.js";
 import { cardFor, weakestSkill, skillOfKind } from "./scheduler.js";
 
@@ -1431,56 +1432,251 @@ export function makeQuestions(env) {
     }
     return null;
   }
-  function caseSightings() {
-    if (caseIndex) return caseIndex;
-    caseIndex = {};
-    for (const c of CASES) caseIndex[c.id] = [];
-    // Every curriculum word's examples, and the speaking and listening pools —
-    // the sentences with recordings, which a lesson already plays.
+  /* The sentences the case modules and the case cards read: every curriculum
+     word's examples, and the speaking and listening pools — the sentences
+     with recordings, which a lesson already plays. Three to twelve words. */
+  /* `wide` reads every studied word's examples, not the curriculum's alone:
+     the case cards want many sentences per trigger, and a verb like
+     «помога́ть» meets its noun in the examples of the noun, not its own. */
+  const caseSentenceLists = {};
+  function caseSentences(wide) {
+    const key = wide ? "wide" : "course";
+    if (caseSentenceLists[key]) return caseSentenceLists[key];
     const sentences = new Map();
-    for (const i of unique(UN.flatMap((u) => u.w))) {
+    const words = wide ? L.map((_, i) => i) : unique(UN.flatMap((u) => u.w));
+    for (const i of words) {
       for (const ex of (L[i] && L[i].x) || []) if (ex && ex.ru && !sentences.has(ex.ru)) sentences.set(ex.ru, ex);
     }
     for (const row of (SPEECH && SPEECH.rows) || []) {
       if (row && row[0] && row[1] && !sentences.has(row[0])) sentences.set(row[0], { ru: row[0], en: row[1] });
     }
-    const byRow = new Map(CASES.map((c) => [c.row, c]));
+    const list = caseSentenceLists[key] = [];
     for (const ex of sentences.values()) {
       const tokens = ex.ru.match(TOKEN) || [];
       if (tokens.length < 3 || tokens.length > 12) continue;
+      // Easiest first: a word outside the commonest costs three plain ones.
+      const rare = tokens.filter((x) => { const h = IX[fold(x)]; return !h || h[0] >= CASE_COMMON; }).length;
+      list.push({ ex, tokens, ease: tokens.length + 3 * rare });
+    }
+    return list;
+  }
+  /* The noun at `k` and every case its form could be in its own table: the
+     lemma, the table, and per case (the row's name) the first cell holding
+     the form. A capital mid-sentence is a name («с То́мом» is Tom, not «том»,
+     a volume — the learner agents, 2026-10-08), and the same noun twice is an
+     idiom («Сериа́л сериа́лу рознь»), not a use. `row` is set when there is
+     only one case it could be. */
+  function nounCaseAt(tokens, k, pronouns) {
+    const tok = tokens[k];
+    if (k > 0 && tok[0] !== tok[0].toLowerCase()) return null;
+    const ids = IX[fold(tok)];
+    const i = ids && ids[0];
+    const w = i !== undefined ? L[i] : null;
+    if (!w) return null;
+    if (w.p !== "noun") {
+      if (!pronouns || w.p !== "pronoun" || !CASE_PRONOUNS.has(fold(w.b))) return null;
+      // «его́ кни́га»: his, not him — a possessive is followed by what it owns.
+      if (POSSESSIVE_TOO.has(fold(tok)) && k + 1 < tokens.length) {
+        const next = IX[fold(tokens[k + 1])];
+        const p = next && L[next[0]] ? L[next[0]].p : null;
+        if (p === "noun" || p === "adjective" || p === "pronoun") return null;
+      }
+    }
+    if (k > 0 && (IX[fold(tokens[k - 1])] || [])[0] === i) return null;
+    const t = tableTitled(w, /Declension/);
+    if (!t) return null;
+    const hits = new Map();
+    t.rows.forEach((r, ri) => cellsOf(r).forEach((cell, ci) => {
+      if (hits.has(r[0]) || !(cell || []).some((f) => fold(f) === fold(tok))) return;
+      hits.set(r[0], { row: r[0], at: [ri, ci + 1], form: cell, plural: /plural/i.test(t.columns[ci + 1] || "") });
+    }));
+    if (!hits.size) return null;
+    const only = hits.size === 1 ? [...hits.values()][0] : null;
+    return { tok, i, w, t, hits, row: only && only.row, at: only && only.at, form: only && only.form,
+             plural: !!(only && only.plural) };
+  }
+  function caseSightings() {
+    if (caseIndex) return caseIndex;
+    caseIndex = {};
+    for (const c of CASES) caseIndex[c.id] = [];
+    const byRow = new Map(CASES.map((c) => [c.row, c]));
+    for (const { ex, tokens, ease } of caseSentences()) {
       tokens.forEach((tok, k) => {
-        // A capital mid-sentence is a name («с То́мом» is Tom, not «том», a
-        // volume — the learner agents, 2026-10-08).
-        if (k > 0 && tok[0] !== tok[0].toLowerCase()) return;
-        const ids = IX[fold(tok)];
-        const i = ids && ids[0];
-        const w = i !== undefined ? L[i] : null;
-        if (!w || w.p !== "noun") return;
-        // «Сериа́л сериа́лу рознь»: the same noun twice is an idiom, not a use.
-        if (k > 0 && (IX[fold(tokens[k - 1])] || [])[0] === i) return;
-        const t = tableTitled(w, /Declension/);
-        if (!t) return;
-        const rows = new Set(), at = [];
-        t.rows.forEach((r, ri) => cellsOf(r).forEach((cell, ci) => {
-          if ((cell || []).some((f) => fold(f) === fold(tok))) { rows.add(r[0]); at.push([ri, ci + 1]); }
-        }));
-        if (rows.size !== 1) return;
-        const c = byRow.get([...rows][0]);
+        const n = nounCaseAt(tokens, k);
+        if (!n || !n.row) return;
+        const c = byRow.get(n.row);
         if (!c) return;
         const u = useOf(c, tokens, k);
         if (!u) return;
         // «в феврале́» is when, not where.
-        if ((u.id === "where" || u.id === "to") && TIME_SET.has(fold(w.b))) return;
-        const [ri, ci] = at[0];
-        // Easiest first: a word outside the commonest costs three plain ones.
-        const rare = tokens.filter((x) => { const h = IX[fold(x)]; return !h || h[0] >= CASE_COMMON; }).length;
-        caseIndex[c.id].push({ ru: ex.ru, en: ex.en, token: tok, i, use: u.id, table: t, at: [ri, ci],
-                               form: cellsOf(t.rows[ri])[ci - 1], plural: /plural/i.test(t.columns[ci] || ""),
-                               ease: tokens.length + 3 * rare });
+        if ((u.id === "where" || u.id === "to") && TIME_SET.has(fold(n.w.b))) return;
+        caseIndex[c.id].push({ ru: ex.ru, en: ex.en, token: tok, i: n.i, use: u.id, table: n.t, at: n.at,
+                               form: n.form, plural: n.plural, ease });
       });
     }
     return caseIndex;
   }
+
+  /* ------------------------------------------------------------ case cards */
+
+  /* Real sentences sorted under the triggers of core/triggers.js — the word in
+     front of a noun that decides its case. The noun's form settles the case
+     (nounCaseAt, the same rule as the modules), so «за» before «столо́м» is
+     the instrumental trigger and before «пода́рок»… nothing, since «пода́рок»
+     is nominative or accusative and is left out. The governor is the word
+     before the noun, passing over what describes it (adjectives, possessives,
+     numbers that are not themselves triggers), as the modules do. */
+  let triggerIndex = null;
+  const TRIGGER_WORDS = new Set(TRIGGERS.flatMap((x) => x.words || []));
+  /* The personal pronouns are case forms a learner needs as much as any noun
+     — «у меня́», «с ним», «помоги́ мне» — and the verbs that take the dative
+     mostly take a pronoun. Folded lemmas. «его́», «её», «их» are also his,
+     her, their, and are left out where a noun follows. */
+  const CASE_PRONOUNS = new Set(["я", "ты", "он", "она", "оно", "мы", "вы", "они", "себя", "кто"]);
+  const POSSESSIVE_TOO = new Set(["его", "ее", "их"]);
+  const WHEN_TIME = new Set(TIME_WORDS);
+  /* The governor: walk back over what describes the noun — adjectives,
+     possessives and demonstratives, numbers that are not triggers — and stop
+     at anything else. A personal pronoun is never passed over («У него́
+     си́льные ру́ки»: «ру́ки» is not «у»'s), and nothing is passed over in
+     front of a pronoun, which takes no describing word («За что его́…»).
+     The text between the two must be one clause with no figures in it: «к
+     2012 го́ду» and «Скажешь, когда мне начина́ть» are not what they look
+     like once the digits and the comma are gone (`gap`). */
+  function governorAt(tokens, k, gap, pronoun) {
+    let j = k - 1;
+    while (j >= 0 && j >= k - 3) {
+      const f = fold(tokens[j]);
+      if (PREP_SET.has(f) || TRIGGER_WORDS.has(f) || pronoun) break;
+      const ids = IX[f];
+      const w = ids && L[ids[0]];
+      const p = w ? w.p : null;
+      if (!p || !SKIP_BEFORE.has(p)) break;
+      if (CASE_PRONOUNS.has(fold(w.b)) && !POSSESSIVE_TOO.has(f)) break;
+      j--;
+    }
+    return j >= 0 && !gap(j, k) ? -2 : j;
+  }
+  /* A verb (or a word like «на́до») of case `c` near the noun, nearest first,
+     the word after the noun before the word before it, when no preposition
+     stands in front:
+     «Я дал кни́гу бра́ту» — the dative is «дать»'s though «кни́гу» comes
+     between — «Ма́ме нра́вится фильм», «Мне на́до». Only for the dative and
+     the instrumental, which with no preposition are almost always a verb's;
+     a genitive with no preposition is far more often a noun's («кни́га
+     бра́та»). Never across a comma. */
+  const VERB_REACH = 4;
+  function verbTriggerNear(tokens, k, c, gap) {
+    if (c.id !== "dative" && c.id !== "instrumental") return null;
+    for (let d = 1; d <= VERB_REACH; d++) {
+      for (const j of [k + d, k - d]) {
+        if (j < 0 || j >= tokens.length || !gap(Math.min(j, k), Math.max(j, k))) continue;
+        const f = fold(tokens[j]);
+        const pred = TRIGGERS.find((y) => y.case === c.id && (y.preds || []).includes(f));
+        if (pred) return { x: pred, j };
+        const ids = IX[f];
+        const g = ids && L[ids[0]];
+        if (!g || g.p !== "verb") continue;
+        const lemma = fold(g.b);
+        const x = TRIGGERS.find((y) => y.case === c.id && (y.verbs || []).includes(lemma));
+        if (x) return { x, j };
+      }
+    }
+    return null;
+  }
+  /* Which trigger holds the noun, and in which case. A form can be more than
+     one case («ма́ме» is dative and prepositional, «парк» nominative and
+     accusative), and what stands in front of it settles it: a preposition
+     takes only the cases its triggers name, and with no preposition the
+     prepositional is impossible. Where the nominative is still possible the
+     noun could be a subject, and it is left out. */
+  const caseOfRow = (row) => CASES.find((x) => x.row === row) || null;
+  const rowOfCase = (id) => (caseById(id) || {}).row;
+  function triggerOf(tokens, k, n, gap) {
+    const j = governorAt(tokens, k, gap, n.w.p === "pronoun");
+    if (j === -2) return null;
+    const f = j >= 0 ? fold(tokens[j]) : "";
+    if (TRIGGER_WORDS.has(f)) {
+      // «Что э́то за суп?» is "what kind of", not «за» meaning for.
+      if (f === "за" && tokens.slice(Math.max(0, j - 2), j).some((x) => fold(x) === "что")) return null;
+      const time = WHEN_TIME.has(fold(n.w.b)) ? "time" : "place";
+      const found = TRIGGERS.filter((x) => (x.words || []).includes(f) && n.hits.has(rowOfCase(x.case))
+        && (!x.when || x.when === time));
+      if (found.length !== 1) return null;
+      const x = found[0];
+      const cell = n.hits.get(rowOfCase(x.case));
+      // Two to four count a singular, five and up a plural.
+      if (x.id === "two-four" && cell.plural) return null;
+      if (x.id === "five-up" && !cell.plural) return null;
+      // A set phrase is not the preposition's ordinary meaning (cases.js).
+      const around = " " + tokens.slice(j, k + 2).map(fold).join(" ") + " ";
+      if (SET_PHRASES.some((p) => around.includes(" " + p + " "))) return null;
+      return { x, j, cell };
+    }
+    if (PREP_SET.has(f)) return null;
+    if (n.hits.has("Nominative")) return null;
+    const rows = [...n.hits.keys()].filter((r) => r !== "Prepositional");
+    if (rows.length === 1) {
+      const c = caseOfRow(rows[0]);
+      const hit = c && triggerAfter(tokens, k, j, f, c, gap);
+      return hit ? { ...hit, cell: n.hits.get(rows[0]) } : null;
+    }
+    /* Still two cases («ей» is dative and instrumental): a verb that names one
+       of them settles it — «помога́ю ей» — and nothing else does. */
+    const named = rows.map((r) => {
+      const c = caseOfRow(r);
+      if (!c) return null;
+      const g = j >= 0 && IX[f] && L[IX[f][0]];
+      const x = g && g.p === "verb" && TRIGGERS.find((y) => y.case === c.id && (y.verbs || []).includes(fold(g.b)));
+      const hit = x ? { x, j } : verbTriggerNear(tokens, k, c, gap);
+      return hit ? { ...hit, cell: n.hits.get(r) } : null;
+    }).filter(Boolean);
+    return named.length === 1 ? named[0] : null;
+  }
+  function triggerAfter(tokens, k, j, f, c, gap) {
+    if (j < 0) return verbTriggerNear(tokens, k, c, gap);
+    const ids = IX[f];
+    const g = ids && L[ids[0]];
+    if (g && g.p === "verb") {
+      const lemma = fold(g.b);
+      const named = TRIGGERS.find((x) => x.case === c.id && (x.verbs || []).includes(lemma));
+      if (named) return { x: named, j };
+      const plain = TRIGGERS.find((x) => x.case === c.id && x.gov === "verb");
+      if (plain) return { x: plain, j };
+    }
+    if (g && g.p === "noun") {
+      const x = TRIGGERS.find((y) => y.case === c.id && y.gov === "noun");
+      if (x) return { x, j };
+    }
+    return verbTriggerNear(tokens, k, c, gap);
+  }
+  // Between two words: one clause, no figures.
+  const GAP_BREAK = /[\d,;:!?.()«»"—–]/;
+  function triggerSightings() {
+    if (triggerIndex) return triggerIndex;
+    triggerIndex = {};
+    for (const x of TRIGGERS) triggerIndex[x.id] = [];
+    for (const { ex, tokens, ease } of caseSentences(true)) {
+      const spans = [...ex.ru.matchAll(TOKEN)].map((m) => [m.index, m.index + m[0].length]);
+      const gap = (a, b) => !GAP_BREAK.test(ex.ru.slice(spans[a][1], spans[b][0]));
+      tokens.forEach((tok, k) => {
+        const n = nounCaseAt(tokens, k, true);
+        if (!n) return;
+        const hit = triggerOf(tokens, k, n, gap);
+        if (!hit) return;
+        // The spelling the sentence used, stressed as the table has it: «него́»
+        // after a preposition, «его́» after a verb.
+        const said = hit.cell.form.find((x) => fold(x) === fold(tok)) || hit.cell.form[0];
+        triggerIndex[hit.x.id].push({ ru: ex.ru, en: ex.en, token: tok, i: n.i, table: n.t, at: hit.cell.at,
+                                      form: hit.cell.form, said, plural: hit.cell.plural, ease,
+                                      trigger: hit.x.id, gov: tokens[hit.j], k, j: hit.j,
+                                      pronoun: n.w.p === "pronoun" });
+      });
+    }
+    return triggerIndex;
+  }
+  /* How many sentences each trigger found, for the hub and the tests. */
+  const triggerCounts = () => Object.fromEntries(TRIGGERS.map((x) => [x.id, triggerSightings()[x.id].length]));
 
   /* The easier part of a use's sentences, shuffled: the easiest `share`, but
      never fewer than `min`, so a drill still ranges widely and a lesson opens
@@ -3771,6 +3967,6 @@ export function makeQuestions(env) {
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
     drillsIntroduced, withTaught, caseLesson, caseDrill, caseCounts, casePoolSize, metBy,
-    wordDrills, wordDrill,
+    wordDrills, wordDrill, triggerSightings, triggerCounts,
   };
 }

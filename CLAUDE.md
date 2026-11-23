@@ -8043,6 +8043,69 @@ Everything in the repo's gift is done; what is his is listed at the foot of
   frame rendered); the transcript under it is the picture. Retake the
   player shot on a phone.
 
+## 30de. Case cards: the word that decides the case (2026-11-23)
+
+The owner: *"sequenced flashcards that focus on triggers and each one is a
+path of 3-4 cards… when you identify the za trigger's a case, you have many
+many many words and sentences that are eligible there. Sometimes it's
+specific verbs that are triggers."* `docs/case-cards.md` is the framework and
+the research behind it (structured input before output, both rule-first and
+example-first, interleaving across triggers). Practice → Grammar → **Case
+cards**, and a row on the Cases hub.
+
+- **A trigger is one word in one meaning** (`core/triggers.js`, 52 of them):
+  «за» behind (instrumental) and «за» for (accusative) are two triggers and
+  siblings; a verb is one («помога́ть»), so is «на́до» (`preds`, the dative
+  experiencer), a counting word, and a verb's plain object (`gov`).
+  `TEACH_ORDER` is the order new ones are met; `checkTriggers` holds the
+  shape, and core.test checks every trigger word against the lexicon. The
+  only Russian in it is the trigger words: every card sentence is attested.
+- **The noun's table settles the case, and the trigger settles the
+  doubt** (`triggerSightings` in core/questions.js). `nounCaseAt` now
+  returns every case a form could be: «ма́ме» is dative or prepositional,
+  so after «к» it is dative, after «о» prepositional, with no preposition
+  only dative; where the nominative is still possible the noun could be a
+  subject and is left out. The personal pronouns count (`CASE_PRONOUNS`) —
+  the verb triggers take little else — except «его́», «её», «их» before a
+  noun. Dative and instrumental verbs govern across the clause
+  (`verbTriggerNear`, the word after the noun first); **nothing crosses a
+  comma or a figure** (`GAP_BREAK`: «к 2012 го́ду», «Скажешь, когда мне
+  начинать»), a personal pronoun is never walked over («У него́ си́льные
+  ру́ки»), and «что за» is not «за». The case modules' own `caseSightings`
+  still keeps a form only when it is one case — the shared reader changed,
+  their behaviour did not (their tests are unchanged and pass).
+- **Wider sentences than the modules** (`caseSentences(true)`): every
+  studied word's examples, not the curriculum's alone — «помога́ть» meets its
+  noun in the noun's examples. 44 of 52 triggers clear
+  `PATH_MIN_SENTENCES` (8); `node tools/sample_triggers.mjs [id|--counts]`
+  prints the counts and the sentences with the noun and trigger marked.
+  **Read it after touching the catalogue or the sorter**: every mis-filing
+  found while building this came from reading it, not from a count.
+- **A path is 3–4 cards on one trigger, a different word each**
+  (`core/casecards.js`): Notice (a real sentence, the noun marked: which
+  case?) and Trigger (the trigger and its meaning: which case?) are checked
+  by a tap on the five cases, always in teaching order; Form (trigger +
+  dictionary form) and Use (the sentence with a gap) are flashcards graded
+  by the learner. Templates: example first for a trigger never met, rule
+  first, contrast with a met sibling, a three-card review once held well.
+  A session is five paths (options: 3, 5, 8), due triggers first, at most
+  two new unless nothing else fills it, interleaved so two paths of one
+  case do not run together. **A front is never word-linked** — a word's
+  sheet names its form, which is the answer; answered, the sentence is.
+- **What is remembered**: `st.caseCards` (a progress key: syncs, cleared by
+  a reset) holds one FSRS card per trigger, graded once per path
+  (`pathGrades`: a wrong case or Again is Again, a Hard Hard, all Easy
+  Easy, else Good; a contrast grades both siblings from their own cards). A
+  production card also moves the noun's "Cases & forms" score at once
+  (§30by), never its meaning card. `st.drills.casecards.recent` keeps the
+  last 200 sentences shown so the next sessions draw others first.
+  `st.drillPrefs.casecards` holds the options (cases, trigger kinds, order,
+  paths a session).
+- **Thin today, and why**: the rare prepositions (кроме, вокруг, про) and
+  half the genitive verbs (достигать, избегать, требовать) have fewer than
+  eight sentences in the corpus and are not offered. They come in by
+  themselves as sentences are added; nothing is written to fill them.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -8075,6 +8138,7 @@ node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner 
 node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches (§30aj)
 node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)
 node tools/audit_answers.mjs   # no typed cue that marks a right answer wrong (§30ch)
+node tools/sample_triggers.mjs --counts   # case cards: sentences per trigger; drop --counts to read them (§30de)
 node tools/yt_captions.mjs     # after touching youtube.js: the real player obeys the subtitle switch (§30cx)
 node tools/patch_expo_audio.mjs --check   # expo-audio hands media keys to the app, and is built from source (§30cy)
 node tools/design.mjs          # scale, rhythm and depth: the arithmetic of looking designed (§30ax)

@@ -68,6 +68,7 @@ import { VocabFlow, QuizFlow } from "./src/flows/Lesson";
 import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow, WordDrillFlow } from "./src/flows/Drills";
 import { FormCardsFlow } from "./src/flows/FormCards";
 import { CaseHub, CaseModule, CaseFlow } from "./src/flows/Cases";
+import { CaseCards, CaseCardsRun } from "./src/flows/CaseCards";
 import { ListeningFlow, ScenesList } from "./src/flows/Listening";
 import { QuizSetup, CustomQuizFlow, RecapFlow } from "./src/flows/Quiz";
 import { PlacementFlow, SectionFlow, FinalFlow } from "./src/flows/Tests";
@@ -323,6 +324,10 @@ function PracticeStack() {
       <Stack.Screen name="CaseRun" component={CaseFlow} options={titled("Cases")} />
       {/* Flashcards of forms and conjugations (flows/FormCards.js, 2026-11-12). */}
       <Stack.Screen name="FormCards" component={FormCardsFlow} options={titled("Form cards")} />
+      {/* Paths of flashcards on the words that decide a case (docs/case-cards.md,
+          2026-11-23): the triggers by case, and a session of paths. */}
+      <Stack.Screen name="CaseCards" component={CaseCards} options={titled("Case cards")} />
+      <Stack.Screen name="CaseCardsRun" component={CaseCardsRun} options={titled("Case cards")} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

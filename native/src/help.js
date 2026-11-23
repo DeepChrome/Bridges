@@ -71,6 +71,20 @@ export const HELP = {
     ["Again · Hard · Good · Easy", "Your own grade; moves Cases & forms only"],
     ["Options", "In the + menu: which drills, which words"],
   ] },
+  CaseCards: { title: "Case cards", lines: [
+    ["A trigger", "A word that decides the case: «без», «помога́ть»"],
+    ["Ring", "How well that trigger is held"],
+    ["Tap a trigger", "Practice that one alone"],
+    ["Start", "A session of paths, mixed by case"],
+    ["Options", "In the + menu: cases, kinds, order, length"],
+  ] },
+  CaseCardsRun: { title: "Case cards", lines: [
+    ["A path", "Three or four cards on one trigger"],
+    ["Which case?", "Tap one of the five; checked at once"],
+    ["Show", "The form, then your own grade"],
+    ["Again · Hard · Good · Easy", "Moves the word's Cases & forms score"],
+    ["End of a path", "Grades the trigger once"],
+  ] },
   Drill: { title: "A drill", lines: [
     ["Options", "In the + menu: what to ask, words, answer style"],
     ["a_", "The answer a piece at a time; costs the grade"],

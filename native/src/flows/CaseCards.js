@@ -102,7 +102,10 @@ function SentenceMarks({ s, gap, size = T.title, testID }) {
 function phraseOf(s) {
   const spans = [...s.ru.matchAll(TOKEN)];
   const [a, b] = s.j < s.k ? [s.j, s.k] : [s.k, s.j];
-  return s.ru.slice(spans[a].index, spans[b].index + spans[b][0].length);
+  const phrase = s.ru.slice(spans[a].index, spans[b].index + spans[b][0].length);
+  // Lifted from the start of a sentence it keeps no capital: «в углу́», not
+  // «В углу́» (a name mid-sentence is never a card's noun).
+  return a === 0 ? phrase[0].toLowerCase() + phrase.slice(1) : phrase;
 }
 
 /* ------------------------------------------------------------- one card */
@@ -133,11 +136,14 @@ function CaseChoices({ answer, picked, onPick }) {
 
 /* What the trigger is, under a case answer and on every back: the trigger,
    its meaning, the case and the question it answers. */
-function TriggerLine({ x, s, right }) {
+/* The case is always drawn as the answer it is — green — whatever was picked:
+   the red is on the wrong button already, and a red pill naming the right case
+   would read as "this is wrong". */
+function TriggerLine({ x, s }) {
   const t = useTheme();
   return (
     <View testID="casecard-why" style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-      <Pill tone={right === false ? "bad" : right === true ? "good" : "brand"} testID="casecard-case">
+      <Pill tone="good" testID="casecard-case">
         {caseName(x.case)}
       </Pill>
       <Text style={{ color: t.ink, fontWeight: "700", fontSize: T.body }}>{governorTitle(x, s)}</Text>
@@ -221,7 +227,7 @@ function CaseCard({ card, state, onPick, onShow }) {
       {check === "self" ? (
         <Text testID="casecard-answer" style={{ color: t.brandInk, fontSize: T.display, fontWeight: "700" }}>{s.said}</Text>
       ) : null}
-      <TriggerLine x={x} s={s} right={check === "case" ? state.picked === x.case : undefined} />
+      <TriggerLine x={x} s={s} />
       {card.face === "notice" ? null : (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 }}>
           <View style={{ flex: 1 }}>
@@ -478,13 +484,17 @@ export function CaseCardsRun({ navigation, route }) {
   ) : null;
 
   return (
-    <Screen footer={footer}>
+    <Screen fill footer={footer}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <RowText testID="casecards-progress" title={`Path ${p + 1} of ${paths.length}`} bold={false} />
         <PathDots n={path.cards.length} at={c} />
       </View>
-      <CaseCard key={`${seed}:${p}:${c}`} card={card} state={state} onPick={pick}
-                onShow={() => setState({ ...state, shown: true })} />
+      {/* The card in the middle of what is left, as Study's is (§30dc); a
+          long back grows past the screen and scrolls. */}
+      <View testID="casecard-well" style={{ flexGrow: 1, justifyContent: "center", paddingBottom: 24 }}>
+        <CaseCard key={`${seed}:${p}:${c}`} card={card} state={state} onPick={pick}
+                  onShow={() => setState({ ...state, shown: true })} />
+      </View>
     </Screen>
   );
 }

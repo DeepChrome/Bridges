@@ -8050,8 +8050,11 @@ path of 3-4 cards… when you identify the za trigger's a case, you have many
 many many words and sentences that are eligible there. Sometimes it's
 specific verbs that are triggers."* `docs/case-cards.md` is the framework and
 the research behind it (structured input before output, both rule-first and
-example-first, interleaving across triggers). Practice → Grammar → **Case
-cards**, and a row on the Cases hub.
+example-first, interleaving across triggers). **Study's Cases tab**
+(`SegmentTabs` Vocabulary · Cases at the top of the Study tab's own screen;
+both tabs stay mounted and the one on show owns the header's options row —
+`useHeaderOptions`' fourth argument); Practice's Case cards tile and the
+Cases hub row open it with `params.tab`.
 
 - **A trigger is one word in one meaning** (`core/triggers.js`, 52 of them):
   «за» behind (instrumental) and «за» for (accusative) are two triggers and
@@ -8086,12 +8089,16 @@ cards**, and a row on the Cases hub.
   case?) and Trigger (the trigger and its meaning: which case?) are checked
   by a tap on the five cases, always in teaching order; Form (trigger +
   dictionary form) and Use (the sentence with a gap) are flashcards graded
-  by the learner. Templates: example first for a trigger never met, rule
-  first, contrast with a met sibling, a three-card review once held well.
-  A session is five paths (options: 3, 5, 8), due triggers first, at most
-  two new unless nothing else fills it, interleaved so two paths of one
-  case do not run together. **A front is never word-linked** — a word's
-  sheet names its form, which is the answer; answered, the sentence is.
+  by the learner. **The faces are composed, not templated**
+  (`composeFaces`): 3 cards, 4 while a trigger is weak; a new trigger opens
+  on Notice or Trigger, a met one on any face; at least one checked and one
+  said; no face twice running; a contrast puts the sibling's same face
+  second. **It is a stack**: four paths dealt at a time (`SESSION_PATHS`),
+  the next four when they run out, until Finish; nothing on screen names a
+  path. `lately` (the triggers met this sitting) sends them to the back of
+  the next deal. Due first, new in teaching order (two, then one a deal),
+  interleaved by case. **A front is never word-linked** — a word's sheet
+  names its form, which is the answer; answered, the sentence is.
 - **What is remembered**: `st.caseCards` (a progress key: syncs, cleared by
   a reset) holds one FSRS card per trigger, graded once per path
   (`pathGrades`: a wrong case or Again is Again, a Hard Hard, all Easy

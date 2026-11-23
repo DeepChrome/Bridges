@@ -51,8 +51,8 @@ export function CaseHub({ navigation }) {
           <Thumb id="cases" tone="good" />
           <RowText title="All the forms" />
         </Row>
-        {/* The words that decide the case, as flashcards (flows/CaseCards.js). */}
-        <Row testID="case-cards" onPress={() => navigation.navigate("CaseCards")}>
+        {/* The words that decide the case, as flashcards: Study's Cases tab. */}
+        <Row testID="case-cards" onPress={() => navigation.navigate("Study", { screen: "Cards", params: { tab: "cases" } })}>
           <Thumb id="casecards" tone="good" />
           <RowText title="Case cards" />
         </Row>

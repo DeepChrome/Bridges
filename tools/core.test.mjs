@@ -2556,8 +2556,28 @@ group("a chapter's grammar run");
     let seed = 7;
     const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     const fresh = CC.caseSession({ sightings: sight, rng });
-    ok(fresh.length === CC.SESSION_PATHS, `a first session is ${CC.SESSION_PATHS} paths (${fresh.length})`);
-    ok(fresh.filter((p) => p.template === "example").length === fresh.length, "a trigger never met starts example first");
+    ok(fresh.length === CC.SESSION_PATHS, `a first deal is ${CC.SESSION_PATHS} paths (${fresh.length})`);
+    ok(fresh.every((p) => ["notice", "trigger"].includes(p.faces[0]) && p.cards.length === 4),
+       "a trigger never met opens on something to look at, four cards");
+    // The composer's own rules, over many draws.
+    const facesBad = [], openers = new Set();
+    for (let r = 0; r < 400; r++) {
+      const args = { isNew: r % 3 === 0, strong: r % 5 === 0 && r % 3 !== 0, sibling: r % 2 === 0, rng };
+      const f = CC.composeFaces(args);
+      const plain = f.map((x) => x.replace(":sib", ""));
+      if (!args.isNew) openers.add(plain[0]);
+      if (f.length < 3 || f.length > 4) facesBad.push(`${f.length} cards`);
+      if (args.strong && f.length !== 3) facesBad.push("a strong trigger takes four");
+      if (args.isNew && !["notice", "trigger"].includes(plain[0])) facesBad.push(`new opens on ${plain[0]}`);
+      if (!plain.some((x) => x === "notice" || x === "trigger")) facesBad.push(`nothing checked: ${f}`);
+      if (!plain.some((x) => x === "form" || x === "use")) facesBad.push(`nothing said: ${f}`);
+      for (let k = 1; k < f.length; k++) if (f[k] === f[k - 1]) facesBad.push(`twice running: ${f}`);
+      if (f.some((x) => x.endsWith(":sib")) && (args.isNew || !args.sibling)) facesBad.push(`a contrast without a met sibling: ${f}`);
+    }
+    ok(!facesBad.length, "a path mixes its cards: 3–4, one checked and one said, nothing twice running", facesBad.slice(0, 4).join("; "));
+    ok(["notice", "trigger", "use"].every((f) => openers.has(f)), `a met trigger opens on any card, the sentence included: ${[...openers]}`);
+    ok(CC.composeFaces({ isNew: false, order: "example", rng })[0] === "notice"
+       && CC.composeFaces({ isNew: false, order: "rule", rng })[0] === "trigger", "the order option sets the opener");
     const newOnes = new Set(fresh.map((p) => p.trigger));
     ok(newOnes.size === fresh.length, "a session never runs one trigger twice");
     const badPath = [], sharedRu = new Set(), dupRu = [];
@@ -2567,13 +2587,13 @@ group("a chapter's grammar run");
     const met = Object.fromEntries(offered.map((x, k) => [x.id, S.review(null, 3, now - (k + 2) * 86400000)]));
     for (let r = 0; r < 12; r++) sessions.push(CC.caseSession({ sightings: sight, cards: met, rng, now }));
     sessions.push(CC.caseSession({ sightings: sight, cards: met, rng, now, focus: "za-instr", n: 4 }));
-    const templates = new Set();
+    const shapes = new Set();
+    let contrasts = 0;
     for (const sess of sessions) {
       const ruHere = new Set();
       for (const p of sess) {
-        templates.add(p.template);
-        const want = CC.TEMPLATES[p.template];
-        if (!want || p.cards.length !== want.length) badPath.push(`${p.trigger}: ${p.cards.length} cards for ${p.template}`);
+        shapes.add(p.faces.join(","));
+        if (p.cards.length !== p.faces.length) badPath.push(`${p.trigger}: ${p.cards.length} cards for ${p.faces}`);
         if (p.cards.length < 3 || p.cards.length > 4) badPath.push(`${p.trigger}: ${p.cards.length} cards`);
         const words = p.cards.filter((c) => c.trigger === p.trigger).map((c) => c.s.i);
         if (new Set(words).size < Math.min(words.length, new Set(sight[p.trigger].map((s) => s.i)).size)) badPath.push(`${p.trigger}: a word twice`);
@@ -2583,7 +2603,8 @@ group("a chapter's grammar run");
           if (ruHere.has(c.s.ru)) dupRu.push(c.s.ru);
           ruHere.add(c.s.ru);
         }
-        if (p.template === "contrast") {
+        if (p.sibling) {
+          contrasts++;
           const sib = T.triggerById(p.sibling);
           if (!sib || sib.case === T.triggerById(p.trigger).case) badPath.push(`${p.trigger}: contrast with ${p.sibling}`);
         }
@@ -2596,11 +2617,17 @@ group("a chapter's grammar run");
         if (a === b && others && sess !== sessions[sessions.length - 1]) badPath.push(`two ${a} paths running`);
       }
     }
-    ok(!badPath.length, "every path is its template, 3–4 cards, a different word each, the right trigger's sentences",
+    ok(!badPath.length, "every path is its faces, 3–4 cards, a different word each, the right trigger's sentences",
        [...new Set(badPath)].slice(0, 5).join("; "));
-    ok(!dupRu.length, "no sentence twice in a session", dupRu.slice(0, 3).join(" | "));
-    ok(["example", "rule", "contrast", "review"].every((t) => templates.has(t)) || (templates.has("example") && templates.has("rule") && templates.has("contrast")),
-       `the orders vary: ${[...templates].join(", ")}`);
+    ok(!dupRu.length, "no sentence twice in a deal", dupRu.slice(0, 3).join(" | "));
+    ok(shapes.size >= 10 && contrasts > 0, `paths vary: ${shapes.size} shapes, ${contrasts} contrasts`);
+    // A stack that runs on: the trigger just ended never opens the next deal,
+    // and the ones met this sitting go to the back.
+    const lately = sessions[1].map((p) => p.trigger);
+    const onward = CC.caseSession({ sightings: sight, cards: met, rng, now, lately });
+    ok(onward.length && onward[0].trigger !== lately[lately.length - 1]
+       && onward.filter((p) => lately.includes(p.trigger)).length === 0,
+       "the next deal moves on to triggers not met this sitting");
     const focused = sessions[sessions.length - 1];
     ok(focused.length === 4 && focused.every((p) => p.trigger === "za-instr"), "one trigger on its own: four paths, all on it");
     // A session on one case holds only that case's triggers.

@@ -51,6 +51,9 @@ export const HELP = {
     ["Drills", "On the back: every drill for that word"],
     ["Low priority", "Out of the rotation; Options lists them"],
     ["Switch", "Offered when one direction falls far behind"],
+    ["Cases", "Cards on the words that decide a case: «без», «помога́ть»"],
+    ["Which case?", "Tap one of the five; checked at once"],
+    ["Trigger", "In the + menu: one trigger on its own"],
   ] },
   WordDrill: { title: "One word's drill", lines: [
     ["a_", "The answer a piece at a time; costs the grade"],
@@ -70,20 +73,6 @@ export const HELP = {
     ["Show", "The form, its sound and the table"],
     ["Again · Hard · Good · Easy", "Your own grade; moves Cases & forms only"],
     ["Options", "In the + menu: which drills, which words"],
-  ] },
-  CaseCards: { title: "Case cards", lines: [
-    ["A trigger", "A word that decides the case: «без», «помога́ть»"],
-    ["Ring", "How well that trigger is held"],
-    ["Tap a trigger", "Practice that one alone"],
-    ["Start", "A session of paths, mixed by case"],
-    ["Options", "In the + menu: cases, kinds, order, length"],
-  ] },
-  CaseCardsRun: { title: "Case cards", lines: [
-    ["A path", "Three or four cards on one trigger"],
-    ["Which case?", "Tap one of the five; checked at once"],
-    ["Show", "The form, then your own grade"],
-    ["Again · Hard · Good · Easy", "Moves the word's Cases & forms score"],
-    ["End of a path", "Grades the trigger once"],
   ] },
   Drill: { title: "A drill", lines: [
     ["Options", "In the + menu: what to ask, words, answer style"],

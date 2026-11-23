@@ -20,8 +20,10 @@ import { isDue, retrievability, familiarity, review } from "./scheduler.js";
 /* A trigger is offered once it has this many sentences: a path wants four,
    each a different word, and the next session four more. */
 export const PATH_MIN_SENTENCES = 8;
-/* Paths in a session (about eighteen cards), and new triggers in one. */
-export const SESSION_PATHS = 5;
+/* Paths dealt at a time. The learner never sees the number: the stack deals
+   the next few when these run out (the owner, 2026-11-23: "they dont see it as
+   a path but just a single front end card"), and new triggers in one deal. */
+export const SESSION_PATHS = 4;
 const NEW_PER_SESSION = 2;
 /* Sentences remembered as shown, so the next sessions draw others first. */
 const RECENT_KEPT = 200;
@@ -37,21 +39,53 @@ export const FACES = {
   use: { check: "self" },      // the sentence with a gap: the form in place
 };
 
-/* The orders a path can take. `sib` marks a card on the trigger's sibling. */
-export const TEMPLATES = {
-  example: ["notice", "trigger", "form", "use"],
-  rule: ["trigger", "form", "use", "notice"],
-  contrast: ["notice", "notice:sib", "use", "use:sib"],
-  review: ["notice", "form", "use"],
-};
-
-/* The learner's choice of order, in the options. "Mixed" is the framework's:
-   example first for a trigger never met, then varied. */
+/* The learner's choice of what a path opens on, in the options. "Mixed" is
+   the framework's: a sentence or the trigger for a trigger never met, any card
+   at all once it has been met. */
 export const ORDERS = [
   { id: "mixed", name: "Mixed" },
-  { id: "example", name: "Example first" },
-  { id: "rule", name: "Rule first" },
+  { id: "example", name: "Sentence first" },
+  { id: "rule", name: "Trigger first" },
 ];
+
+const CHECKED = ["notice", "trigger"];   // a tap on the case
+const SAID = ["form", "use"];            // the learner's own grade
+
+/* The faces of one path, mixed and matched rather than taken from a fixed
+   list (the owner, 2026-11-23: "the cards can be sort of mix and matched…
+   sometimes maybe the sentence comes first"). The rules that keep it a path:
+   - three cards, or four for a trigger not yet held well;
+   - it opens on something to look at before anything to say when the trigger
+     is new (structured input first, docs/case-cards.md) — a sentence or the
+     trigger itself; once met, on any of the four, the gap sentence included;
+   - it holds at least one card checked by a tap and one the learner says;
+   - no face twice running, and no face twice at all where there is room;
+   - now and then, with a sibling met («за» behind beside «за» for), the card
+     after the first is the same face on the sibling: the contrast. */
+export function composeFaces({ isNew = true, strong = false, sibling = false, order = "mixed", rng = Math.random }) {
+  const pick = (list) => list[Math.floor(rng() * list.length) % list.length];
+  const len = strong ? 3 : isNew ? 4 : rng() < 0.5 ? 3 : 4;
+  const first = order === "example" ? "notice" : order === "rule" ? "trigger"
+    : isNew ? (rng() < 0.65 ? "notice" : "trigger") : pick(["notice", "notice", "trigger", "use", "form"]);
+  const faces = [first];
+  const contrast = sibling && !isNew && rng() < 0.35;
+  if (contrast) faces.push(`${first}:sib`);
+  const plain = (f) => f.replace(":sib", "");
+  while (faces.length < len) {
+    const have = new Set(faces.map(plain));
+    const lastFace = plain(faces[faces.length - 1]);
+    const needChecked = !faces.some((f) => CHECKED.includes(plain(f)));
+    const needSaid = !faces.some((f) => SAID.includes(plain(f)));
+    const left = len - faces.length;
+    let pool = ["notice", "trigger", "form", "use"].filter((f) => f !== lastFace);
+    // The last places go to what the path still lacks.
+    if (left === 1 && needChecked) pool = pool.filter((f) => CHECKED.includes(f));
+    else if (left === 1 && needSaid) pool = pool.filter((f) => SAID.includes(f));
+    const unused = pool.filter((f) => !have.has(f));
+    faces.push(pick(unused.length ? unused : pool));
+  }
+  return faces;
+}
 
 /* The triggers with enough sentences to make cards, in teaching order. */
 export function offered(sightings) {
@@ -67,19 +101,11 @@ function contrastSibling(x, pool, cards) {
   return siblingsOf(x).find((y) => pool.some((p) => p.id === y.id) && cards[y.id]) || null;
 }
 
-/* Which template a path takes. A trigger never met is example first (see it
-   before saying it); a strong one the three-card review; otherwise the
-   learner's order, or under "mixed" a contrast now and then where there is a
-   sibling to stand against, and example or rule first in turn. */
-function chooseTemplate(x, { card, sibling, order, rng = Math.random }) {
-  if (order === "example") return "example";
-  if (order === "rule") return card ? "rule" : "example";
-  if (!card) return "example";
-  if (sibling && rng() < 0.4) return "contrast";
-  // Read on the full horizon: a trigger has no frequency rank.
-  const score = familiarity(card);
-  if (score !== null && score >= STRONG_AT) return "review";
-  return rng() < 0.5 ? "example" : "rule";
+/* The faces for one trigger as it stands with this learner. Strength is read
+   on the full horizon: a trigger has no frequency rank. */
+function facesFor(x, { card, sibling, order, rng = Math.random }) {
+  const score = card ? familiarity(card) : null;
+  return composeFaces({ isNew: !card, strong: score !== null && score >= STRONG_AT, sibling: !!sibling, order, rng });
 }
 
 /* `n` sentences from a trigger's list: never one used this session, the ones
@@ -105,12 +131,11 @@ function pickSightings(list, n, { used, recent, known, rng = Math.random, avoidW
   return out;
 }
 
-/* One path: the template's cards on `x` (and on `sib` for a contrast), each
-   on its own sentence. Null when the trigger cannot fill it. */
-function buildPath(x, template, sightings, opts) {
-  const faces = TEMPLATES[template];
-  const sib = template === "contrast" ? opts.sibling : null;
-  if (!faces || (template === "contrast" && !sib)) return null;
+/* One path: the cards of `faces` on `x` (and on `sib` where a face is marked
+   for it), each on its own sentence. Null when the trigger cannot fill it. */
+function buildPath(x, faces, sightings, opts) {
+  const sib = faces.some((f) => f.endsWith(":sib")) ? opts.sibling : null;
+  if (faces.some((f) => f.endsWith(":sib")) && !sib) return null;
   const mine = faces.filter((f) => !f.endsWith(":sib"));
   const theirs = faces.filter((f) => f.endsWith(":sib"));
   const a = pickSightings(sightings[x.id] || [], mine.length, opts);
@@ -124,7 +149,7 @@ function buildPath(x, template, sightings, opts) {
   const cards = faces.map((f) => (f.endsWith(":sib")
     ? { face: f.slice(0, -4), trigger: sib.id, s: b[bi++] }
     : { face: f, trigger: x.id, s: a[ai++] }));
-  return { trigger: x.id, sibling: sib ? sib.id : null, template, cards };
+  return { trigger: x.id, sibling: sib ? sib.id : null, faces: faces.slice(), cards };
 }
 
 /* Mixes the triggers so no two of the same case run together where that can
@@ -139,13 +164,17 @@ export function interleave(list) {
   return out;
 }
 
-/* A session. `focus` is one trigger practised on its own; otherwise the
-   triggers of the chosen `cases` and `kinds`: what is due (the most
-   forgotten first), then up to `newMax` new ones in teaching order, then the
-   least recently seen — mixed by case. Returns the paths. */
+/* The next paths of the stack. `focus` is one trigger practised on its own;
+   otherwise the triggers of the chosen `cases` and `kinds`: what is due (the
+   most forgotten first), then up to `newMax` new ones in teaching order, then
+   the least recently seen — mixed by case. `lately` is the triggers already
+   met in this sitting, newest last: they go to the back, so a stack that runs
+   on keeps moving across triggers rather than circling the few it began with,
+   and the trigger that just ended never opens the next deal. Returns the
+   paths. */
 export function caseSession({ sightings, cards = {}, now = Date.now(), n = SESSION_PATHS, newMax = NEW_PER_SESSION,
                               focus = null, cases = null, kinds = null, order = "mixed", known = null,
-                              recent = null, rng = Math.random, schedOpts }) {
+                              recent = null, lately = null, rng = Math.random, schedOpts }) {
   const all = offered(sightings);
   const pool = focus ? all.filter((x) => x.id === focus)
     : all.filter((x) => (!cases || !cases.length || cases.includes(x.case))
@@ -153,31 +182,40 @@ export function caseSession({ sightings, cards = {}, now = Date.now(), n = SESSI
   if (!pool.length) return [];
   const used = new Set();
   const opts = { used, recent: recent instanceof Set ? recent : new Set(recent || []), known, rng };
-  const pathFor = (x, k) => {
+  const pathFor = (x) => {
     const card = cards[x.id] || null;
     const sibling = contrastSibling(x, all, cards);
-    const template = focus && card ? ["example", "rule", sibling ? "contrast" : "example", "review"][k % 4]
-      : chooseTemplate(x, { card, sibling, order, rng });
-    return buildPath(x, template, sightings, { ...opts, sibling })
-      || (template !== "example" ? buildPath(x, "example", sightings, { ...opts, sibling: null }) : null)
-      || buildPath(x, "review", sightings, { ...opts, sibling: null });
+    const faces = facesFor(x, { card, sibling, order, rng });
+    return buildPath(x, faces, sightings, { ...opts, sibling })
+      || buildPath(x, facesFor(x, { card, sibling: null, order, rng }), sightings, { ...opts, sibling: null })
+      || buildPath(x, ["notice", "use", "form"], sightings, { ...opts, sibling: null });
   };
   if (focus) {
     const out = [];
-    for (let k = 0; k < n; k++) { const p = pathFor(pool[0], k); if (!p) break; out.push(p); }
+    for (let k = 0; k < n; k++) { const p = pathFor(pool[0]); if (!p) break; out.push(p); }
     return out;
   }
-  const due = pool.filter((x) => cards[x.id] && isDue(cards[x.id], now, 0))
+  // Met this sitting: how long ago, in triggers (0 is never).
+  const ago = new Map();
+  (lately || []).forEach((id, k, a) => ago.set(id, a.length - k));
+  const met = (x) => ago.has(x.id);
+  const due = pool.filter((x) => cards[x.id] && !met(x) && isDue(cards[x.id], now, 0))
     .sort((a, b) => retrievability(cards[a.id], now, schedOpts) - retrievability(cards[b.id], now, schedOpts));
-  const fresh = pool.filter((x) => !cards[x.id]).slice(0, newMax);
-  const rest = pool.filter((x) => cards[x.id] && !due.includes(x))
+  const fresh = pool.filter((x) => !cards[x.id] && !met(x)).slice(0, newMax);
+  const rest = pool.filter((x) => cards[x.id] && !due.includes(x) && !met(x))
     .sort((a, b) => (cards[a.id].lastAt || 0) - (cards[b.id].lastAt || 0));
+  // Only when nothing met is left to fill the deal does it take more than
+  // `newMax` new ones: a first sitting is still a sitting.
+  const more = pool.filter((x) => !cards[x.id] && !met(x));
+  // And met this sitting, longest ago first, the one just ended last of all.
+  const again = pool.filter(met).sort((a, b) => ago.get(b.id) - ago.get(a.id));
   const picked = [];
-  // Only when nothing met is left to fill the session does it take more than
-  // `newMax` new ones: a first session is still a session.
-  const more = pool.filter((x) => !cards[x.id]);
-  for (const x of due.concat(fresh, rest, more)) if (picked.length < n && !picked.includes(x)) picked.push(x);
-  return interleave(picked).map((x, k) => pathFor(x, k)).filter(Boolean);
+  for (const x of due.concat(fresh, rest, more, again)) if (picked.length < n && !picked.includes(x)) picked.push(x);
+  const last = lately && lately.length ? lately[lately.length - 1] : null;
+  const dealt = interleave(picked);
+  // The trigger just ended does not open the deal when anything else can.
+  if (dealt.length > 1 && dealt[0].id === last) dealt.push(dealt.shift());
+  return dealt.map((x) => pathFor(x)).filter(Boolean);
 }
 
 /* What a path's cards say about each trigger it touched, as one grade each:

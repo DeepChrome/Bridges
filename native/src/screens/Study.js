@@ -15,9 +15,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable, Animated } from "react-native";
 import { useSession } from "../session";
-import { useTheme, radius, type as T } from "../theme";
+import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, Unselectable, toneOf,
-         Familiarity, familiarityColor, RowText, ActionChip } from "../ui";
+         Familiarity, familiarityColor, RowText, ActionChip, SegmentTabs } from "../ui";
+import { CaseStack } from "../flows/CaseCards";
 import { PartialHintButton, PartialHintLine } from "../hint";
 import { hintSteps, hintMask } from "@core/hint";
 import { cardSenses } from "@core/util";
@@ -220,12 +221,46 @@ function Front({ face, direction, senses }) {
   );
 }
 
+/* **Two kinds of flashcard, one screen** (the owner, 2026-11-23: "since the
+   basis of this is flashcards, lets try and have this contained within the
+   study module with a little switch at the top"): Vocabulary is the word and
+   sentence pile below, Cases the stack of case cards (flows/CaseCards.js).
+   Both stay mounted, so switching back finds a sitting where it was left; the
+   tab on show owns the header's options row. Only the Study tab's own screen
+   carries the switch — a round handed in from a lesson or a video (ListCards)
+   is the word pile alone. The choice lasts while the app is open, and
+   `params.tab` opens a tab from elsewhere (Practice's Case cards tile). */
+const TABS = [{ id: "words", name: "Vocabulary" }, { id: "cases", name: "Cases" }];
+let lastTab = "words";
+
 export default function Study({ navigation, route }) {
+  const t = useTheme();
+  const asked = route && route.params && route.params.tab;
+  const [tab, setTab] = useState(asked || lastTab);
+  useEffect(() => { if (asked) setTab(asked); }, [asked]);
+  useEffect(() => { lastTab = tab; }, [tab]);
+  if (!route || route.name !== "Cards") return <WordStudy navigation={navigation} route={route} />;
+  return (
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <View style={{ paddingHorizontal: space.pad, paddingTop: 10 }}>
+        <SegmentTabs testID="study-tabs" options={TABS} value={tab} onPick={setTab} />
+      </View>
+      <View style={{ flex: 1, display: tab === "words" ? "flex" : "none" }}>
+        <WordStudy navigation={navigation} route={route} active={tab === "words"} />
+      </View>
+      <View style={{ flex: 1, display: tab === "cases" ? "flex" : "none" }}>
+        <CaseStack route={route} active={tab === "cases"} />
+      </View>
+    </View>
+  );
+}
+
+function WordStudy({ navigation, route, active = true }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
   const [picker, setPicker] = useState(false);
   // The header menu's "Study options" row opens the picker (headermenu.js).
-  useHeaderOptions(route, () => setPicker(true), "Study options");
+  useHeaderOptions(route, () => setPicker(true), "Study options", active);
   const [session, setSession] = useState(null);   // core/queue.js buildSession
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);

@@ -31,9 +31,12 @@ import { screenAbout } from "./about";
    test reaches what the header's menu would. */
 const registry = new Map();
 let newest = null;
-export function useHeaderOptions(route, open, label = "Options") {
+/* `enabled` false registers nothing: a screen holding two tabs that are both
+   mounted (Study: Vocabulary · Cases) lets the one on show own the menu row. */
+export function useHeaderOptions(route, open, label = "Options", enabled = true) {
   const key = (route && route.key) || "screen";
   useEffect(() => {
+    if (!enabled) return undefined;
     const entry = { label, open };
     registry.set(key, entry);
     newest = entry;
@@ -41,7 +44,7 @@ export function useHeaderOptions(route, open, label = "Options") {
       if (registry.get(key) === entry) registry.delete(key);
       if (newest === entry) newest = null;
     };
-  }, [key, open, label]);
+  }, [key, open, label, enabled]);
 }
 export const optionsFor = (route) => (route && route.key ? registry.get(route.key) || null : newest);
 export function openScreenOptions() {

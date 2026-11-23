@@ -1,11 +1,15 @@
-/* Case cards: paths of flashcards on the words that decide a case (the
+/* Case cards: a stack of flashcards on the words that decide a case (the
  * owner, 2026-11-23; docs/case-cards.md is the framework, core/casecards.js
  * the paths, core/triggers.js the catalogue).
  *
- * Two screens. `CaseCards` lists the triggers by case, each with how well it
- * is held, and starts a session; a trigger tapped there is practised on its
- * own. `CaseCardsRun` is the session: paths of three or four cards, every card
- * a different word, mixed across the cases.
+ * The Cases tab of Study (screens/Study.js). It is a stack, as the word cards
+ * are: one card at a time, the next one dealt as this one is answered, on
+ * until the learner finishes. Underneath, the cards come in paths of three or
+ * four on one trigger — each card a different word, the faces mixed and
+ * matched (core/casecards.js composeFaces) — but nothing on screen says so: the
+ * learner sees one card, then the next (the owner: "they dont see it as a path
+ * but just a single front end card because the rest hasnt been revealed to
+ * them yet… but all are connected on the back end").
  *
  * Four faces. Notice and Trigger ask which case and are checked by a tap on
  * one of the five, always in the same order, so their position gives nothing
@@ -17,32 +21,33 @@
  * A path grades its trigger once, into `st.caseCards` (core/casecards.js
  * pathGrades); a production card also moves the noun's "Cases & forms" score
  * at once, as Form cards do (§30by). The sentences shown are kept in
- * `st.drills.casecards.recent` so the next sessions draw others first.
+ * `st.drills.casecards.recent` so the next deals draw others first.
  */
 
-import React, { useMemo, useRef, useState } from "react";
-import { View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { View, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, List, Row, RowText, Text, Muted, Sheet, Loading, Lift, toneOf, Speaker, Pill,
-         OptionRow, SectionLabel, Familiarity } from "../ui";
+         OptionRow, Familiarity } from "../ui";
 import { Linked } from "../words";
 import { useHeaderOptions } from "../headermenu";
 import { useAbout } from "../about";
 import { Table } from "../rules";
-import { useAudioStopOnLeave } from "../screens/Run";
+import { useSwap } from "../motion";
 import { Q } from "../questions";
 import { L, IX } from "../data";
 import { CASES, caseById } from "@core/cases";
 import { triggerById, TRIGGER_KINDS } from "@core/triggers";
-import { caseSession, offered, pathGrades, gradeTriggers, keepRecent, FACES, ORDERS, SESSION_PATHS } from "@core/casecards";
-import { gradeSkill, familiarity, cardFor, schedulerOpts } from "@core/scheduler";
+import { caseSession, offered, pathGrades, gradeTriggers, keepRecent, FACES, ORDERS } from "@core/casecards";
+import { gradeSkill, familiarity, cardFor, schedulerOpts, isDue } from "@core/scheduler";
 import { fold, TOKEN } from "@core/util";
 
 /* The score a production card's grade moves (FormCards' FORM_SKILL). */
 const FORMS = "forms";
 const CASECARDS_KEY = "casecards";
-const PATH_COUNTS = [3, 5, 8];
+/* How many triggers a sitting remembers as met, to keep moving across them. */
+const LATELY_KEPT = 12;
 
 /* ------------------------------------------------------------ the words */
 
@@ -51,8 +56,8 @@ const stressed = (bare) => {
   return ids && L[ids[0]] ? L[ids[0]].w : bare;
 };
 
-/* How a trigger is named on the list and on a Trigger card: its word, or its
-   first verbs stressed, or what kind of word governs. */
+/* How a trigger is named in the options and on the start panel: its word, or
+   its first verbs stressed, or what kind of word governs. */
 export function triggerTitle(x) {
   if (x.words) return x.words[0];
   if (x.verbs) return x.verbs.slice(0, 2).map(stressed).join(", ");
@@ -134,11 +139,11 @@ function CaseChoices({ answer, picked, onPick }) {
   );
 }
 
-/* What the trigger is, under a case answer and on every back: the trigger,
-   its meaning, the case and the question it answers. */
-/* The case is always drawn as the answer it is — green — whatever was picked:
-   the red is on the wrong button already, and a red pill naming the right case
-   would read as "this is wrong". */
+/* What the trigger is, under a case answer and on every back: the case, the
+   trigger, its meaning and the question it answers. The case is always drawn
+   as the answer it is — green — whatever was picked: the red is on the wrong
+   button already, and a red pill naming the right case would read as "this
+   is wrong". */
 function TriggerLine({ x, s }) {
   const t = useTheme();
   return (
@@ -152,7 +157,7 @@ function TriggerLine({ x, s }) {
   );
 }
 
-function CaseCard({ card, state, onPick, onShow }) {
+function CaseCard({ card, state, onPick }) {
   const t = useTheme();
   const x = triggerById(card.trigger);
   const s = card.s;
@@ -247,15 +252,30 @@ function CaseCard({ card, state, onPick, onShow }) {
 
   return (
     <View testID={`casecard-${card.face}`} style={{ borderWidth: 1, borderColor: t.lineSoft, borderRadius: radius.xl,
-                                                    backgroundColor: t.surface, padding: 20, marginTop: 12 }}>
+                                                    backgroundColor: t.surface, padding: 20 }}>
       {front}
       {check === "case" ? <CaseChoices answer={x.case} picked={state.picked} onPick={onPick} /> : null}
       {back}
-      {check === "self" && !shown ? (
-        <View style={{ marginTop: 18 }}>
-          <Btn block kind="pri" testID="casecard-show" label="Show" onPress={onShow} />
-        </View>
-      ) : null}
+    </View>
+  );
+}
+
+/* The card on top of the stack, with the edges of the two beneath it showing
+   under its foot: a pile, as the word cards are, not a page of steps. Each new
+   card slides in (motion.js useSwap). */
+function OnTop({ swapKey, children }) {
+  const t = useTheme();
+  const swap = useSwap(swapKey);
+  const edge = (inset, k) => (
+    <View key={k} style={{ position: "absolute", left: inset, right: inset, bottom: -6 * (k + 1), height: 24,
+                           borderWidth: 1, borderTopWidth: 0, borderColor: t.lineSoft, backgroundColor: t.surface,
+                           borderBottomLeftRadius: radius.xl, borderBottomRightRadius: radius.xl,
+                           opacity: 1 - 0.35 * k }} />
+  );
+  return (
+    <View testID="casecard-stack" style={{ marginTop: 12, marginBottom: 14 }}>
+      {[edge(20, 1), edge(10, 0)]}
+      <Animated.View style={swap}>{children}</Animated.View>
     </View>
   );
 }
@@ -266,145 +286,159 @@ function casePrefs(st) {
   return ((st.drillPrefs || {})[CASECARDS_KEY]) || {};
 }
 
-function CaseCardOptions({ prefs, onChange, onClose }) {
+/* The options, as every options sheet is: a row a category (ui.js OptionRow).
+   "Trigger" is one trigger practised on its own, each listed with how well it
+   is held; Any is the whole stack. */
+function CaseCardOptions({ prefs, list, cards, onChange, onClose }) {
   const cases = prefs.cases && prefs.cases.length ? prefs.cases : CASES.map((c) => c.id);
   const kinds = prefs.kinds && prefs.kinds.length ? prefs.kinds : TRIGGER_KINDS.map((k) => k.id);
+  const triggers = [{ id: "any", name: "Any" }].concat(list.map((x) => {
+    const score = familiarity(cards[x.id] || null);
+    return { id: x.id, name: triggerTitle(x), sub: `${caseName(x.case)} · ${x.en}`,
+             note: score === null ? "New" : String(score) };
+  }));
   return (
     <Sheet onClose={onClose} testID="casecards-options" title="Case card options" maxHeight="88%"
            footer={<Btn block kind="pri" testID="casecards-apply" label="Apply" style={{ marginTop: 8 }} onPress={onClose} />}>
       <List>
+        <OptionRow testID="casecards-focus" title="Trigger" value={prefs.focus || "any"} options={triggers}
+                   onPick={(id) => onChange({ ...prefs, focus: id === "any" ? null : id })} />
         <OptionRow testID="casecards-cases" title="Cases" multi minOne value={cases}
                    options={CASES.map((c) => ({ id: c.id, name: c.name }))}
                    onPick={(ids) => onChange({ ...prefs, cases: ids.length === CASES.length ? null : ids })} />
-        <OptionRow testID="casecards-kinds" title="Triggers" multi minOne value={kinds}
+        <OptionRow testID="casecards-kinds" title="Triggers from" multi minOne value={kinds}
                    options={TRIGGER_KINDS}
                    onPick={(ids) => onChange({ ...prefs, kinds: ids.length === TRIGGER_KINDS.length ? null : ids })} />
-        <OptionRow testID="casecards-order" title="Order" value={prefs.order || "mixed"} options={ORDERS}
+        <OptionRow testID="casecards-order" title="Opens on" value={prefs.order || "mixed"} options={ORDERS}
                    onPick={(id) => onChange({ ...prefs, order: id })} />
-        <OptionRow testID="casecards-paths" title="Paths a session" value={String(prefs.paths || SESSION_PATHS)}
-                   options={PATH_COUNTS.map((n) => ({ id: String(n), name: String(n) }))}
-                   onPick={(id) => onChange({ ...prefs, paths: Number(id) })} />
       </List>
     </Sheet>
   );
 }
 
-/* ------------------------------------------------------------ the list */
-
-/* Every trigger with enough sentences, under its case, with how well it is
-   held — a ring, or New. A tap practises that one; Start runs a session. */
-export function CaseCards({ navigation, route }) {
-  const { st, update, ready } = useSession();
-  const t = useTheme();
-  const prefs = casePrefs(st);
-  const [cog, setCog] = useState(false);
-  useHeaderOptions(route, () => setCog(true), "Case card options");
-  const list = useMemo(() => offered(Q.triggerSightings()), []);
-  const cards = st.caseCards || {};
-  if (!ready) return <Screen><Loading /></Screen>;
-  const setPrefs = (next) => update((p) => ({ ...p, drillPrefs: { ...(p.drillPrefs || {}), [CASECARDS_KEY]: next } }));
-  return (
-    <>
-      <Screen footer={<Btn block kind="pri" testID="casecards-start" label="Start"
-                           onPress={() => navigation.navigate("CaseCardsRun", {})} />}>
-        {CASES.map((c, k) => {
-          const mine = list.filter((x) => x.case === c.id);
-          if (!mine.length) return null;
-          return (
-            <View key={c.id}>
-              <SectionLabel gap={k > 0}>{c.name}</SectionLabel>
-              <List>
-                {mine.map((x) => {
-                  const score = familiarity(cards[x.id] || null);
-                  return (
-                    <Row key={x.id} testID={`trigger-${x.id}`}
-                         onPress={() => navigation.navigate("CaseCardsRun", { focus: x.id })}>
-                      <RowText title={triggerTitle(x)} sub={x.en} />
-                      {score === null ? <Pill testID={`trigger-new-${x.id}`}>New</Pill>
-                        : <Familiarity score={score} size={30} testID={`trigger-score-${x.id}`} />}
-                    </Row>
-                  );
-                })}
-              </List>
-            </View>
-          );
-        })}
-        <Muted size={T.tiny} style={{ marginTop: 14, textAlign: "center", color: t.ink3 }}>
-          {`${list.length} triggers`}
-        </Muted>
-      </Screen>
-      {cog ? <CaseCardOptions prefs={prefs} onChange={setPrefs} onClose={() => setCog(false)} /> : null}
-    </>
-  );
-}
-
-/* ------------------------------------------------------------ the run */
+/* ------------------------------------------------------------ the stack */
 
 const GRADES = [[1, "Again", "bad"], [2, "Hard", "plain"], [3, "Good", "good"], [4, "Easy", "pri"]];
+const FRESH = { picked: null, shown: false };
 
-export function CaseCardsRun({ navigation, route }) {
+export function CaseStack({ route, active = true }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
-  const focus = (route.params || {}).focus || null;
   const prefs = casePrefs(st);
-  const [seed, setSeed] = useState(0);
-  const [p, setP] = useState(0);         // which path
-  const [c, setC] = useState(0);         // which card in it
-  const [state, setState] = useState({ picked: null, shown: false });
-  const results = useRef([]);            // this path's, card by card
-  const [ended, setEnded] = useState([]); // { trigger, grade } per finished path
-  useAudioStopOnLeave();
+  const [opts, setOpts] = useState(false);
+  useHeaderOptions(route, () => setOpts(true), "Case card options", active);
 
-  const paths = useMemo(() => {
-    if (!ready) return null;
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [queue, setQueue] = useState([]);   // paths dealt and not yet run
+  const [c, setC] = useState(0);            // which card of the path on top
+  const [state, setState] = useState(FRESH);
+  const [count, setCount] = useState(0);    // cards answered this sitting
+  const [ended, setEnded] = useState([]);   // { trigger, grade } per finished path
+  const results = useRef([]);               // the path on top's, card by card
+  const lately = useRef([]);                // triggers met this sitting, newest last
+  const dealtFor = useRef(null);            // the options the queue was dealt under
+  const deals = useRef(0);                  // deals made, so a re-dealt card slides in too
+  const [nothing, setNothing] = useState(false); // the options hold no trigger to deal
+
+  const list = useMemo(() => (ready && (active || started) ? offered(Q.triggerSightings()) : []),
+    [ready, active, started]);
+  const cards = st.caseCards || {};
+  const dueN = list.filter((x) => cards[x.id] && isDue(cards[x.id], Date.now(), 0)).length;
+  const prefsKey = JSON.stringify([prefs.focus || null, prefs.cases || null, prefs.kinds || null, prefs.order || "mixed"]);
+
+  /* The next few paths, from the learner as they stand now — dealt when the
+     stack runs out, and again when the options change under it. */
+  const deal = () => {
     const seen = st.seen || {};
     const known = (i) => {
-      const card = L[i] ? cardFor(seen[L[i].b]) : null;
-      const f = familiarity(card);
+      const f = familiarity(L[i] ? cardFor(seen[L[i].b]) : null);
       return f === null ? 0 : f / 100;
     };
-    return caseSession({
+    dealtFor.current = prefsKey;
+    deals.current += 1;
+    const paths = caseSession({
       sightings: Q.triggerSightings(), cards: st.caseCards || {}, now: Date.now(),
-      n: focus ? 4 : prefs.paths || SESSION_PATHS, focus, cases: prefs.cases, kinds: prefs.kinds,
-      order: prefs.order || "mixed", known, recent: (((st.drills || {})[CASECARDS_KEY]) || {}).recent,
-      schedOpts: schedulerOpts(st),
+      focus: prefs.focus || null, cases: prefs.cases, kinds: prefs.kinds, order: prefs.order || "mixed",
+      known, recent: (((st.drills || {})[CASECARDS_KEY]) || {}).recent, lately: lately.current,
+      newMax: count ? 1 : undefined, schedOpts: schedulerOpts(st),
     });
+    setNothing(!paths.length);
+    setQueue(paths);
+    setC(0);
+    setState(FRESH);
+    results.current = [];
+  };
+  useEffect(() => {
+    if (!started || finished || (nothing && dealtFor.current === prefsKey)) return;
+    // Options changed mid-sitting: the paths not yet begun go, the new ones
+    // follow the new options. A path part-way through is let go too, ungraded.
+    if (dealtFor.current !== prefsKey || !queue.length) deal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, seed, focus]);
+  }, [started, finished, queue.length, prefsKey]);
 
-  const path = paths && paths[p];
-  const card = path && path.cards[c];
-  useAbout(card ? {
-    kind: "casecard", step: `path ${p + 1} of ${paths.length}, card ${c + 1} of ${path.cards.length}`,
+  const path = queue[0] || null;
+  const card = started && !finished && path ? path.cards[c] : null;
+  useAbout(card && active ? {
+    kind: "casecard",
     text: [card.face === "use" ? card.s.ru.replace(card.s.token, "___") : card.face === "notice" ? card.s.ru : "",
            card.face === "trigger" || card.face === "form" ? `${triggerTitle(triggerById(card.trigger))}: ${triggerById(card.trigger).en}` : "",
            state.picked || state.shown ? `Answer: ${caseName(triggerById(card.trigger).case)}, ${card.s.said}` : ""]
       .filter(Boolean).join("\n"),
   } : null);
 
-  if (!paths) return <Screen><Loading /></Screen>;
-  if (!paths.length) {
+  const setPrefs = (next) => update((p) => ({ ...p, drillPrefs: { ...(p.drillPrefs || {}), [CASECARDS_KEY]: next } }));
+  const options = opts ? (
+    <CaseCardOptions prefs={prefs} list={list} cards={cards} onChange={setPrefs} onClose={() => setOpts(false)} />
+  ) : null;
+
+  if (!ready) return <Screen><Loading /></Screen>;
+
+  const begin = () => {
+    lately.current = []; setCount(0); setEnded([]); setQueue([]); dealtFor.current = null;
+    setFinished(false); setNothing(false); setStarted(true);
+  };
+  const focus = prefs.focus ? triggerById(prefs.focus) : null;
+  const clearFocus = () => setPrefs({ ...prefs, focus: null });
+
+  /* Before the first card: how many triggers are due, Start, and the options.
+     The same shape as the word cards' start (Study.js). */
+  if (!started) {
     return (
       <Screen>
-        <RowText title="Nothing to practice with these options" bold={false} />
-        <View style={{ marginTop: 16 }}>
-          <Btn block kind="pri" label="Back" testID="casecards-back" onPress={() => navigation.goBack()} />
+        <View testID="casecards-start-panel" style={{ marginTop: 48, alignItems: "center", paddingHorizontal: 24 }}>
+          <Text testID="casecards-due" style={{ color: t.ink, fontSize: 56, fontWeight: "700", lineHeight: 64 }}>
+            {String(dueN)}
+          </Text>
+          <Muted>{dueN === 1 ? "trigger due" : "triggers due"}</Muted>
+          <Btn kind="pri" testID="casecards-start" style={{ marginTop: 24, minWidth: 240 }}
+               label={focus ? `Start: ${triggerTitle(focus)}` : "Start"} onPress={begin} />
+          {focus ? <Btn kind="link" testID="casecards-any" style={{ marginTop: 10 }} label="Any trigger" onPress={clearFocus} />
+            : <Btn kind="link" testID="casecards-choose" style={{ marginTop: 10 }} label="Choose a trigger" onPress={() => setOpts(true)} />}
+          <Muted size={T.tiny} style={{ marginTop: 28, color: t.ink3 }}>{`${list.length} triggers`}</Muted>
         </View>
+        {options}
       </Screen>
     );
   }
 
-  if (!path) {
-    // The end: each trigger met, with what the session did to it.
-    const cards = st.caseCards || {};
+  /* Finished: each trigger met, with what the sitting did to it, and the way
+     back into the stack. */
+  if (finished || nothing) {
+    const none = nothing && !ended.length;
     return (
       <Screen footer={
         <View style={{ flexDirection: "row", gap: 8 }}>
-          <Btn kind="plain" testID="casecards-again" label="Again" style={{ flex: 1 }}
-               onPress={() => { results.current = []; setEnded([]); setP(0); setC(0); setState({ picked: null, shown: false }); setSeed(seed + 1); }} />
-          <Btn kind="pri" testID="casecards-done" label="Done" style={{ flex: 1 }} onPress={() => navigation.goBack()} />
+          <Btn kind="plain" testID="casecards-done" label="Done" style={{ flex: 1 }}
+               onPress={() => { setStarted(false); setFinished(false); }} />
+          {none ? null : (
+            <Btn kind="pri" testID="casecards-keep-going" label="Keep going" style={{ flex: 1 }}
+                 onPress={() => { setFinished(false); setNothing(false); setQueue([]); dealtFor.current = null; }} />
+          )}
         </View>}>
-        <Text testID="casecards-end" style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>Session done</Text>
+        <Text testID="casecards-end" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", marginBottom: 12 }}>
+          {none ? "Nothing to practice with these options" : `${count} ${count === 1 ? "card" : "cards"}`}
+        </Text>
         <List>
           {ended.map((e, k) => {
             const x = triggerById(e.trigger);
@@ -419,19 +453,19 @@ export function CaseCardsRun({ navigation, route }) {
             );
           })}
         </List>
+        {options}
       </Screen>
     );
   }
 
-  const next = () => {
-    if (c + 1 < path.cards.length) {
-      setC(c + 1);
-      setState({ picked: null, shown: false });
-      return;
-    }
-    // The path is done: grade its triggers once, keep its sentences.
+  if (!card) return <Screen><Loading /></Screen>;
+
+  /* A path closed: its trigger graded once on the cards answered, the
+     sentences shown kept. At its end, or part-way when the learner finishes. */
+  const closePath = (upTo) => {
+    if (!results.current.some(Boolean)) return;
     const grades = pathGrades(path, results.current);
-    const shown = path.cards.map((x) => x.s.ru);
+    const shown = path.cards.slice(0, upTo).map((x) => x.s.ru);
     const now = Date.now();
     update((prev) => ({
       ...prev,
@@ -440,11 +474,19 @@ export function CaseCardsRun({ navigation, route }) {
                 [CASECARDS_KEY]: { ...((prev.drills || {})[CASECARDS_KEY] || {}),
                                    recent: keepRecent((((prev.drills || {})[CASECARDS_KEY]) || {}).recent, shown) } },
     }));
-    setEnded(ended.concat(Object.keys(grades).map((id) => ({ trigger: id, grade: grades[id] }))));
+    setEnded((was) => was.concat(Object.keys(grades).map((id) => ({ trigger: id, grade: grades[id] }))));
+    lately.current = lately.current.filter((id) => id !== path.trigger).concat(path.trigger).slice(-LATELY_KEPT);
     results.current = [];
-    setP(p + 1);
+  };
+  /* On to the next card: the next of this path, or — the path done — the
+     path closed and the next one on top. */
+  const next = () => {
+    setCount(count + 1);
+    if (c + 1 < path.cards.length) { setC(c + 1); setState(FRESH); return; }
+    closePath(path.cards.length);
+    setQueue(queue.slice(1));
     setC(0);
-    setState({ picked: null, shown: false });
+    setState(FRESH);
   };
 
   const pick = (id) => {
@@ -465,50 +507,52 @@ export function CaseCardsRun({ navigation, route }) {
   };
 
   const check = FACES[card.face].check;
-  const footer = check === "case" && state.picked ? (
-    <Btn block kind="pri" testID="casecard-next" label="Continue" onPress={next} />
-  ) : check === "self" && state.shown ? (
-    <View style={{ flexDirection: "row", gap: 6 }}>
-      {GRADES.map(([g, label, kind]) => {
-        const tone = toneOf(t, kind);
-        return (
-          <Lift key={g} testID={`casecard-grade-${g}`} fill={tone.bg} edge={tone.edge} border={tone.border}
-                r={radius.md} style={{ flex: 1 }} onPress={() => grade(g)}>
-            <View style={{ alignItems: "center", paddingVertical: 13 }}>
-              <Text style={{ fontWeight: "700", fontSize: T.small, color: tone.fg }}>{label}</Text>
-            </View>
-          </Lift>
-        );
-      })}
-    </View>
-  ) : null;
+  const main = check === "case" ? (state.picked
+    ? <Btn block kind="pri" testID="casecard-next" label="Continue" onPress={next} />
+    : null)
+    : !state.shown ? <Btn block kind="pri" testID="casecard-show" label="Show" onPress={() => setState({ ...state, shown: true })} />
+    : (
+      <View style={{ flexDirection: "row", gap: 6 }}>
+        {GRADES.map(([g, label, kind]) => {
+          const tone = toneOf(t, kind);
+          return (
+            <Lift key={g} testID={`casecard-grade-${g}`} fill={tone.bg} edge={tone.edge} border={tone.border}
+                  r={radius.md} style={{ flex: 1 }} onPress={() => grade(g)}>
+              <View style={{ alignItems: "center", paddingVertical: 13 }}>
+                <Text style={{ fontWeight: "700", fontSize: T.small, color: tone.fg }}>{label}</Text>
+              </View>
+            </Lift>
+          );
+        })}
+      </View>
+    );
+  const footer = (
+    <>
+      {main}
+      <View style={{ flexDirection: "row", gap: 8, marginTop: main ? 10 : 0 }}>
+        <Btn kind="ghost" testID="casecards-finish" label="Finish" style={{ flex: 1 }}
+             onPress={() => { closePath(c + 1); setFinished(true); setQueue([]); }} />
+      </View>
+    </>
+  );
 
   return (
     <Screen fill footer={footer}>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <RowText testID="casecards-progress" title={`Path ${p + 1} of ${paths.length}`} bold={false} />
-        <PathDots n={path.cards.length} at={c} />
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
+        <Muted testID="casecards-count">{`${count} ${count === 1 ? "card" : "cards"}`}</Muted>
+        {focus ? (
+          <Btn kind="link" testID="casecards-focus-clear" label={`${triggerTitle(focus)} ✕`} onPress={clearFocus}
+               accessibilityLabel={`Only ${triggerTitle(focus)}: show every trigger`} />
+        ) : null}
       </View>
       {/* The card in the middle of what is left, as Study's is (§30dc); a
           long back grows past the screen and scrolls. */}
-      <View testID="casecard-well" style={{ flexGrow: 1, justifyContent: "center", paddingBottom: 24 }}>
-        <CaseCard key={`${seed}:${p}:${c}`} card={card} state={state} onPick={pick}
-                  onShow={() => setState({ ...state, shown: true })} />
+      <View testID="casecard-well" style={{ flexGrow: 1, justifyContent: "center", paddingBottom: 12 }}>
+        <OnTop swapKey={`${deals.current}:${count}`}>
+          <CaseCard key={`${deals.current}:${count}`} card={card} state={state} onPick={pick} />
+        </OnTop>
       </View>
+      {options}
     </Screen>
-  );
-}
-
-/* Where in the path: one dot a card, the done ones filled. */
-function PathDots({ n, at }) {
-  const t = useTheme();
-  return (
-    <View testID="casecards-dots" style={{ flexDirection: "row", gap: 6 }}
-          accessibilityLabel={`Card ${at + 1} of ${n}`}>
-      {Array.from({ length: n }, (_, k) => (
-        <View key={k} style={{ width: 8, height: 8, borderRadius: 4,
-                               backgroundColor: k <= at ? t.brand : t.surface3 }} />
-      ))}
-    </View>
   );
 }

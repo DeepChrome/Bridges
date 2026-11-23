@@ -76,26 +76,36 @@ one right answer. The two production faces are self-graded, as every
 flashcard in the app is. The case buttons are always the same five, in
 teaching order, so their position cannot give the answer away.
 
-**The order of a path varies.** There are four templates:
+**The cards of a path are mixed and matched, not a fixed order**
+(`composeFaces`; the owner, the same day: *"sometimes maybe the sentence
+comes first"*). The rules that keep it a path:
 
-- **Example first** (the default for a trigger never met): Notice, Trigger,
-  Form, Use. See it, name the rule, make it, use it. This is point 2.
-- **Rule first**: Trigger, Form, Use, Notice. Used for variety once a
-  trigger has been met (point 3).
-- **Contrast**: a trigger and its sibling side by side. Notice «за» +
-  instrumental, Notice «за» + accusative, Use, Use. Offered once both have
-  been met, because discrimination needs two things to tell apart (point 4).
-- **Review**: Notice, Form, Use. Three cards for a trigger already held
-  well, so a strong trigger costs less time.
+- Three cards, or four for a trigger not yet held well.
+- A trigger never met opens on something to look at before anything to say:
+  a sentence (Notice) or the trigger itself. This is point 2. Once met, a path
+  opens on any face, the gap sentence included (point 3).
+- Every path holds at least one card checked by a tap and one the learner
+  says. No face comes twice running, or twice at all where there is room.
+- Now and then, once a sibling has been met, the second card is the same
+  face on the sibling: «за» + instrumental, then «за» + accusative. That is
+  the contrast, because discrimination needs two things to tell apart
+  (point 4).
 
-**A session is several paths, mixed.** It holds five paths by default
-(about eighteen cards). Within a path the cards are blocked, which is how a
-trigger gets learned. Across paths the triggers are mixed, never two of the
-same case running when that can be avoided, which is how the triggers get
-told apart (point 4). Due triggers come first, then at most two new ones in
-teaching order, then the ones least recently seen. Teaching order starts with
+The options can fix the opener: Sentence first or Trigger first.
+
+**It is a stack, like the word cards.** It is Study's **Cases** tab, beside
+Vocabulary. The learner sees one card, then the next. Nothing on screen
+names a path: the cards behind the first are connected, but only the app
+knows it. A few paths are dealt at a time, and the next few are dealt when
+they run out, so the stack goes on until Finish. Within a path the cards are
+blocked, which is how a trigger gets learned. Across paths the triggers are
+mixed, never two of the same case running when that can be avoided, which is
+how the triggers get told apart (point 4). Due triggers come first, then new
+ones in teaching order (two in the first deal, one in each after), then the
+ones least recently seen. Triggers already met in the sitting go to the back,
+so a long sitting keeps moving across triggers. Teaching order starts with
 the contrasts a beginner needs first: «в»/«на» for where, then for where to.
-A single trigger can also be practised on its own from the list.
+One trigger can be practised on its own from the options.
 
 **What is remembered.** Each trigger has its own FSRS card in `st.caseCards`.
 That is a progress key, so it syncs and a reset clears it. A path grades its

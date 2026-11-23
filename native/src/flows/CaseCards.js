@@ -428,14 +428,16 @@ export function CaseStack({ route, active = true }) {
     const none = nothing && !ended.length;
     return (
       <Screen footer={
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <Btn kind="plain" testID="casecards-done" label="Done" style={{ flex: 1 }}
-               onPress={() => { setStarted(false); setFinished(false); }} />
+        /* One primary and the way out under it, as the stack's own footer
+           (Finish) and Study's end are. */
+        <>
           {none ? null : (
-            <Btn kind="pri" testID="casecards-keep-going" label="Keep going" style={{ flex: 1 }}
+            <Btn block kind="pri" testID="casecards-keep-going" label="Keep going"
                  onPress={() => { setFinished(false); setNothing(false); setQueue([]); dealtFor.current = null; }} />
           )}
-        </View>}>
+          <Btn kind="ghost" testID="casecards-done" label="Done" style={{ marginTop: none ? 0 : 10 }}
+               onPress={() => { setStarted(false); setFinished(false); }} />
+        </>}>
         <Text testID="casecards-end" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", marginBottom: 12 }}>
           {none ? "Nothing to practice with these options" : `${count} ${count === 1 ? "card" : "cards"}`}
         </Text>
@@ -539,7 +541,7 @@ export function CaseStack({ route, active = true }) {
   return (
     <Screen fill footer={footer}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 28 }}>
-        <Muted testID="casecards-count">{`${count} ${count === 1 ? "card" : "cards"}`}</Muted>
+        <Muted testID="casecards-count">{count ? `${count} ${count === 1 ? "card" : "cards"}` : ""}</Muted>
         {focus ? (
           <Btn kind="link" testID="casecards-focus-clear" label={`${triggerTitle(focus)} ✕`} onPress={clearFocus}
                accessibilityLabel={`Only ${triggerTitle(focus)}: show every trigger`} />

@@ -463,7 +463,7 @@ function countingCard(r, ctx) {
     if (got && /singular/i.test(t.columns[1] || "")) { made = { w, t, got, i, n: counted(r.say, w.g) }; break; }
   }
   const phrase = made ? `${made.n} ${made.got.cell[0]}` : null;
-  const back = { why: [r.why], speak: phrase || undefined,
+  const back = { why: [r.why], speak: phrase || undefined, line: row === "Genitive" ? { case: "genitive" } : undefined,
                  example: made ? { ru: phrase, en: `${r.say === "много" ? "many" : r.en} ${meaningOf(ctx, made.i) || ""}`.trim(), hl: [] } : undefined,
                  table: made ? made.t : undefined, at: made ? made.got.at : undefined, headword: made ? made.w.w : undefined };
   if (made && ctx.rng() < 0.5) {

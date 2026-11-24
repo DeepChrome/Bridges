@@ -54,7 +54,7 @@ function chapterGroups() {
 
 /* The course's own card for a unit, or nothing when that unit has none. The
    reference names units; the payload decides what they say. */
-function cardsFor(section) {
+export function cardsFor(section) {
   return (section.cards || [])
     .map((id) => {
       const unit = UN.find((u) => u.id === id);

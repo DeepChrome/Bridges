@@ -172,6 +172,22 @@ describe("case cards", () => {
     expect(within(screen.getByTestId("casecards-review")).getByTestId("casecard-table")).toBeTruthy();
   });
 
+  /* The owner, 2026-11-23: "if I click the case title (prepositional for
+     example) the table and associated rules pop up for reference". */
+  it("a tap on the case opens its page of the reference and the words that take it", async () => {
+    await stack(only(["trigger-case"], { focus: "v-where" }));
+    await start();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-pick-prepositional")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-case-open")); });
+    const sheet = await screen.findByTestId("casecard-reference");
+    expect(within(sheet).getByTestId("casecard-reference-section")).toBeTruthy();
+    expect(within(sheet).getByTestId("casecard-reference-v-where")).toBeTruthy();
+    expect(within(sheet).getByTestId("casecard-reference-o")).toBeTruthy();
+    // Only the prepositional's words: «к» takes the dative.
+    expect(within(sheet).queryByTestId("casecard-reference-k")).toBeNull();
+    expect(within(sheet).getByTestId("casecard-reference-page")).toBeTruthy();
+  });
+
   it("Back steps to the card before, as it was answered, without grading it again", async () => {
     const { BackHandler } = require("react-native");
     const handlers = [];

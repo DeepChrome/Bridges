@@ -22,20 +22,23 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Animated, BackHandler } from "react-native";
+import { View, Animated, BackHandler, Pressable } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, List, Row, RowText, Text, Muted, Sheet, Loading, Lift, toneOf, Speaker, Pill,
          OptionRow, Familiarity, Marked } from "../ui";
-import { Linked } from "../words";
+import { Linked, navRef } from "../words";
 import { useHeaderOptions } from "../headermenu";
 import { useAbout } from "../about";
-import { Table } from "../rules";
+import { Table, TopicSection } from "../rules";
+import { cardsFor } from "../screens/Grammar";
+import { topicById } from "@core/grammar";
 import { useSwap } from "../motion";
 import { Q } from "../questions";
 import { L, IX, UN, rankOf, reachedUnits } from "../data";
 import { CASES, caseById } from "@core/cases";
-import { triggerById, TRIGGER_KINDS } from "@core/triggers";
+import { triggerById, TRIGGER_KINDS, TRIGGERS } from "@core/triggers";
 import { ENDING_RULES, COUNT_RULES } from "@core/caserules";
 import { caseDeck, offered, gradeOf, itemOf, gradeItem, keepRecent, CARD_TYPES, NUMBERS } from "@core/casecards";
 import { gradeSkill, familiarity, cardFor, skillScores, schedulerOpts, isDue } from "@core/scheduler";
@@ -191,12 +194,58 @@ function OptionChoices({ options, picked, onPick }) {
   );
 }
 
+/* A case for reference, from a tap on its name (the owner, 2026-11-23: "if I
+   click the case title… the table and associated rules pop up"). The case's
+   own page of the grammar reference — the same section, drawn by the same
+   component, so the card and the reference cannot disagree — and under it
+   the words that take the case, from the trigger catalogue. */
+function CaseReference({ caseId, onClose }) {
+  const t = useTheme();
+  const topic = topicById("cases");
+  const section = topic ? topic.sections.find((s) => s.heading === caseName(caseId)) : null;
+  const takes = TRIGGERS.filter((x) => x.case === caseId && !x.gov);
+  const open = () => {
+    onClose();
+    if (navRef.isReady()) navRef.navigate("Grammar", { topic: "cases", section: caseName(caseId), only: true });
+  };
+  return (
+    <Sheet testID="casecard-reference" title={caseName(caseId)} onClose={onClose} maxHeight="88%"
+           footer={<Btn block kind="plain" testID="casecard-reference-page" label="Open the full page" onPress={open} />}>
+      {section ? <TopicSection section={{ ...section, heading: "" }} cards={cardsFor(section)} testID="casecard-reference-section" /> : null}
+      {takes.length ? (
+        <View style={{ marginTop: 12 }}>
+          <Muted size={T.small} style={{ marginBottom: 6 }}>Words that take it</Muted>
+          <List>
+            {takes.map((x) => (
+              <Row key={x.id} testID={`casecard-reference-${x.id}`}>
+                <RowText title={triggerTitle(x)} sub={x.en} />
+                <Muted size={T.small}>{x.ask}</Muted>
+              </Row>
+            ))}
+          </List>
+        </View>
+      ) : null}
+    </Sheet>
+  );
+}
+
 /* The case the answer is, always green: it is the answer, whatever was
-   picked (the red is on the wrong button already). */
+   picked (the red is on the wrong button already). A tap opens the case for
+   reference. */
 function CaseLine({ line }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
   return (
     <View testID="casecard-why" style={{ flexDirection: "row", marginBottom: 8 }}>
-      <Pill tone="good" testID="casecard-case">{caseName(line.case)}</Pill>
+      <Pressable testID="casecard-case-open" accessibilityRole="button" hitSlop={8}
+                 accessibilityLabel={`${caseName(line.case)}: the table and its rules`}
+                 onPress={() => setOpen(true)}
+                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 6, opacity: pressed ? 0.6 : 1 })}>
+        <Pill tone="good" testID="casecard-case">{caseName(line.case)}</Pill>
+        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={t.ink3} strokeWidth={2}
+             strokeLinecap="round" strokeLinejoin="round"><Path d="M9 6l6 6-6 6" /></Svg>
+      </Pressable>
+      {open ? <CaseReference caseId={line.case} onClose={() => setOpen(false)} /> : null}
     </View>
   );
 }
@@ -257,7 +306,7 @@ function CaseCard({ card, state, onPick, openTable = false }) {
               {b.speak ? <Speaker text={b.speak} size={36} recordedOnly /> : null}
             </View>
           ) : null}
-          {b.line && !b.answer ? <CaseLine line={b.line} /> : null}
+          {b.line ? <CaseLine line={b.line} /> : null}
           {miss ? <Marked testID="casecard-miss" text={miss} size={T.small} color={t.bad} style={{ marginBottom: 6 }} /> : null}
           {why.map((line, k) => (
             <Marked key={k} testID={`casecard-rule-${k}`} text={line} size={T.body} color={t.ink} style={{ marginBottom: 6 }} />

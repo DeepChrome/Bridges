@@ -339,7 +339,7 @@ export default function You({ navigation }) {
       {showing === "trouble" ? (
         <Sheet testID="trouble-sheet" title="Trouble words" onClose={() => setShowing(null)}
                footer={trouble.length ? (
-                 <Btn kind="pri" style={{ marginTop: 14 }}
+                 <Btn kind="pri" block style={{ marginTop: 14 }}
                       label={`Review ${trouble.length} trouble ${trouble.length === 1 ? "word" : "words"}`}
                       onPress={() => {
                         setShowing(null);

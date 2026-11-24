@@ -20,6 +20,13 @@ import { describeForm, GENDER_NAMES } from "@core/forms";
 import { wordFacts } from "@core/facts";
 import { entryOf, linkable } from "./words";
 import { tablesText } from "./about";
+import { PEOPLE } from "@core/names";
+
+/* The cast's names and their case forms («Не́жа», «Не́жи», «Яри́ку»): a
+   capitalised word on a name's stem with an ending of up to three letters. */
+const NAME_STEMS = Object.keys(PEOPLE).map((n) => fold(n).replace(/[аяйоеиь]$/, ""));
+const isName = (tok) => tok[0] !== tok[0].toLowerCase()
+  && NAME_STEMS.some((s) => s.length >= 3 && fold(tok).startsWith(s) && fold(tok).length - s.length <= 3);
 
 /* Words looked up for one question: enough for "время or времени?" and the
    word on screen, few enough that every table fits (backend ask.js
@@ -71,9 +78,10 @@ export function unknownIn(answer, question, grounded) {
   for (const m of text.matchAll(TOKEN)) {
     const tok = m[0], k = fold(tok);
     // An ending («-ов») is not a word, and a name («Те́дди») is not in a
-    // dictionary of words.
-    if (text[m.index - 1] === "-" || tok[0] !== tok[0].toLowerCase()) continue;
-    if (ok.has(k) || linkable(tok)) continue;
+    // dictionary of words. A capital alone does not make a name: a made-up
+    // form opening a sentence («Време…») is exactly what the check is for.
+    if (text[m.index - 1] === "-" || isName(tok)) continue;
+    if (ok.has(k) || linkable(tok) || linkable(tok.toLowerCase())) continue;
     ok.add(k);
     out.push(tok);
   }

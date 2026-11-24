@@ -242,7 +242,7 @@ const TRIGGER_MAKERS = {
      behind, + accusative for. The sibling's meaning is always among the
      wrong ones, since telling the two apart is the point. */
   "trigger-meaning": (x, ctx) => {
-    if (triggerKind(x) !== "prep") return null;
+    if (triggerKind(x) !== "prep" || !x.words) return null;
     const s = pickSighting(ctx.sightings[x.id], ctx);
     if (!s) return null;
     const sibs = siblingsOf(x).map((y) => y.en);
@@ -319,14 +319,16 @@ const TRIGGER_MAKERS = {
 /* The rule a word's cell follows, if any: shown on the back of a word card,
    so the form is seen as a pattern and not a one-off. */
 const ruleFor = (w, t, caseId, num) => ENDING_RULES.find((r) => r.case === caseId && r.num === num && fits(r, w, t)) || null;
-/* An ending rule, as a sentence: "All nouns: the prepositional plural ends in
-   «-ах» or «-ях»." */
+/* An ending rule, as a sentence: "The prepositional plural ends in «-ах» or
+   «-ях», for every noun." */
 function ruleSentence(r) {
   const what = `the ${lower(r.case)} ${numName(r.num)}`;
   const how = r.same ? `is the same as the ${r.same.toLowerCase()}`
     : r.zero ? "has no ending: the word just loses its last vowel"
     : `ends in ${r.label.split("/").map((e) => `«${e.trim()}»`).join(" or ")}`;
-  return `${capital(r.who)}: ${what} ${how}.`;
+  // "All nouns:" read as a label nobody asked for; the rule leads with the
+  // case and says whom it covers after.
+  return `${capital(what)} ${how}${r.who === "all nouns" ? ", for every noun" : ` (${r.who})`}.`;
 }
 /* A name is not a word to decline on a card: «А́нглия». */
 /* …nor is a counting word, which the lexicon files as a noun with a wrong
@@ -434,7 +436,7 @@ const RULE_MAKERS = {
       misses[c.id] = `The ${c.name.toLowerCase()} ${numName(r.num)} ${parts.join(", or ") || "ends differently"}.`;
     }
     return { check: "case", answer: r.case, i: e.i, misses,
-             front: { ask: "Which case ends like this?", big: r.cue, sub: "A noun ending" },
+             front: { ask: "Which case ends like this?", big: r.cue, sub: `A noun's ending, ${numName(r.num)}` },
              back: { line: { case: r.case }, why: [ruleSentence(r)], example: wordExample(e, ctx), speak: e.got.cell[0],
                      table: e.t, at: e.got.at, headword: e.w.w } };
   },
@@ -464,7 +466,7 @@ function countingCard(r, ctx) {
   }
   const phrase = made ? `${made.n} ${made.got.cell[0]}` : null;
   const back = { why: [r.why], speak: phrase || undefined, line: row === "Genitive" ? { case: "genitive" } : undefined,
-                 example: made ? { ru: phrase, en: `${r.say === "много" ? "many" : r.en} ${meaningOf(ctx, made.i) || ""}`.trim(), hl: [] } : undefined,
+                 example: made ? { ru: phrase, en: `${r.en} + ${meaningOf(ctx, made.i) || ""}`.trim(), hl: [] } : undefined,
                  table: made ? made.t : undefined, at: made ? made.got.at : undefined, headword: made ? made.w.w : undefined };
   if (made && ctx.rng() < 0.5) {
     return { check: "self", word: made.w.b, i: made.i,

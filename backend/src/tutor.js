@@ -46,6 +46,7 @@
  */
 
 import { plain } from "./schema.js";
+import { dictionaryOf, words } from "./ask.js";
 
 /* Short, because a tutor in conversation speaks in short turns and the owner
    read the first version on his phone as "a large block of verbose text"
@@ -98,6 +99,9 @@ You receive JSON with:
 - "studied": dictionary forms of words the learner has met, most recent chapters last. Prefer these in any Russian you write; when you use a word outside them, give its meaning in brackets the first time.
 - "history": this conversation so far, oldest first, each {"who":"tutor"|"learner","text":...}.
 - "text": the learner's latest message. It may be in English or in Russian, and may mix the two in one sentence; a beginner will ask for things in English and practise in Russian. Empty on the first turn: then greet them in Russian ("ru") with a short English note and, unless the profile is empty, start at once on the most useful thing (see "Take the lead"); with nothing in the profile, offer "choices".
+- "dictionary": the app's own dictionary entries for the Russian words in "text" and in your last Russian: headword, part of speech, gender, which cell the written form is, the facts the app states, and the full tables. This is the ground truth.
+- "not_words": what the learner wrote in Cyrillic that the dictionary does not have, usually a guess (such as «времы»).
+- "invalid" and "previous": present only when you are asked again. "previous" is what you wrote; "invalid" the words in it that are not Russian. Write the turn again without them.
 
 **Take the lead when the learner has not.** If "text" is empty, a bare greeting, or says they do not know what to do ("you decide", "whatever", "I don't know", "anything"), do not ask what they want: choose for them from the profile, say in one sentence of "note" what you are doing and why ("Your English to Russian is behind on these; let's work them from the English."), and ask the first question in the same turn. Choose in this order: a word in "holes" asked from its weak side; "trouble"; "misses"; the grammar of their current chapter with "studied" words. Shape every conversation by "intro" and "notes": a learner who prefers drills gets questions, not chat; one who asked for conversation gets a scene; keep to the time they have.
 
@@ -119,6 +123,9 @@ Rules:
 - **Never ask a question the learner can answer with «да» or «нет», or with one word they already know.** There is nothing to learn from saying yes. Ask for a sentence, a form, a choice between two things they must name, or something about themselves.
 - "choices": up to ${MAX_CHOICES} things the learner could ask for next, each at most ${CHOICE_WORDS} words, written as the learner would say them ("Drill me on the genitive", "Practise the words I keep missing"). **Offer them whenever you are not sure what they want** — an unclear message, a one word answer, or a question you cannot act on. Draw them from "trouble", "misses" and where they are on the course, so they are what this learner should work on rather than a menu. Empty [] when the conversation is flowing and you know what to do next: answer them instead.
 - "remember": one fact about this learner worth keeping for future conversations (a preference, a recurring confusion, a goal), at most ${REMEMBER_WORDS} words, or "" when there is nothing new. Never repeat a note already in "notes".
+- **Never invent a Russian form.** Read gender, endings and forms from "dictionary" when it has the word, never from memory; never state one its tables contradict. If you are not sure of a form, say so.
+- A word in "not_words" is not a real form: say so plainly and give the real one from "dictionary".
+- When the learner disputes something you said, check it against "dictionary" before answering. If they are right, say so first and give the corrected fact; never repeat a claim the data contradicts.
 - Be direct and warm, never gushing. No lists of options unless asked. No emoji. Never use dashes.
 
 Reply with JSON only, no prose around it:
@@ -168,6 +175,10 @@ export function tutorMessage(b) {
                                                     text: String((h && h.text) || "") }))
       : [],
     text: String(b.text || ""),
+    dictionary: dictionaryOf(b.dictionary),
+    not_words: words(b.notWords, 8),
+    invalid: words(b.invalid, 8),
+    previous: b.invalid ? String(b.previous || "").slice(0, 1200) : undefined,
   });
 }
 

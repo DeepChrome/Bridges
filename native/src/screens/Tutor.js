@@ -38,7 +38,8 @@ import { Screen, Btn, Muted, Text, TextInput, Note, BulbButton, Sheet,
          List, Row, SectionLabel, Choice, RowText, IconButton, ChatTurn, TypingTurn, OptionRow, ToggleRow } from "../ui";
 import { useHeaderOptions } from "../headermenu";
 import { Linked } from "../words";
-import { STAGES, studiedFor, routePosition, rankOf, lessonCount, lessonsDone } from "../data";
+import { STAGES, studiedFor, routePosition, rankOf, wordScore, lessonCount, lessonsDone } from "../data";
+import { groundQuestion, unknownIn } from "../groundask";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop, voiceFor } from "../audio";
 // The tutor is Teddy (backend/src/tutor.js), and sounds like him.
@@ -125,7 +126,7 @@ export function tutorProfile(st, now = Date.now()) {
   const seen = st.seen || {};
   const words = Object.keys(seen);
   const strong = words
-    .map((w) => ({ w, f: familiarity(cardFor(seen[w]), rankOf(w)) }))
+    .map((w) => ({ w, f: cardFor(seen[w]) ? wordScore(seen[w], w) : null }))
     .filter((x) => x.f !== null && x.f >= STRONG_AT)
     .sort((a, b) => b.f - a.f).slice(0, LIST_N).map((x) => x.w);
   /* **The data and the algorithm, not only the lists** (the owner,
@@ -242,12 +243,22 @@ function Choices({ choices, onPick, onOther }) {
 function TutorBubble({ turn, en }) {
   const t = useTheme();
   const aside = !!(turn.ru && turn.note);
+  const unchecked = turn.unchecked && turn.unchecked.length ? (
+    <Text testID="tutor-unchecked" style={{ color: t.ink3, fontSize: 13, marginTop: 4, marginLeft: 6 }}>
+      {`Not in the dictionary: ${turn.unchecked.map((w) => `«${w}»`).join(", ")}`}
+    </Text>
+  ) : null;
   return (
     <ChatTurn testID="tutor-turn" side="left" avatar={castById[GUIDE_ID].avatar}
-              below={aside ? (
-                <View testID="tutor-aside" style={{ marginTop: 6, marginLeft: 6, paddingLeft: 10,
-                                                    borderLeftWidth: 2, borderLeftColor: t.brand }}>
-                  <Note testID="tutor-note" text={turn.note} size={15} color={t.ink2} gap={4} />
+              below={aside || unchecked ? (
+                <View>
+                  {aside ? (
+                    <View testID="tutor-aside" style={{ marginTop: 6, marginLeft: 6, paddingLeft: 10,
+                                                        borderLeftWidth: 2, borderLeftColor: t.brand }}>
+                      <Note testID="tutor-note" text={turn.note} size={15} color={t.ink2} gap={4} />
+                    </View>
+                  ) : null}
+                  {unchecked}
                 </View>
               ) : null}>
       {/* The mark first: it is what the learner is waiting to see. */}
@@ -460,12 +471,30 @@ export default function Tutor({ navigation, route }) {
     setFailure(null);
     setPending(true);
     inFlight.current = true;
-    const reply = await askTutor({
+    /* Grounded in the app's dictionary, as the sparkle is (groundask.js): the
+       learner's words and the tutor's last Russian looked up, so a dispute
+       over «время» is settled by its table and not by the model's memory (the
+       owner, 2026-11-23). The reply's Russian is checked; a made-up form is
+       asked about once more, and what is still unknown is said under it. */
+    const lastRu = (history.slice().reverse().find((x) => x.who === "tutor" && x.ru) || {}).ru || "";
+    const grounded = groundQuestion(text || "", { word: lastRu });
+    const body = {
       profile: tutorProfile(st), studied: studiedFor(st),
       // A tutor turn goes back as the words it said, Russian then note, so the
       // model reads its own past turns the way the learner did.
       history: history.map((x) => ({ who: x.who, text: turnText(x) })), text,
-    });
+      dictionary: grounded.dictionary, notWords: grounded.notWords,
+    };
+    const russianOf = (r) => [r.ru, r.note, r.mark && r.mark.right].filter(Boolean).join(" ");
+    let reply = await askTutor(body);
+    let unchecked = reply && reply.ok === true ? unknownIn(russianOf(reply), `${text || ""} ${lastRu}`, grounded) : [];
+    if (unchecked.length) {
+      const again = await askTutor({ ...body, invalid: unchecked, previous: russianOf(reply) });
+      if (again && again.ok === true) {
+        reply = again;
+        unchecked = unknownIn(russianOf(again), `${text || ""} ${lastRu}`, grounded);
+      }
+    }
     if (askSeq.current === mine) inFlight.current = false;
     if (!alive.current || run !== runRef.current) return;
     setPending(false);
@@ -483,7 +512,7 @@ export default function Tutor({ navigation, route }) {
       ? { ok: reply.mark.ok, yours: String(reply.mark.yours || ""), right: String(reply.mark.right || "") } : null;
     const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "",
                    mark: mark && (mark.yours || mark.right) ? mark : null,
-                   choices: unsure.current >= CHOICES_AFTER ? suggested : [] };
+                   choices: unsure.current >= CHOICES_AFTER ? suggested : [], unchecked };
     // The Worker refuses a turn with nothing in it; this is the app refusing too.
     if (!turn.ru && !turn.note && !turn.mark) { fail({ ok: false, reason: "parse", errors: ["empty turn"] }); return; }
     setTurns((prev) => prev.concat([turn]));

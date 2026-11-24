@@ -73,6 +73,27 @@ test("the profile rides in every message, trimmed, and the history is capped", (
   assert.equal(JSON.parse(tutorMessage({})).profile.intro, null);
 });
 
+/* The tutor is grounded as the sparkle is (2026-11-24): it called «время»
+   «време», neuter in -е, and held to it. The dictionary's entries, the
+   learner's non-words and a re-ask's invalid words reach the model; the
+   prompt makes the dictionary the ground truth. */
+test("the dictionary, the learner's non-words and a re-ask ride to the tutor", () => {
+  const m = JSON.parse(tutorMessage({
+    text: "время или времы?",
+    dictionary: [{ asked: "время", word: "вре́мя", pos: "noun", gender: "neuter", tables: "Nominative: вре́мя | времена́" }],
+    notWords: ["времы"], invalid: ["време"], previous: "«време» is neuter",
+  }));
+  assert.equal(m.dictionary[0].gender, "neuter");
+  assert.deepEqual(m.not_words, ["времы"]);
+  assert.deepEqual(m.invalid, ["време"]);
+  assert.equal(m.previous, "«време» is neuter");
+  const bare = JSON.parse(tutorMessage({ text: "hi" }));
+  assert.equal(bare.dictionary, null);
+  assert.equal(bare.previous, undefined);
+  assert.match(SYSTEM_TUTOR, /Never invent a Russian form/);
+  assert.match(SYSTEM_TUTOR, /"dictionary"/);
+});
+
 /* The data and the algorithm ride along (2026-11-12): chapters worked on,
    the four skill averages, the words with a hole between their two meaning
    skills, the resting words, the days studied and the questionnaire. */

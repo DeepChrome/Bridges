@@ -8153,6 +8153,15 @@ The owner's next look at the case cards, and a bug report on the sparkle.
   replayed in part); the "?" stays on the shared model.
   `backend/eval/ask_vremya.mjs` is the regression against the live API (about
   two cents a run on Opus 5.5; Haiku 5.5 also passed, more clumsily).
+  **The personal tutor is grounded the same way** (2026-11-24; the report was
+  about the tutor, and the first fix reached only the sparkle): `Tutor.js`
+  looks up the learner's words and its own last Russian, `tutorMessage`
+  carries `dictionary`/`not_words`/`invalid`/`previous` (sharing ask.js's
+  `dictionaryOf`), the prompt makes them ground truth, and a reply with an
+  unknown form is asked once more. The tutor stays on the shared model: a
+  conversation is many turns, and Opus at two cents each is the owner's call.
+  `unknownIn` no longer passes a word for its capital («Време…» opening a
+  sentence); only the cast's names and their case forms are let through.
 - **The score a word shows is all of it** (`overallScore` in
   core/scheduler.js, `wordScore` in data.js): the mean of its meaning (both
   directions, read off the card where one was never asked), its forms for a

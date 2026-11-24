@@ -120,6 +120,42 @@ describe("tutor", () => {
     expect(Object.keys(st.seen)).toEqual([]);
   });
 
+  /* The bug report (the owner, 2026-11-23): the tutor called «время» «време»,
+     neuter in -е, and held to it. The turn carries the dictionary's entries
+     for the learner's words; a reply with a made-up form is asked once more,
+     and anything still unknown is said under the turn. A made-up form
+     opening a sentence («Време…») counts: a capital is not a name. */
+  it("grounds the tutor's turn in the dictionary and asks again over a made-up form", async () => {
+    tutor.mockResolvedValueOnce(GREET)
+         .mockResolvedValueOnce({ ok: true, ru: "Време — это слово.", en: "", note: "It is neuter.", remember: "" })
+         .mockResolvedValueOnce({ ok: true, ru: "", en: "", note: "«вре́мя» is neuter, a -мя noun.", remember: "" });
+    await open();
+    await screen.findByTestId("tutor-turn");
+    const input = screen.getByTestId("tutor-input");
+    fireEvent.changeText(input, "время или времы?");
+    await waitFor(() => expect(input.props.value).toBe("время или времы?"));
+    await act(async () => { fireEvent.press(screen.getByTestId("tutor-send")); });
+    await waitFor(() => expect(tutor).toHaveBeenCalledTimes(3));
+    const sent = tutor.mock.calls[1][0];
+    expect(sent.dictionary.find((d) => d.asked === "время")).toMatchObject({ gender: "neuter" });
+    expect(sent.notWords).toContain("времы");
+    expect(tutor.mock.calls[2][0]).toMatchObject({ invalid: ["Време"], previous: expect.stringMatching(/Време/) });
+    await waitFor(() => expect(screen.getAllByTestId("tutor-turn")).toHaveLength(2));
+    expect(screen.queryByTestId("tutor-unchecked")).toBeNull();
+  });
+
+  it("names a form still unrecognised after the second ask", async () => {
+    const bad = { ok: true, ru: "", en: "", note: "It is «време».", remember: "" };
+    tutor.mockResolvedValueOnce(GREET).mockResolvedValueOnce(bad).mockResolvedValueOnce(bad);
+    await open();
+    await screen.findByTestId("tutor-turn");
+    const input = screen.getByTestId("tutor-input");
+    fireEvent.changeText(input, "what is время?");
+    await waitFor(() => expect(input.props.value).toBe("what is время?"));
+    await act(async () => { fireEvent.press(screen.getByTestId("tutor-send")); });
+    expect(await screen.findByTestId("tutor-unchecked")).toHaveTextContent(/Not in the dictionary: «време»/);
+  });
+
   it("takes a spoken turn through the microphone", async () => {
     tutor.mockResolvedValueOnce(GREET).mockResolvedValueOnce(REPLY);
     await open();

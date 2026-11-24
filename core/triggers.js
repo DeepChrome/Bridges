@@ -141,7 +141,9 @@ const PREP_WORDS = new Set(["в", "во", "на", "о", "об", "обо", "из"
   "между", "через", "про", "при"]);
 export function triggerKind(x) {
   if (x.verbs || x.preds || x.gov === "verb") return "verb";
-  if ((x.words || []).every((w) => PREP_WORDS.has(w))) return "prep";
+  // A trigger with no words of its own («of», a noun after a noun) is not a
+  // preposition: `[].every` is true, and the meaning maker then read x.words.
+  if (x.words && x.words.length && x.words.every((w) => PREP_WORDS.has(w))) return "prep";
   return "count";
 }
 

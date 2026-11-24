@@ -287,7 +287,7 @@ export function masteryOf(st, cards) {
   for (const c of cards) {
     const card = cardFor((st.seen || {})[c.b]);
     if (!card || kindOf(card) === "new") fresh++;
-    else if (familiarity(card, rankOf(c.b)) >= MASTERED_AT) mastered++;
+    else if (wordScore(st.seen[c.b], c.b) >= MASTERED_AT) mastered++;
     else learning++;
   }
   return { mastered, learning, fresh };

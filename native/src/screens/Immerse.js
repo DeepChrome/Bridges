@@ -365,10 +365,10 @@ export function Immerse({ navigation }) {
       {suggest ? (
         <Sheet testID="suggest-sheet" title="For you" onClose={() => setSuggest(false)}
                footer={(
-                 <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-                   <Btn kind="plain" testID="suggest-more" label="Show others" style={{ flex: 1 }}
+                 <View style={{ marginTop: 10 }}>
+                   <Btn kind="pri" block label="Done" onPress={() => setSuggest(false)} />
+                   <Btn kind="link" testID="suggest-more" label="Show others" style={{ alignSelf: "center", marginTop: 4 }}
                         onPress={() => setSkip(skip + 3)} />
-                   <Btn kind="pri" label="Done" style={{ flex: 1 }} onPress={() => setSuggest(false)} />
                  </View>
                )}>
           {picks.length ? (

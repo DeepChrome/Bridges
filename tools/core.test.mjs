@@ -2548,6 +2548,11 @@ group("a chapter's grammar run");
     ok(!!mne && sight.pomogat.some((s) => s.pronoun), "pronouns count: «мне на́до», «помоги́ мне»");
     ok(!filed("Мне надо ей сказать.").includes("govorit") || sight.govorit.some((s) => s.ru === "Мне надо ей сказать." && fold(s.token) === "ей"),
        "«мне» in «Мне на́до ей сказа́ть» is «на́до»'s, «ей» is «сказа́ть»'s");
+    // A trigger with no words of its own («of») is not a preposition: as one it
+    // reached the meaning maker, which read its words and threw (2026-11-24).
+    ok(T.TRIGGERS.every((x) => T.triggerKind(x) !== "prep" || (x.words && x.words.length)),
+       "only a trigger with words is a preposition");
+    ok(T.triggerKind(T.triggerById("of")) === "count", "«of» sits with counting and нет");
     // Siblings: «за» has two, a verb none.
     ok(T.siblingsOf(T.triggerById("za-instr")).map((x) => x.id).join() === "za-acc", "«за» behind and «за» for are siblings");
     ok(!T.siblingsOf(T.triggerById("pomogat")).length, "a verb trigger has no sibling");

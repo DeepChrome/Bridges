@@ -97,7 +97,7 @@ const str = (x, n = 300) => (x === undefined || x === null ? null : String(x).sl
    (native/src/groundask.js), cut to DICTIONARY_CHARS as JSON: three words'
    full tables fit, a fourth is dropped before any table is cut. */
 export const DICTIONARY_CHARS = 4000;
-function dictionaryOf(d) {
+export function dictionaryOf(d) {
   if (!Array.isArray(d)) return null;
   const out = d.slice(0, 4).filter((x) => x && typeof x === "object").map((x) => ({
     asked: str(x.asked, 60), word: str(x.word, 60), pos: str(x.pos, 20), gender: str(x.gender, 20),
@@ -107,7 +107,7 @@ function dictionaryOf(d) {
   while (out.length && JSON.stringify(out).length > DICTIONARY_CHARS) out.pop();
   return out.length ? out : null;
 }
-const words = (a, n) => (Array.isArray(a) ? a.slice(0, n).map((w) => str(w, 40)).filter(Boolean) : undefined);
+export const words = (a, n) => (Array.isArray(a) ? a.slice(0, n).map((w) => str(w, 40)).filter(Boolean) : undefined);
 
 /* The card, numbered as the screen numbers it, cut to CARD_CHARS as JSON so
    a long entry costs a bounded number of tokens. */

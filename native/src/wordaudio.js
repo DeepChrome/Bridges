@@ -24,7 +24,7 @@ export const PACKS = [
   {"id":"ch8-931b309d84","label":"ch8","chapter":8,"bytes":10433678,"count":1688},
   {"id":"ch9-48a1f99987","label":"ch9","chapter":9,"bytes":7232984,"count":1225},
   {"id":"ch10-1b378cd8f8","label":"ch10","chapter":10,"bytes":6478934,"count":1093},
-  {"id":"more1-b99eeab2fe","label":"more1","chapter":null,"bytes":12895212,"count":3061},
+  {"id":"more1-ac3bcb62b3","label":"more1","chapter":null,"bytes":12895308,"count":3061},
 ];
 
 export const WORD_CLIPS = {

@@ -8121,6 +8121,64 @@ Cases hub row open it with `params.tab`.
   eight sentences in the corpus and are not offered. They come in by
   themselves as sentences are added; nothing is written to fill them.
 
+## 30df. A card says what it asks and why; the AI answers from the dictionary (2026-11-23)
+
+The owner's next look at the case cards, and a bug report on the sparkle.
+
+- **A case card is single, about one thing, asked one of thirteen ways**
+  (paths are gone; `CARD_TYPES` in core/casecards.js, `core/caserules.js`
+  for the endings, counting and question words). Every card carries
+  `front.ask` (the question in a line), `back.why` (the rule as sentences,
+  Russian in «guillemets», drawn by `Marked`), an example with its English,
+  the noun's table (`tableOpen` where the table is the point, a "Table" link
+  elsewhere), and `misses` — what a wrong pick would have been, read off the
+  noun's own table (`caseMisses`) or the catalogue. The end screen lists the
+  misses; each reopens the card in a sheet with its table. *"Confusing what's
+  even being asked but more confusing that we don't know the rule"* is what
+  a card without these was. `core.test.mjs` fails a card with no question, no
+  rule, a sentence or example with no English, or an unexplained wrong pick.
+  Counting cards count a real noun, the number in its gender («одна́
+  ло́жка», «две ло́жки»).
+- **The sparkle answers from the app's dictionary** (native/src/groundask.js;
+  the report: «время» called «време», neuter in -е, and defended).
+  `groundQuestion` sends each Russian word of the question with its gender,
+  the cell asked about, the entry's facts and its whole tables
+  (`dictionary`), and what the dictionary does not have (`notWords`); the
+  prompt makes that ground truth and says to re-check when disputed.
+  `unknownIn` checks the answer's Russian against the dictionary: one more
+  ask over the strangers (`invalid`, `previous`), and what is still unknown is
+  said under the answer. The route has its own model (`ASK_MODEL`,
+  `ASK_EFFORT` in wrangler.toml; Opus 5.5 at low effort, server-side
+  fallback, retries sent fresh because a thinking model's turn cannot be
+  replayed in part); the "?" stays on the shared model.
+  `backend/eval/ask_vremya.mjs` is the regression against the live API (about
+  two cents a run on Opus 5.5; Haiku 5.5 also passed, more clumsily).
+- **The score a word shows is all of it** (`overallScore` in
+  core/scheduler.js, `wordScore` in data.js): the mean of its meaning (both
+  directions, read off the card where one was never asked), its forms for a
+  word that inflects (0 until asked) and its use once asked. «брат» at 100
+  with its cases at 0 was the report. The schedule still runs on the card;
+  every ring, word row, entry and the Stats levels read the shown score.
+- **How common a word is weighs in the review** (`commonness`,
+  `FILL_WEIGHTS.common` in core/queue.js); Study options → Focus → Common
+  words weighs it again (`COMMON_FOCUS_POWER`, `st.reviewFocus`).
+- **A held microphone listens `RELEASE_TAIL_MS` (0.7 s) past the release**,
+  and ticks (haptics `tap`) when the engine is really listening: the start
+  and end of what was said were being cut.
+- **Inter put every stress mark on the next letter.** It registers its
+  `mark`/`mkmk` features under Latin and the default script only, so a
+  shaper never placed U+0301 on Cyrillic, and я and Ю had no anchor at all.
+  `tools/patch_inter_marks.py` (fontTools, a scratch venv; not the pipeline)
+  patches the four files in place; `--check` says whether a font has it.
+  Re-run it on any new Inter drop. It read to the owner as "words slightly
+  clipped".
+- **A person's keep beats the pitch tool.** «бесплатный» and «выглядеть»
+  sounded worse after four intonation re-buys; their first clips are back,
+  with a `keep` verdict that both `audio_intonation.py --flag` and
+  `--rebuy-flagged` respect. Changing `data/word_audio/manifest.json` does
+  nothing until `build_word_assets.mjs` runs and the changed pack is
+  uploaded.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

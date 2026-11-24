@@ -8158,8 +8158,10 @@ The owner's next look at the case cards, and a bug report on the sparkle.
   looks up the learner's words and its own last Russian, `tutorMessage`
   carries `dictionary`/`not_words`/`invalid`/`previous` (sharing ask.js's
   `dictionaryOf`), the prompt makes them ground truth, and a reply with an
-  unknown form is asked once more. The tutor stays on the shared model: a
-  conversation is many turns, and Opus at two cents each is the owner's call.
+  unknown form is asked once more. The tutor runs on the ask route's model
+  too (`TUTOR_MODEL`, `TUTOR_EFFORT`; the owner's call, 2026-11-24), about
+  two cents a turn — `GLOBAL_DAILY_CAP` was priced at Haiku's rates and
+  bounds calls, not dollars, so the Anthropic console's limit is the stop.
   `unknownIn` no longer passes a word for its capital («Време…» opening a
   sentence); only the cast's names and their case forms are let through.
 - **The score a word shows is all of it** (`overallScore` in

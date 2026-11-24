@@ -192,7 +192,10 @@ test("POST /v1/tutor: 401 without a token, 400 without text, the reply through, 
   assert.equal(body.note, "Ready for a drill?");
   assert.equal(body.ru, "Привет!");
   assert.equal(body.en, "Hi!");
-  assert.equal(up.calls[0].max_tokens, 700);
+  // The ask route's model: room for its thinking, and the model named.
+  assert.equal(up.calls[0].max_tokens, 3000);
+  assert.equal(up.calls[0].model, "claude-opus-5-5");
+  assert.equal(up.calls[0].output_config.effort, "low");
   assert.match(up.calls[0].system[0].text, /personal Russian tutor/);
 
   const e = env({ TALK_DAILY_CAP: "1" });

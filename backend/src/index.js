@@ -337,7 +337,13 @@ const ROUTES = {
      whichever screen asked. */
   "/v1/tutor": {
     kind: "tutor", counter: "talk", cap: (env) => parseInt(env.TALK_DAILY_CAP, 10) || DEFAULT_TALK_CAP,
-    maxTokens: 700, system: SYSTEM_TUTOR,
+    /* On the ask route's model since 2026-11-24 (the owner: "you can let the
+       tutor use smarter AI"): the «време» report was the tutor's. The budget
+       covers the thinking as well as the turn, and a retry is sent fresh for
+       the same reason as the ask's. */
+    maxTokens: 3000, system: SYSTEM_TUTOR, freshRetry: true,
+    model: (env) => env.TUTOR_MODEL || env.ASK_MODEL || "claude-opus-5-5",
+    effort: (env) => env.TUTOR_EFFORT || env.ASK_EFFORT || "low",
     check: (b) => (typeof b.text === "string" && Array.isArray(b.history) ? null : "text and history are required"),
     message: (b) => tutorMessage(b),
     validate: (parsed) => validateTutor(parsed),

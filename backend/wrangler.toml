@@ -34,6 +34,9 @@ MODEL = "claude-haiku-4-5-20251001"
 # Russian forms (2026-11-23). Thinking always on; effort steers its depth.
 ASK_MODEL = "claude-opus-5-5"
 ASK_EFFORT = "low"
+# The personal tutor too (2026-11-24, the owner's call): about 2c a turn.
+TUTOR_MODEL = "claude-opus-5-5"
+TUTOR_EFFORT = "low"
 DAILY_CAP = "300"
 # Conversation turns a day for one user: a backstop against a runaway loop, not a
 # budget — the owner lifted the three-sessions limit on 2026-09-07.

@@ -8,7 +8,7 @@ that are eligible there. Sometimes it's specific verbs that are triggers."*
 
 This file is the design. `core/triggers.js` is the catalogue,
 `core/questions.js triggerSightings` sorts the corpus under it,
-`core/casecards.js` builds the paths and the session, and
+`core/casecards.js` builds the deck from them and `core/caserules.js`, and
 `native/src/flows/CaseCards.js` is the screen.
 
 ## What the research says
@@ -59,62 +59,66 @@ so after «к» it is dative, after «о» prepositional, and with no prepositio
 it can only be dative. Personal pronouns count as nouns («у меня́», «с ним»,
 «помоги́ мне»), since that is mostly what the verb triggers take.
 
-**A path is three or four cards on one trigger, and every card shows a
-different word.** The trigger stays the same and the word changes, so one
-trigger reaches dozens of nouns. That is the owner's "many many many words".
-There are four card faces:
+**Single cards, each about one thing, asked many ways.** The owner tried
+paths of three or four cards the same day and set them aside: *"just stick
+to flashcards similar to the vocab/sentence flashcards except they can all
+target different parts of cases… Make sure the cards go multiple
+directions… some cards can even just be like… plural genitive ending."*
+So a card is about one of four kinds of thing — a trigger, an ending rule
+(`core/caserules.js`), a counting rule or a case's question words, or one of
+the learner's own words — and there are thirteen kinds of card
+(`core/casecards.js CARD_TYPES`):
 
-| Face | The front | The answer | Checked by |
+| Card | The front | The answer | Checked by |
 |---|---|---|---|
-| **Notice** | A real sentence with the noun marked | Which case | A tap on the case: right or wrong |
-| **Trigger** | The trigger and its meaning: «за» *behind* | Which case | A tap on the case |
-| **Form** | The trigger and the noun's dictionary form: «без» + «сестра́» | «без сестры́» | Self-graded, as a flashcard |
-| **Use** | The sentence with a gap, the dictionary form given | The form in place | Self-graded, as a flashcard |
+| Trigger → case | «без», or «помога́ть» as a sentence used it | the case | a tap on the five |
+| Case → trigger | "Instrumental" | which of four words takes it | one of four |
+| Trigger → meaning | «за» + Instrumental | *behind*; the sibling's meaning always a wrong option | one of four |
+| Sentence → case | a real sentence, the noun marked | the case | a tap |
+| What sets the case | the sentence and its case | which of its words does | one of four |
+| Fill the gap | the sentence with a gap, the dictionary form | the form | self-graded |
+| Build the phrase | «без» + «сестра́» | «без сестры́» | self-graded |
+| Word → case form | «кни́га», Instrumental | «кни́гой», with the rule it follows | self-graded |
+| Form → case | «кни́гой» | the case (only a form that is one case in its table) | a tap |
+| Case → ending | Genitive plural, masculine, like «стол» | -ов | self-graded |
+| Ending → case | -ами / -ями (only endings no other case has) | the case | a tap |
+| Counting | «два, три, четы́ре» + … ; or «три» + «стол» | genitive singular; «три стола́» | one of four; self-graded |
+| Question words | «кому́? чему́?» ; or Dative | the case; the questions | a tap; self-graded |
 
-The two recognition faces are checked by the app, because "which case" has
-one right answer. The two production faces are self-graded, as every
-flashcard in the app is. The case buttons are always the same five, in
-teaching order, so their position cannot give the answer away.
+The case buttons are always the same five, in teaching order, so their
+position cannot give the answer away.
 
-**The cards of a path are mixed and matched, not a fixed order**
-(`composeFaces`; the owner, the same day: *"sometimes maybe the sentence
-comes first"*). The rules that keep it a path:
+**No example is written for a rule.** An ending rule names the kinds of noun
+it is for and how to check one; the example on the card is a real noun's own
+form read off its table, and a noun whose form does not follow the rule
+(«друг», «друзе́й») is never shown under it. The counting phrases are a
+number and a table cell, as the drills build.
 
-- Three cards, or four for a trigger not yet held well.
-- A trigger never met opens on something to look at before anything to say:
-  a sentence (Notice) or the trigger itself. This is point 2. Once met, a path
-  opens on any face, the gap sentence included (point 3).
-- Every path holds at least one card checked by a tap and one the learner
-  says. No face comes twice running, or twice at all where there is room.
-- Now and then, once a sibling has been met, the second card is the same
-  face on the sibling: «за» + instrumental, then «за» + accusative. That is
-  the contrast, because discrimination needs two things to tell apart
-  (point 4).
-
-The options can fix the opener: Sentence first or Trigger first.
+**The words are the learner's own** (the owner: *"prioritize the vocabulary
+words that the user is familiar with… especially ones where the user has
+maybe a high recall but a low case performance"*). Every met noun and
+case-taking pronoun is weighted by its recall (its meaning scores) against
+its "Cases & forms" score, and the word cards draw by that weight; the
+sentences for a trigger prefer the same words. A learner with fewer than 25
+of their own words also gets the course's first nouns, at a low weight.
 
 **It is a stack, like the word cards.** It is Study's **Cases** tab, beside
-Vocabulary. The learner sees one card, then the next. Nothing on screen
-names a path: the cards behind the first are connected, but only the app
-knows it. A few paths are dealt at a time, and the next few are dealt when
-they run out, so the stack goes on until Finish. Within a path the cards are
-blocked, which is how a trigger gets learned. Across paths the triggers are
-mixed, never two of the same case running when that can be avoided, which is
-how the triggers get told apart (point 4). Due triggers come first, then new
-ones in teaching order (two in the first deal, one in each after), then the
-ones least recently seen. Triggers already met in the sitting go to the back,
-so a long sitting keeps moving across triggers. Teaching order starts with
-the contrasts a beginner needs first: «в»/«на» for where, then for where to.
-One trigger can be practised on its own from the options.
+Vocabulary: ten cards dealt at a time, the next ten when they run out, until
+Finish. No two cards in a deal are about one thing, no kind of card comes
+twice running, no sentence twice. Due things come first, then new ones (three
+triggers and three rules in the first deal, two after), then the least
+recently seen; what this sitting has met goes to the back. A trigger never
+met is first met as something to look at (point 2). Back steps to the card
+before, as it was answered. The options pick the cards, the cases, singular
+or plural, the kinds of trigger, or one trigger asked every way.
 
-**What is remembered.** Each trigger has its own FSRS card in `st.caseCards`.
-That is a progress key, so it syncs and a reset clears it. A path grades its
-trigger once. A wrong case or an Again gives Again. Any Hard gives Hard.
-Otherwise the result is Good, or Easy when every production card was Easy.
-A contrast path grades both siblings from their own cards. Production cards
-also move the noun's "Cases & forms" score, as Form cards do (§30by). They
-never move the word's meaning card. The last 200 sentences shown are kept,
-so the next sessions draw others first.
+**What is remembered.** Each trigger and rule has its own FSRS card in
+`st.caseCards` (a trigger by its id; `end:`, `count:`, `q:` for the rest).
+That is a progress key, so it syncs and a reset clears it. Every answer
+grades at once: a right tap Good, a wrong one Again, a said card its own
+grade. A card on one word's forms moves that word's "Cases & forms" score, as
+Form cards do (§30by), never its meaning card. The last 200 sentences shown
+are kept, so the next deals draw others first.
 
 **What it deliberately does not do.**
 

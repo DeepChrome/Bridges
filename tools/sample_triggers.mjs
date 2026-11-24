@@ -18,7 +18,7 @@ import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { parseDeep } from "../core/search.js";
 import { TRIGGERS } from "../core/triggers.js";
 import { TOKEN } from "../core/util.js";
-import { PATH_MIN_SENTENCES } from "../core/casecards.js";
+import { MIN_SENTENCES } from "../core/casecards.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const data = loadPayload(ROOT);
@@ -53,10 +53,10 @@ for (const x of TRIGGERS) {
   if (only && x.id !== only) continue;
   const list = all[x.id].slice().sort((a, b) => a.ease - b.ease);
   const nouns = new Set(list.map((s) => s.i)).size;
-  const ok = list.length >= PATH_MIN_SENTENCES;
+  const ok = list.length >= MIN_SENTENCES;
   if (ok) offered++;
   console.log(`${ok ? " " : "-"} ${x.id.padEnd(12)} ${x.case.padEnd(13)} ${String(list.length).padStart(4)} sentences ${String(nouns).padStart(4)} nouns  ${x.en}`);
   if (countsOnly) continue;
   for (const s of list.slice(0, only ? 20 : 3)) console.log(`      ${mark(s)}  — ${s.en}`);
 }
-console.log(`\n${offered} of ${TRIGGERS.length} triggers have at least ${PATH_MIN_SENTENCES} sentences`);
+console.log(`\n${offered} of ${TRIGGERS.length} triggers have at least ${MIN_SENTENCES} sentences`);

@@ -1,11 +1,11 @@
-/* Case cards (flows/CaseCards.js; docs/case-cards.md): a stack of flashcards
- * on the words that decide a case, as Study's Cases tab. Pinned: the tab and
- * the tile that opens it; the stack shows one card at a time and never names
- * a path; a front is never word-linked (a word's sheet names its form, which
- * is the answer); a case card is checked by a tap and a production card graded
- * by the learner; a path grades its trigger once and moves the forms score of
- * the words it produced, never their meaning card; the stack runs on past a
- * path, onto another trigger; Finish ends on what was met. */
+/* Case cards (flows/CaseCards.js; core/casecards.js): a stack of flashcards
+ * on the cases, as Study's Cases tab. Pinned: the tab and the tile that opens
+ * it; a front is never word-linked (a word's sheet names its form, which is
+ * the answer); a case card is checked by a tap, a choice card by one of four,
+ * a production card graded by the learner; every answer grades at once — the
+ * trigger or rule in `caseCards`, a word's forms score and never its meaning
+ * card; the stack runs across many kinds of card; Finish ends on what was
+ * met. */
 
 import React from "react";
 import { render, screen, fireEvent, act, within } from "@testing-library/react-native";
@@ -16,6 +16,8 @@ import { flushState } from "../src/store";
 import Study from "../src/screens/Study";
 import { CaseStack } from "../src/flows/CaseCards";
 import { Practice } from "../src/screens/Practice";
+import { review } from "@core/scheduler";
+import { CARD_TYPES } from "@core/casecards";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn(), replace: jest.fn(),
               addListener: () => () => {} };
@@ -31,24 +33,21 @@ async function withProfile(ui, state = {}) {
 }
 const saved = async () => { await flushState(); return global.__db.saved("p1"); };
 const stack = (state, key = "cards-1") => withProfile(<CaseStack route={{ key, name: "Cards" }} />, state);
-const onlyOne = (id) => ({ drillPrefs: { casecards: { focus: id } } });
-
-/* Every link inside a node: a word-linked sentence renders its words with the
-   link role (words.js Linked). */
+const only = (types, extra = {}) => ({ drillPrefs: { casecards: { types, ...extra } } });
 const links = (node) => within(node).queryAllByRole("link");
+const start = async () => { await act(async () => { fireEvent.press(await screen.findByTestId("casecards-start")); }); };
 
-/* Answers the card on top: the case named, or Show and a grade. */
-async function answer(caseId, g = 3) {
+/* Answers whatever card is on top, and moves on. */
+async function answerAny(g = 3) {
   if (screen.queryByTestId("casecard-show")) {
     await act(async () => { fireEvent.press(screen.getByTestId("casecard-show")); });
     await act(async () => { fireEvent.press(screen.getByTestId(`casecard-grade-${g}`)); });
-    return "said";
+    return;
   }
-  await act(async () => { fireEvent.press(await screen.findByTestId(`casecard-pick-${caseId}`)); });
+  const pick = screen.queryByTestId("casecard-pick-genitive") || screen.getByTestId("casecard-opt-0");
+  await act(async () => { fireEvent.press(pick); });
   await act(async () => { fireEvent.press(screen.getByTestId("casecard-next")); });
-  return "checked";
 }
-const start = async () => { await act(async () => { fireEvent.press(await screen.findByTestId("casecards-start")); }); };
 
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });
 afterEach(async () => { await flushState(); });
@@ -75,12 +74,10 @@ describe("case cards", () => {
     expect(nav.navigate).toHaveBeenCalledWith("Study", { screen: "Cards", params: { tab: "cases" } });
   });
 
-  it("opens on a card to look at, unlinked, with five cases to tap — and no path named", async () => {
-    await stack({ drillPrefs: { casecards: { focus: "v-where", order: "example" } } });
+  it("a sentence card: unlinked, five cases to tap, checked at once and graded at once", async () => {
+    await stack(only(["sentence-case"], { focus: "v-where" }));
     await start();
-    expect(screen.getByTestId("casecard-stack")).toBeTruthy();
-    expect(screen.queryByText(/path/i)).toBeNull();
-    const card = screen.getByTestId("casecard-notice");
+    const card = screen.getByTestId("casecard-sentence-case");
     expect(links(card)).toHaveLength(0);
     expect(within(card).getByTestId("casecard-noun")).toBeTruthy();
     for (const c of ["prepositional", "accusative", "genitive", "dative", "instrumental"]) {
@@ -90,90 +87,102 @@ describe("case cards", () => {
     await act(async () => { fireEvent.press(screen.getByTestId("casecard-pick-prepositional")); });
     expect(screen.getByTestId("casecard-why")).toBeTruthy();
     expect(screen.getByTestId("casecard-next")).toBeTruthy();
-  });
-
-  it("walks a path: checks the cases, takes the learner's grades, grades the trigger once, and runs on", async () => {
-    await stack(onlyOne("v-where"));
-    await start();
-    // A trigger never met is a four-card path.
-    let said = 0;
-    for (let k = 0; k < 4; k++) {
-      if (screen.queryByTestId("casecard-show")) {
-        // A production card: plain on the front, the answer only on Show.
-        expect(screen.queryByTestId("casecard-answer")).toBeNull();
-        await act(async () => { fireEvent.press(screen.getByTestId("casecard-show")); });
-        expect(screen.getByTestId("casecard-answer")).toBeTruthy();
-        await act(async () => { fireEvent.press(screen.getByTestId("casecard-grade-3")); });
-        said++;
-      } else await answer("prepositional");
-    }
-    expect(said).toBeGreaterThanOrEqual(1);
     const st = await saved();
     expect(st.caseCards["v-where"].reps).toBe(1);
-    expect(Object.keys(st.caseCards)).toEqual(["v-where"]);
-    // The produced nouns moved their forms score, and no meaning card.
-    const forms = Object.keys(st.seen).filter((w) => st.seen[w].forms);
-    expect(forms.length).toBeGreaterThanOrEqual(1);
-    for (const w of forms) expect(st.seen[w].recognise).toBeUndefined();
-    expect(st.drills.casecards.recent).toHaveLength(4);
-    // The stack goes on: another card is on top, and the count says four.
-    expect(screen.getByTestId("casecard-stack")).toBeTruthy();
-    expect(screen.getByTestId("casecards-count").props.children).toBe("4 cards");
   });
 
-  it("runs on to another trigger when not focused", async () => {
-    await stack({});
+  it("a wrong case is Again", async () => {
+    await stack(only(["trigger-case"], { focus: "v-where" }));
     await start();
-    const seen = new Set();
-    for (let guard = 0; guard < 24; guard++) {
-      const why = async () => {
-        // Answer whatever is on top with the wrong case if need be; read the trigger off the back.
-        if (screen.queryByTestId("casecard-show")) {
-          await act(async () => { fireEvent.press(screen.getByTestId("casecard-show")); });
-        } else {
-          await act(async () => { fireEvent.press(screen.getByTestId("casecard-pick-genitive")); });
-        }
-        seen.add(within(screen.getByTestId("casecard-why")).getByTestId("casecard-case").props.children);
-        if (screen.queryByTestId("casecard-grade-3")) await act(async () => { fireEvent.press(screen.getByTestId("casecard-grade-3")); });
-        else await act(async () => { fireEvent.press(screen.getByTestId("casecard-next")); });
-      };
-      await why();
-    }
-    // Twenty-four cards cross more than one case.
-    expect(seen.size).toBeGreaterThan(1);
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-pick-dative")); });
     const st = await saved();
-    expect(Object.keys(st.caseCards).length).toBeGreaterThan(2);
-  });
-
-  it("a wrong case marks the pick red and the trigger is graded Again", async () => {
-    await stack({ drillPrefs: { casecards: { focus: "v-where", order: "example" } } });
-    await start();
-    await act(async () => { fireEvent.press(await screen.findByTestId("casecard-pick-dative")); });
-    expect(screen.getByTestId("casecard-case")).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByTestId("casecard-next")); });
-    for (let k = 1; k < 4; k++) await answer("prepositional", 4);
-    const st = await saved();
-    // Again on a new card is a learning step, not a review.
     expect(st.caseCards["v-where"].state).not.toBe(2);
   });
 
-  it("Finish ends on the triggers met, and Keep going deals again", async () => {
-    await stack(onlyOne("za-instr"));
+  it("a word card moves the word's forms score and never its meaning card", async () => {
+    const now = Date.now();
+    const seen = { "книга": { recognise: review(null, 4, now - 9 * 86400000) } };
+    await stack({ seen, ...only(["make-case"]) });
     await start();
-    for (let k = 0; k < 5; k++) await answer("instrumental");
+    expect(screen.getByTestId("casecard-make-case")).toBeTruthy();
+    expect(screen.queryByTestId("casecard-answer")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-show")); });
+    expect(screen.getByTestId("casecard-answer")).toBeTruthy();
+    expect(screen.getByTestId("casecard-table")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-grade-3")); });
+    const st = await saved();
+    const forms = Object.keys(st.seen).filter((w) => st.seen[w].forms);
+    expect(forms).toHaveLength(1);
+    if (forms[0] !== "книга") expect(st.seen[forms[0]].recognise).toBeUndefined();
+    expect(st.seen["книга"].recognise.reps).toBe(seen["книга"].recognise.reps);
+    expect(st.caseCards || {}).toEqual({});
+  });
+
+  it("a choice card offers four and checks the one picked", async () => {
+    await stack(only(["trigger-meaning"]));
+    await start();
+    for (const k of [0, 1, 2, 3]) expect(screen.getByTestId(`casecard-opt-${k}`)).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-opt-0")); });
+    expect(screen.getByTestId("casecard-next")).toBeTruthy();
+    const st = await saved();
+    expect(Object.keys(st.caseCards)).toHaveLength(1);
+  });
+
+  it("runs on across many kinds of card", async () => {
+    await stack({ seen: { "стол": { recognise: review(null, 3, Date.now() - 86400000) } } });
+    await start();
+    const kinds = new Set();
+    for (let k = 0; k < 30; k++) {
+      for (const x of CARD_TYPES) if (screen.queryByTestId(`casecard-${x.id}`)) kinds.add(x.id);
+      await answerAny();
+    }
+    expect(kinds.size).toBeGreaterThanOrEqual(6);
+    expect(screen.getByTestId("casecards-count").props.children).toBe("30 cards");
+  });
+
+  it("Finish ends on what was met, and Keep going deals again", async () => {
+    await stack(only(["trigger-case", "sentence-case"], { focus: "za-instr" }));
+    await start();
+    for (let k = 0; k < 3; k++) await answerAny();
     await act(async () => { fireEvent.press(screen.getByTestId("casecards-finish")); });
-    expect(screen.getByTestId("casecards-end")).toBeTruthy();
-    expect(screen.getAllByTestId(/^casecards-result-/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByTestId("casecards-end").props.children).toMatch(/of 3 right/);
+    expect(screen.getByTestId("casecards-result-za-instr")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByTestId("casecards-keep-going")); });
     expect(await screen.findByTestId("casecard-stack")).toBeTruthy();
   });
 
-  it("keeps its options in drillPrefs, from the + menu: one trigger, cases, kinds, opener", async () => {
+  it("Back steps to the card before, as it was answered, without grading it again", async () => {
+    const { BackHandler } = require("react-native");
+    const handlers = [];
+    const spy = jest.spyOn(BackHandler, "addEventListener").mockImplementation((ev, fn) => {
+      handlers.push(fn);
+      return { remove: () => { const k = handlers.indexOf(fn); if (k >= 0) handlers.splice(k, 1); } };
+    });
+    const pressBack = async () => { let took; await act(async () => { took = handlers[handlers.length - 1](); }); return took; };
+    await stack(only(["trigger-case"], { focus: "v-where" }));
+    await start();
+    // Nothing to step back to on the first card: the gesture is the app's.
+    expect(await pressBack()).toBe(false);
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-pick-prepositional")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-next")); });
+    expect(await pressBack()).toBe(true);
+    // The card before, answered, with the way forward.
+    expect(screen.getByTestId("casecard-why")).toBeTruthy();
+    expect(screen.queryByTestId("casecards-finish")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-forward")); });
+    expect(screen.queryByTestId("casecard-why")).toBeNull();
+    expect(screen.getByTestId("casecards-finish")).toBeTruthy();
+    const st = await saved();
+    expect(st.caseCards["v-where"].reps).toBe(1);
+    spy.mockRestore();
+  });
+
+  it("keeps its options in drillPrefs, from the + menu", async () => {
     await stack({});
     await screen.findByTestId("casecards-start");
     await act(async () => { global.__openOptions(); });
     expect(await screen.findByTestId("casecards-options")).toBeTruthy();
-    for (const id of ["focus", "cases", "kinds", "order"]) expect(screen.getByTestId(`casecards-${id}`)).toBeTruthy();
+    for (const id of ["types", "cases", "numbers", "kinds", "focus"]) expect(screen.getByTestId(`casecards-${id}`)).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByTestId("casecards-focus")); });
     await act(async () => { fireEvent.press(await screen.findByTestId("casecards-focus-opt-za-instr")); });
     const st = await saved();

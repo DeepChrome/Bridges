@@ -51,9 +51,10 @@ export const HELP = {
     ["Drills", "On the back: every drill for that word"],
     ["Low priority", "Out of the rotation; Options lists them"],
     ["Switch", "Offered when one direction falls far behind"],
-    ["Cases", "Cards on the words that decide a case: «без», «помога́ть»"],
+    ["Cases", "Case cards: triggers, sentences, endings, forms, counting"],
     ["Which case?", "Tap one of the five; checked at once"],
-    ["Trigger", "In the + menu: one trigger on its own"],
+    ["Case options", "In the + menu: cards, cases, number, one trigger"],
+    ["Back", "On a case card: the card before"],
   ] },
   WordDrill: { title: "One word's drill", lines: [
     ["a_", "The answer a piece at a time; costs the grade"],

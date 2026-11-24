@@ -2552,111 +2552,128 @@ group("a chapter's grammar run");
     ok(T.siblingsOf(T.triggerById("za-instr")).map((x) => x.id).join() === "za-acc", "«за» behind and «за» for are siblings");
     ok(!T.siblingsOf(T.triggerById("pomogat")).length, "a verb trigger has no sibling");
 
-    /* Paths. A seeded draw, so a failure names the same session each run. */
+    /* The deck. A seeded draw, so a failure names the same deck each run. */
+    const R = await import("../core/caserules.js");
+    const rules = R.checkCaseRules();
+    ok(!rules.length, "the case rules: an id once, a real case, one way to check, a cue no other case has", rules.join("; "));
     let seed = 7;
     const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    const fresh = CC.caseSession({ sightings: sight, rng });
-    ok(fresh.length === CC.SESSION_PATHS, `a first deal is ${CC.SESSION_PATHS} paths (${fresh.length})`);
-    ok(fresh.every((p) => ["notice", "trigger"].includes(p.faces[0]) && p.cards.length === 4),
-       "a trigger never met opens on something to look at, four cards");
-    // The composer's own rules, over many draws.
-    const facesBad = [], openers = new Set();
-    for (let r = 0; r < 400; r++) {
-      const args = { isNew: r % 3 === 0, strong: r % 5 === 0 && r % 3 !== 0, sibling: r % 2 === 0, rng };
-      const f = CC.composeFaces(args);
-      const plain = f.map((x) => x.replace(":sib", ""));
-      if (!args.isNew) openers.add(plain[0]);
-      if (f.length < 3 || f.length > 4) facesBad.push(`${f.length} cards`);
-      if (args.strong && f.length !== 3) facesBad.push("a strong trigger takes four");
-      if (args.isNew && !["notice", "trigger"].includes(plain[0])) facesBad.push(`new opens on ${plain[0]}`);
-      if (!plain.some((x) => x === "notice" || x === "trigger")) facesBad.push(`nothing checked: ${f}`);
-      if (!plain.some((x) => x === "form" || x === "use")) facesBad.push(`nothing said: ${f}`);
-      for (let k = 1; k < f.length; k++) if (f[k] === f[k - 1]) facesBad.push(`twice running: ${f}`);
-      if (f.some((x) => x.endsWith(":sib")) && (args.isNew || !args.sibling)) facesBad.push(`a contrast without a met sibling: ${f}`);
-    }
-    ok(!facesBad.length, "a path mixes its cards: 3–4, one checked and one said, nothing twice running", facesBad.slice(0, 4).join("; "));
-    ok(["notice", "trigger", "use"].every((f) => openers.has(f)), `a met trigger opens on any card, the sentence included: ${[...openers]}`);
-    ok(CC.composeFaces({ isNew: false, order: "example", rng })[0] === "notice"
-       && CC.composeFaces({ isNew: false, order: "rule", rng })[0] === "trigger", "the order option sets the opener");
-    const newOnes = new Set(fresh.map((p) => p.trigger));
-    ok(newOnes.size === fresh.length, "a session never runs one trigger twice");
-    const badPath = [], sharedRu = new Set(), dupRu = [];
-    const sessions = [fresh];
-    // A learner who has met everything offered: the other templates appear.
+    const lemmaOf = (tok) => { const h = IX[fold(tok)]; return h && L[h[0]] ? L[h[0]].w : tok; };
+    const lex = { word: (i) => L[i], lemma: lemmaOf, stress: lemmaOf };
+    const nouns = [...new Set(UN.flatMap((u) => u.w))].filter((i) => L[i] && L[i].p === "noun");
+    const words = nouns.slice(0, 150).map((i, k) => ({ i, weight: 0.2 + (k % 9) / 3 }));
+    // Every ending rule has a course noun that follows it, checked against its own form.
+    const noExample = R.ENDING_RULES.filter((r) => !nouns.some((i) => {
+      const t = (L[i].t || []).find((x) => /Declension/.test(x.title));
+      return t && R.fits(r, L[i], t);
+    })).map((r) => r.id);
+    ok(!noExample.length, "every ending rule has a real noun that follows it", noExample.join(", "));
+    // «друг» is not «стол»: an irregular plural never illustrates -ов.
+    const drug = L[IX["друг"][0]], drugT = drug.t.find((x) => /Declension/.test(x.title));
+    ok(!R.fits(R.ENDING_RULES.find((r) => r.id === "gen-pl-m"), drug, drugT), "«друзе́й» is never shown under -ов");
     const now = Date.now();
-    const met = Object.fromEntries(offered.map((x, k) => [x.id, S.review(null, 3, now - (k + 2) * 86400000)]));
-    for (let r = 0; r < 12; r++) sessions.push(CC.caseSession({ sightings: sight, cards: met, rng, now }));
-    sessions.push(CC.caseSession({ sightings: sight, cards: met, rng, now, focus: "za-instr", n: 4 }));
-    const shapes = new Set();
-    let contrasts = 0;
-    for (const sess of sessions) {
-      const ruHere = new Set();
-      for (const p of sess) {
-        shapes.add(p.faces.join(","));
-        if (p.cards.length !== p.faces.length) badPath.push(`${p.trigger}: ${p.cards.length} cards for ${p.faces}`);
-        if (p.cards.length < 3 || p.cards.length > 4) badPath.push(`${p.trigger}: ${p.cards.length} cards`);
-        const words = p.cards.filter((c) => c.trigger === p.trigger).map((c) => c.s.i);
-        if (new Set(words).size < Math.min(words.length, new Set(sight[p.trigger].map((s) => s.i)).size)) badPath.push(`${p.trigger}: a word twice`);
-        for (const c of p.cards) {
-          if (!CC.FACES[c.face]) badPath.push(`${p.trigger}: face ${c.face}`);
-          if (c.s.trigger !== c.trigger) badPath.push(`${p.trigger}: a ${c.s.trigger} sentence on a ${c.trigger} card`);
-          if (ruHere.has(c.s.ru)) dupRu.push(c.s.ru);
-          ruHere.add(c.s.ru);
+    const cards = {};
+    const decks = [];
+    for (let d = 0; d < 30; d++) {
+      const deck = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, first: d === 0 });
+      decks.push(deck);
+      for (const c of deck) { const k = CC.itemOf(c); if (k && !cards[k]) cards[k] = S.review(null, 3, now - (d + 2) * 86400000); }
+    }
+    const first = decks[0];
+    ok(first.length === CC.DEAL, `a deal is ${CC.DEAL} cards (${first.length})`);
+    const types = new Set(decks.flat().map((c) => c.type));
+    const missing = CC.CARD_TYPES.filter((x) => !types.has(x.id)).map((x) => x.id);
+    ok(!missing.length, `every kind of card is dealt (${types.size} of ${CC.CARD_TYPES.length})`, missing.join(", "));
+    ok(first.filter((c) => T.triggerById(c.key) && !c.key.includes(":")).length >= 1, "a first deal meets triggers");
+    const newTriggers = new Set(first.filter((c) => T.triggerById(c.key)).map((c) => c.key));
+    ok(newTriggers.size <= 3, `a first deal meets at most three new triggers (${newTriggers.size})`);
+    ok(first.filter((c) => T.triggerById(c.key)).every((c) => ["trigger-case", "sentence-case", "trigger-meaning"].includes(c.type)),
+       "a trigger never met is first met as something to look at");
+    const bad = [];
+    const takesCase = (w, caseId) => T.TRIGGERS.some((y) => y.case === caseId && (y.words || y.verbs || y.preds || []).includes(fold(w)));
+    for (const deck of decks) {
+      const keys = new Set(), ru = new Set();
+      let last = null;
+      for (const c of deck) {
+        if (keys.has(c.key)) bad.push(`${c.key} twice in a deal`);
+        keys.add(c.key);
+        if (c.s) { if (ru.has(c.s.ru)) bad.push(`sentence twice: ${c.s.ru}`); ru.add(c.s.ru); }
+        if (c.type === last && new Set(deck.map((x) => x.type)).size > 1) {
+          // Allowed only when nothing else could be made; rare enough to report.
         }
-        if (p.sibling) {
-          contrasts++;
-          const sib = T.triggerById(p.sibling);
-          if (!sib || sib.case === T.triggerById(p.trigger).case) badPath.push(`${p.trigger}: contrast with ${p.sibling}`);
+        last = c.type;
+        const x = T.triggerById(c.key);
+        if (c.check === "case" && x && c.answer !== x.case) bad.push(`${c.type} ${c.key}: answer ${c.answer}`);
+        if (c.check === "choice") {
+          const labels = c.options.map((o) => fold(o.label));
+          if (c.options.filter((o) => o.right).length !== 1) bad.push(`${c.type}: ${c.options.filter((o) => o.right).length} right`);
+          if (new Set(labels).size !== labels.length) bad.push(`${c.type}: two options alike ${labels}`);
         }
-      }
-      // Mixed by case: two paths of one case run together only when the
-      // session holds nothing else to put between them.
-      for (let k = 1; k < sess.length; k++) {
-        const a = T.triggerById(sess[k - 1].trigger).case, b = T.triggerById(sess[k].trigger).case;
-        const others = sess.slice(k).some((p) => T.triggerById(p.trigger).case !== a);
-        if (a === b && others && sess !== sessions[sessions.length - 1]) badPath.push(`two ${a} paths running`);
+        if (c.type === "case-trigger") {
+          for (const o of c.options) if (!o.right && takesCase(o.label, x.case)) bad.push(`case-trigger ${x.case}: «${o.label}» takes it`);
+        }
+        if (c.type === "form-case") {
+          const t = c.back.table, form = fold(c.front.big);
+          const rowsWith = t.rows.filter((r) => r.slice(1).some((cell) => (cell || []).some((f) => fold(f) === form)));
+          if (rowsWith.length !== 1) bad.push(`form-case «${c.front.big}»: in ${rowsWith.length} rows`);
+        }
+        if (c.type === "make-case") {
+          const cell = c.back.table.rows[c.back.at[0]][c.back.at[1]];
+          if (c.back.answer !== cell.join(" / ")) bad.push(`make-case ${c.front.big}: ${c.back.answer}`);
+        }
+        if (c.type === "ending") {
+          const r = R.ENDING_RULES.find((y) => `end:${y.id}` === c.key);
+          if (!r || c.back.answer !== r.label) bad.push(`ending ${c.key}`);
+        }
+        if ((c.type === "gap" || c.type === "sentence-case") && c.s.trigger !== c.key) bad.push(`${c.type}: a ${c.s.trigger} sentence on ${c.key}`);
       }
     }
-    ok(!badPath.length, "every path is its faces, 3–4 cards, a different word each, the right trigger's sentences",
-       [...new Set(badPath)].slice(0, 5).join("; "));
-    ok(!dupRu.length, "no sentence twice in a deal", dupRu.slice(0, 3).join(" | "));
-    ok(shapes.size >= 10 && contrasts > 0, `paths vary: ${shapes.size} shapes, ${contrasts} contrasts`);
-    // A stack that runs on: the trigger just ended never opens the next deal,
-    // and the ones met this sitting go to the back.
-    const lately = sessions[1].map((p) => p.trigger);
-    const onward = CC.caseSession({ sightings: sight, cards: met, rng, now, lately });
-    ok(onward.length && onward[0].trigger !== lately[lately.length - 1]
-       && onward.filter((p) => lately.includes(p.trigger)).length === 0,
-       "the next deal moves on to triggers not met this sitting");
-    const focused = sessions[sessions.length - 1];
-    ok(focused.length === 4 && focused.every((p) => p.trigger === "za-instr"), "one trigger on its own: four paths, all on it");
-    // A session on one case holds only that case's triggers.
-    const dat = CC.caseSession({ sightings: sight, cards: met, rng, now, cases: ["dative"] });
-    ok(dat.length && dat.every((p) => T.triggerById(p.trigger).case === "dative"), "a session narrowed to the dative is the dative");
-    const verbs = CC.caseSession({ sightings: sight, cards: met, rng, now, kinds: ["verb"] });
-    ok(verbs.length && verbs.every((p) => T.triggerKind(T.triggerById(p.trigger)) === "verb"), "a session narrowed to verbs is verbs");
-    // Due first: the most forgotten trigger opens the session.
-    const old = { ...met, "k": S.review(null, 1, now - 40 * 86400000) };
-    const dueFirst = CC.caseSession({ sightings: sight, cards: old, rng, now, n: 3 });
-    ok(dueFirst.some((p) => p.trigger === "k"), "a trigger due comes into the session");
-    // Grading a path.
-    const p = fresh[0];
-    const right = p.cards.map((c) => (CC.FACES[c.face].check === "case" ? { right: true } : { grade: 3 }));
-    ok(CC.pathGrades(p, right)[p.trigger] === 3, "all right is Good");
-    ok(CC.pathGrades(p, p.cards.map((c) => (CC.FACES[c.face].check === "case" ? { right: true } : { grade: 4 })))[p.trigger] === 4,
-       "every production card Easy is Easy");
-    const oneWrong = right.slice(); oneWrong[0] = CC.FACES[p.cards[0].face].check === "case" ? { right: false } : { grade: 1 };
-    ok(CC.pathGrades(p, oneWrong)[p.trigger] === 1, "one wrong case is Again");
-    const hard = right.map((r) => (r.grade ? { grade: 2 } : r));
-    ok(CC.pathGrades(p, hard)[p.trigger] === 2, "a Hard is Hard");
-    const graded = CC.gradeTriggers({}, { [p.trigger]: 3 }, now);
-    ok(graded[p.trigger] && graded[p.trigger].reps === 1, "a graded trigger gets its card");
+    ok(!bad.length, "every card's answer is right, its options sound, nothing twice in a deal", [...new Set(bad)].slice(0, 6).join("; "));
+    // The options narrow the deck.
+    const dat = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, cases: ["dative"] });
+    const caseOfCard = (c) => {
+      const x = T.triggerById(c.key);
+      if (x) return x.case;
+      if (c.key.startsWith("end:")) return R.ENDING_RULES.find((y) => `end:${y.id}` === c.key).case;
+      if (c.key.startsWith("q:")) return c.key.slice(2);
+      if (c.type === "form-case") return c.answer;
+      if (c.type === "make-case") return { Dative: "dative" }[c.front.pills[0]] || c.front.pills[0];
+      return "other";
+    };
+    ok(dat.length && dat.every((c) => caseOfCard(c) === "dative"), "a deck narrowed to the dative is the dative",
+       dat.map((c) => `${c.type}:${caseOfCard(c)}`).filter((s) => !s.endsWith("dative")).join(", "));
+    const plural = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, numbers: ["pl"], types: ["make-case", "ending"] });
+    ok(plural.length && plural.every((c) => (c.type === "ending" ? /plural/.test(c.front.big) : c.front.pills.includes("plural")
+                                                                  || !c.back.table.columns.some((x) => /plural/i.test(x)))),
+       "a deck narrowed to the plural asks plurals");
+    const focused = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, focus: "za-instr" });
+    ok(focused.length >= 3 && focused.every((c) => c.key === "za-instr"), `one trigger on its own: every card on it (${focused.length})`);
+    const onlyWords = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, types: ["make-case"] });
+    ok(onlyWords.length === CC.DEAL && onlyWords.every((c) => c.word && L[c.i].b === c.word), "a word card names the word it grades");
+    // The words weighted up are the words asked.
+    const heavy = words.slice(0, 5).map((x) => ({ ...x, weight: 50 }));
+    const light = words.slice(5, 80).map((x) => ({ ...x, weight: 0.1 }));
+    const drawn = CC.caseDeck({ sightings: sight, cards, words: heavy.concat(light), nouns, lex, rng, now, types: ["make-case", "form-case"], n: 6 });
+    ok(drawn.filter((c) => heavy.some((h) => h.i === c.i)).length >= 4, "a word known well with weak forms is asked first");
+    // Due first: a trigger long overdue is in the next deal.
+    const old = { ...cards, "k": S.review(null, 1, now - 40 * 86400000) };
+    const dueFirst = CC.caseDeck({ sightings: sight, cards: old, words, nouns, lex, rng, now });
+    ok(dueFirst.some((c) => c.key === "k"), "a trigger due comes into the deal");
+    // Met this sitting goes to the back.
+    const lately = first.map((c) => c.key);
+    const onward = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, lately, n: 4, types: ["trigger-case", "sentence-case"] });
+    ok(onward.length && onward.filter((c) => lately.includes(c.key)).length === 0, "the next deal moves on to what this sitting has not met", onward.map((c) => c.key).join(",") + " | " + lately.join(","));
+    // Grading.
+    ok(CC.gradeOf({ check: "case" }, { right: true }) === 3 && CC.gradeOf({ check: "case" }, { right: false }) === 1
+       && CC.gradeOf({ check: "self" }, { grade: 2 }) === 2, "a right tap is Good, a wrong one Again, a said card its grade");
+    ok(CC.itemOf({ key: "word:5" }) === null && CC.itemOf({ key: "end:prep-pl" }) === "end:prep-pl", "a word card grades no rule");
+    const graded = CC.gradeItem({}, "za-instr", 3, now);
+    ok(graded["za-instr"] && graded["za-instr"].reps === 1, "a graded thing gets its card");
     ok(CC.keepRecent(["a", "b"], ["b", "c"]).join() === "a,b,c", "recent keeps the newest last, once");
-    // The recent list is honoured: a session drawn after one does not repeat it.
-    const shown = fresh.flatMap((x) => x.cards.map((c) => c.s.ru));
-    const next = CC.caseSession({ sightings: sight, rng, recent: shown });
-    const again = next.flatMap((x) => x.cards.map((c) => c.s.ru)).filter((ru) => shown.includes(ru));
-    ok(!again.length, "the next session draws sentences not just shown", again.slice(0, 3).join(" | "));
+    const shown = first.filter((c) => c.s).map((c) => c.s.ru);
+    const next = CC.caseDeck({ sightings: sight, words, nouns, lex, rng, now, recent: shown, types: ["sentence-case", "gap"] });
+    const again = next.filter((c) => c.s && shown.includes(c.s.ru)).map((c) => c.s.ru);
+    ok(!again.length, "the next deal draws sentences not just shown", again.slice(0, 3).join(" | "));
   }
   ok(!strangers.length, "a form question only asks about a word the route has taught", strangers.slice(0, 6).join(", "));
   // A lesson with a verb to conjugate starts its run on it (a lesson of nouns

@@ -8084,30 +8084,38 @@ Cases hub row open it with `params.tab`.
   prints the counts and the sentences with the noun and trigger marked.
   **Read it after touching the catalogue or the sorter**: every mis-filing
   found while building this came from reading it, not from a count.
-- **A path is 3–4 cards on one trigger, a different word each**
-  (`core/casecards.js`): Notice (a real sentence, the noun marked: which
-  case?) and Trigger (the trigger and its meaning: which case?) are checked
-  by a tap on the five cases, always in teaching order; Form (trigger +
-  dictionary form) and Use (the sentence with a gap) are flashcards graded
-  by the learner. **The faces are composed, not templated**
-  (`composeFaces`): 3 cards, 4 while a trigger is weak; a new trigger opens
-  on Notice or Trigger, a met one on any face; at least one checked and one
-  said; no face twice running; a contrast puts the sibling's same face
-  second. **It is a stack**: four paths dealt at a time (`SESSION_PATHS`),
-  the next four when they run out, until Finish; nothing on screen names a
-  path. `lately` (the triggers met this sitting) sends them to the back of
-  the next deal. Due first, new in teaching order (two, then one a deal),
-  interleaved by case. **A front is never word-linked** — a word's sheet
-  names its form, which is the answer; answered, the sentence is.
+- **Single cards, not paths** (the owner, the same evening: *"just stick to
+  flashcards… they can all target different parts of cases… multiple
+  directions"*). A card is about one thing — a trigger, an ending rule
+  (`core/caserules.js`: case × number × kind of noun, checked against the
+  noun's own table by `fits`, so «друзе́й» never illustrates -ов), a
+  counting rule, a case's question words, or one of the learner's words —
+  and is one of thirteen `CARD_TYPES` in `core/casecards.js`, asked three
+  ways: a tap on the five cases, one of four options, or Show and the
+  learner's grade. Both directions where they make sense (trigger → case
+  and case → trigger; ending → case only for an ending no other case has,
+  `cue`). A wrong option is never a right one: case → trigger refuses any
+  word that takes the case in any meaning (`ALSO` lists the uses the
+  catalogue lacks — «под стол», «о сте́ну»), trigger → meaning refuses a
+  same-word same-case twin («в» where / «в» a month). **The words are
+  weighted** by the screen (`caseWords`: recall × weak forms, the met
+  nouns and case-taking pronouns) and a word card moves only that word's
+  "Cases & forms" score. **A front is never word-linked** — a word's sheet
+  names its form, which is the answer. Ten cards a deal (`DEAL`), no thing
+  twice in a deal, no type twice running, due first, new ones per kind
+  (three, then two), a new trigger first met as something to look at; what
+  the sitting met goes to the back (`lately`). Hardware Back steps to the
+  card before, as answered, ungraded. «пять» is in the lexicon as a noun
+  with a wrong table (genitive «пя»), so counting words are kept off word
+  cards (`COUNTING`) — the data defect is open.
 - **What is remembered**: `st.caseCards` (a progress key: syncs, cleared by
-  a reset) holds one FSRS card per trigger, graded once per path
-  (`pathGrades`: a wrong case or Again is Again, a Hard Hard, all Easy
-  Easy, else Good; a contrast grades both siblings from their own cards). A
-  production card also moves the noun's "Cases & forms" score at once
-  (§30by), never its meaning card. `st.drills.casecards.recent` keeps the
-  last 200 sentences shown so the next sessions draw others first.
-  `st.drillPrefs.casecards` holds the options (cases, trigger kinds, order,
-  paths a session).
+  a reset) holds one FSRS card per trigger (its id) and per rule (`end:`,
+  `count:`, `q:`), graded on every answer (`gradeOf`: a right tap Good, a
+  wrong one Again, a said card its grade). `st.drills.casecards.recent`
+  keeps the last 200 sentences shown. `st.drillPrefs.casecards` holds the
+  options (types, cases, numbers, kinds, focus). Read the deck with a probe
+  after touching a maker: `core.test.mjs` checks every answer and option,
+  not whether a card teaches well.
 - **Thin today, and why**: the rare prepositions (кроме, вокруг, про) and
   half the genitive verbs (достигать, избегать, требовать) have fewer than
   eight sentences in the corpus and are not offered. They come in by

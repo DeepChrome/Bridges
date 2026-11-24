@@ -37,7 +37,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { wanted, cardFor, dayOf, familiarity, strength, skillScores } from "@core/scheduler";
+import { wanted, cardFor, dayOf, familiarity, strength, skillScores, overallScore } from "@core/scheduler";
 import { rollGoal, goalBadge } from "@core/queue";
 import { isIrregular } from "@core/facts";
 import { CASES } from "@core/cases";
@@ -848,6 +848,17 @@ export const recapKey = (day = dayOf(Date.now())) => `recap:${day}`;
  * (§23 — «нет» was once a form of «житься»). A learner's cards are keyed by
  * headword, so the headword is the thing to look up. Undefined for a deck card
  * or a sentence, which have no rank and take the full horizon. */
+/* The score a word shows (core/scheduler.js overallScore): a word that
+   declines or conjugates counts its "Cases & forms" too. Read off the class,
+   not the tables, so a list of a thousand words does not rebuild a thousand
+   paradigms. */
+const INFLECTS = new Set(["noun", "verb", "adjective", "pronoun", "numeral"]);
+export function wordScore(entry, word) {
+  const rank = rankOf(word);
+  const w = rank ? L[rank - 1] : null;
+  return overallScore(entry || null, rank, { inflects: !!(w && w.b === word && INFLECTS.has(w.p)) });
+}
+
 let rankByHeadword = null;
 export function rankOf(w) {
   if (rankByHeadword === null) {

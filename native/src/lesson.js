@@ -36,7 +36,7 @@ import { useSession } from "./session";
 import { familiarity, cardFor } from "@core/scheduler";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
-import { L, linesWith, rankOf } from "./data";
+import { L, linesWith, rankOf, wordScore } from "./data";
 import { pictureOf, Photo } from "./pictures";
 import { firstSense } from "@core/util";
 import { hasRealAudio } from "./audio";
@@ -202,7 +202,7 @@ export function GrammarNote({ unit, note, at, total, onEpisode, label }) {
 export function CardActions({ word, testID = "word-card-actions" }) {
   const session = useSession();
   const seen = (session && session.st && session.st.seen) || {};
-  const score = familiarity(cardFor(seen[word] || null), rankOf(word));
+  const score = wordScore(seen[word], word);
   const go = (route, params) => { if (navRef.isReady()) navRef.navigate(route, params); };
   return (
     <View testID={testID}

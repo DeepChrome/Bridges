@@ -21,7 +21,7 @@ import { useSession } from "../session";
 import { useTheme, type as T, radius } from "../theme";
 import { Screen, Muted, SectionLabel, Text, Familiarity, familiarityColor, Sheet, Bubble, List, Row, RowText, Thumb } from "../ui";
 import { readLog } from "../store";
-import { rankOf, dueCount, UN, exactIdx, grammarNoteOf } from "../data";
+import { rankOf, dueCount, UN, exactIdx, grammarNoteOf, wordScore } from "../data";
 import { DAY, dayOf, cardsOf, cardFor, NEW, familiarity, familiarityLabel } from "@core/scheduler";
 import { goalPerDay } from "@core/queue";
 
@@ -283,10 +283,12 @@ const LEVEL_MEANS = {
   Strong: "Held for weeks; score 75 to 95",
   Mastered: "Held for months; score 95 and up",
 };
-export function mastery(seen, rank) {
+/* `scoreOf` is the score a word shows (data.js wordScore); without it, the
+   card's alone. */
+export function mastery(seen, rank, scoreOf) {
   const out = Object.fromEntries(LEVELS.map(([name]) => [name, 0]));
   for (const w in seen || {}) {
-    out[familiarityLabel(familiarity(cardFor(seen[w]), rank ? rank(w) : undefined))]++;
+    out[familiarityLabel(scoreOf ? scoreOf(w) : familiarity(cardFor(seen[w]), rank ? rank(w) : undefined))]++;
   }
   return out;
 }
@@ -408,7 +410,7 @@ export default function Stats() {
   const days = log ? studiedDays(log) : null;
   const run = days ? runOf(days, now) : 0;
   const weekLabels = week ? week.map((_, k) => DAYS[new Date(now - (6 - k) * DAY).getUTCDay()]) : [];
-  const levels = mastery(st.seen, rankOf);
+  const levels = mastery(st.seen, rankOf, (w) => wordScore(st.seen[w], w));
   const pct = retention === null ? null : Math.round(retention * 100);
   const report = useMemo(() => (log ? dayReport(log, topicOfRow) : null), [log]);
   const [open, setOpen] = useState(null);           // { c, d } of the day tapped

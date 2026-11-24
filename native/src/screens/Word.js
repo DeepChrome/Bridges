@@ -17,7 +17,7 @@ import { wordFacts, isIrregular } from "@core/facts";
 import { grammarLine } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
-import { L, UN, resolveWord, heardIn, sensesOf, rankOf } from "../data";
+import { L, UN, resolveWord, heardIn, sensesOf, rankOf, wordScore } from "../data";
 import { Linked, GrammarLine, navRef } from "../words";
 import { useAbout, cardAbout, tablesText } from "../about";
 import { pictureOf, Photo } from "../pictures";
@@ -66,7 +66,7 @@ function WordStatus({ word, navigation }) {
   const session = useSession();
   if (!session || !session.st) return null;
   const entry = (session.st.seen || {})[word] || null;
-  const score = familiarity(cardFor(entry), rankOf(word));
+  const score = wordScore(entry, word);
   const label = familiarityLabel(score);
   /* The entry has every drill the word takes, as the flashcard's back does
      (the owner, 2026-11-10: "in the full card or main card, make sure there's

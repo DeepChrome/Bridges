@@ -432,7 +432,17 @@ export const goalBadge = (goal, now, opts) => {
  * With the caller's `rng` constant (a test's `() => 0.5`) the draw is a plain
  * sort by priority, which is what makes it checkable. */
 export const FILL_COOLDOWN_DAYS = 1;
-export const FILL_WEIGHTS = { fade: 0.30, since: 0.35, score: 0.15, hole: 0.10, hard: 0.10 };
+/* `common` is how common the word is (the owner, 2026-11-23: "I'm really
+   getting thrown some not so important words repeatedly… What I really want
+   to see is some heavier weight to showing the most common words"): the
+   lemma's frequency rank on a log scale, 1 for the commonest and 0 past
+   COMMON_HORIZON. The "Common words" focus weights the draw by it again
+   (COMMON_FOCUS_POWER), so the review is mostly the words most used. */
+export const FILL_WEIGHTS = { fade: 0.25, since: 0.30, score: 0.12, hole: 0.08, hard: 0.08, common: 0.17 };
+export const COMMON_HORIZON = 5000;
+export const COMMON_FOCUS_POWER = 3;
+export const commonness = (rank) => (Number.isFinite(rank) && rank > 0
+  ? Math.max(0, 1 - Math.log10(1 + rank) / Math.log10(1 + COMMON_HORIZON)) : 0.3);
 export const SINCE_HORIZON_DAYS = 30;
 export const FILL_SHARPEN = 3;
 export const RARE_WEIGHT = 0.05;
@@ -474,7 +484,7 @@ export function meaningHole(entry) {
 }
 /* The priority and each part of it in 0–1 (the developer panel on a card
    reads the parts; the draw reads `p`). */
-export function fillPriorityParts({ card, entry, r, score, now }) {
+export function fillPriorityParts({ card, entry, r, score, now, rank }) {
   const W = FILL_WEIGHTS;
   const days = card && card.lastAt !== undefined && card.lastAt !== null
     ? Math.max(0, (now - card.lastAt) / DAY) : SINCE_HORIZON_DAYS;
@@ -483,8 +493,9 @@ export function fillPriorityParts({ card, entry, r, score, now }) {
   const hard = Math.min(1, Math.max(0, (((card && card.d) || 1) - 1) / 9));
   const fade = Math.min(1, Math.max(0, 1 - (Number.isFinite(r) ? r : 0)));
   const hole = meaningHole(entry);
-  const parts = { fade, since, score: 1 - fam, hole, hard };
-  const p = W.fade * fade + W.since * since + W.score * (1 - fam) + W.hole * hole + W.hard * hard;
+  const common = commonness(rank);
+  const parts = { fade, since, score: 1 - fam, hole, hard, common };
+  const p = W.fade * fade + W.since * since + W.score * (1 - fam) + W.hole * hole + W.hard * hard + W.common * common;
   return { p, parts, days };
 }
 export const fillPriority = (x) => fillPriorityParts(x).p;
@@ -547,7 +558,7 @@ export const untack = (daily, word) =>
  * the spaced repetition"*): the formula decides which cards are in the day,
  * the shuffle decides nothing but the order they are met in. */
 export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next, rare,
-                              tacked, shuffle }) {
+                              tacked, shuffle, rank, focus }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);
   for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
   const random = rng || Math.random;
@@ -586,7 +597,7 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
       if (!fillReady(card, now)) return;
       const r = retrievability(card, now, o.scheduler);
       const fam = score(w, card);
-      const { p, parts, days } = fillPriorityParts({ card, entry, r, score: fam, now });
+      const { p, parts, days } = fillPriorityParts({ card, entry, r, score: fam, now, rank: rank ? rank(w) : undefined });
       pool.push({ w, entry, card, rare: !!isRare, p,
                   why: { source: isRare ? "rare" : "fill", p, parts, weights: FILL_WEIGHTS, r, days, score: fam,
                          hold: fillHoldDays(card) } });
@@ -600,7 +611,8 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     const drawn = typeof order === "function"
       ? pool.slice().sort((a, b) => (order(a.w) - order(b.w)) || (b.p - a.p))
           .map((x) => ({ x, w: null, key: order(x.w) }))
-      : drawKeys(shuffled(pool, random), (x) => Math.pow(x.p, FILL_SHARPEN) * (x.rare ? RARE_WEIGHT : 1), random);
+      : drawKeys(shuffled(pool, random), (x) => Math.pow(x.p, FILL_SHARPEN) * (x.rare ? RARE_WEIGHT : 1)
+          * (focus === "common" ? Math.pow(0.05 + x.why.parts.common, COMMON_FOCUS_POWER) : 1), random);
     drawn.forEach(({ x, w: weight, key }, place) => {
       if (items.length >= want) return;
       items.push({ word: x.w, direction: frontFor(x.card, fronts, x.entry), card: x.card, kind: kindOf(x.card), extra: true,

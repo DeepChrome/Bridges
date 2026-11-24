@@ -151,6 +151,27 @@ describe("case cards", () => {
     expect(await screen.findByTestId("casecard-stack")).toBeTruthy();
   });
 
+  /* The owner, 2026-11-23: "confusing what's even being asked but more
+     confusing that we don't know the rule that makes the answer correct…
+     the learner needs the ability to review why they were wrong at the end". */
+  it("says what it asks, gives the rule and the wrong pick's meaning, and lists the misses at the end", async () => {
+    await stack(only(["trigger-case"], { focus: "v-where" }));
+    await start();
+    expect(screen.getByTestId("casecard-ask").props.children).toBe("Which case does it take?");
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-pick-dative")); });
+    expect(screen.getByTestId("casecard-rule-0")).toBeTruthy();
+    expect(screen.getByTestId("casecard-miss")).toBeTruthy();
+    // The table, a tap away.
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-show-table")); });
+    expect(screen.getByTestId("casecard-table")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecard-next")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("casecards-finish")); });
+    expect(screen.getByTestId("casecards-missed")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("casecards-miss-0")); });
+    expect(await screen.findByTestId("casecards-review")).toBeTruthy();
+    expect(within(screen.getByTestId("casecards-review")).getByTestId("casecard-table")).toBeTruthy();
+  });
+
   it("Back steps to the card before, as it was answered, without grading it again", async () => {
     const { BackHandler } = require("react-native");
     const handlers = [];

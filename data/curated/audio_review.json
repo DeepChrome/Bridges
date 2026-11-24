@@ -1192,6 +1192,13 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +11.0 semitones over the lowest third, ending at 292 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "keep",
+     "id": "a0476bd6910c3c31",
+     "at": "2026-11-23",
+     "who": "owner",
+     "note": "the re-bought clips sounded worse (portal, 2026-11-20); the first clip is kept"
     }
    ],
    "rebought": [
@@ -6710,6 +6717,13 @@
      "at": "2026-11-18",
      "who": "intonation",
      "note": "rises at the end: +6.1 semitones over the lowest third, ending at 300 Hz (tools/audio_intonation.py)"
+    },
+    {
+     "verdict": "keep",
+     "id": "fcc50c5ba7318ad5",
+     "at": "2026-11-23",
+     "who": "owner",
+     "note": "the re-bought clips sounded worse (portal, 2026-11-20); the first clip is kept"
     }
    ],
    "rebought": [

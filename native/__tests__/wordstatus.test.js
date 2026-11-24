@@ -55,8 +55,18 @@ describe("the entry", () => {
   /* Four months held: mastered for a word as common as this one (the score
      is an asymptote since 2026-11-17; a month is "Strong"). */
   it("shows the score and a word for it once the word is studied", async () => {
-    await open(VERB, { seen: { [VERB]: card(120) } });
+    const both = card(120);
+    both.forms = both.recognise;
+    await open(VERB, { seen: { [VERB]: both } });
     expect(screen.getByTestId("familiarity")).toBeTruthy();
     expect(screen.getByText("Mastered")).toBeTruthy();
+  });
+
+  /* The owner, 2026-11-23: «брат» at 100 with its cases at 0. A word that
+     inflects counts its forms in the score it shows. */
+  it("is not mastered on its meaning alone when its forms were never practised", async () => {
+    await open(VERB, { seen: { [VERB]: card(120) } });
+    expect(screen.getByTestId("familiarity")).toBeTruthy();
+    expect(screen.queryByText("Mastered")).toBeNull();
   });
 });

@@ -39,6 +39,7 @@ import {
 } from "expo-speech-recognition";
 import { APP_NAME } from "./brand";
 import { rearmAudio } from "./audio";
+import { tap } from "./haptics";
 
 const MIC_OFF = `The microphone is off for ${APP_NAME}.`;
 
@@ -93,6 +94,12 @@ export function modelBlock(locale, status) {
    word plainly said (the owner, 2026-09-19). A release before this is honoured
    this much later; a release after it stops at once. */
 export const MIN_LISTEN_MS = 900;
+/* How long the microphone stays open after the finger lifts (the owner,
+   2026-11-23: "I need to have a buffer on both sides… or else it doesn't pick
+   it up well"). Stopping the engine the moment the button was released cut
+   the last syllable, which is usually still being said, or still in the
+   recogniser's buffer, when the finger comes up. */
+export const RELEASE_TAIL_MS = 700;
 
 /* How many hearings the engine is asked for. The top one is what is shown
    while listening; an activity that knows what it expects (Say, Shadow) picks
@@ -304,7 +311,13 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
   // The engine is up and hearing: now the button may say so.
   const ready = () => {
     if (readyTimer.current) { clearTimeout(readyTimer.current); readyTimer.current = null; }
-    if (engine.current && phaseRef.current === "asking") go("listening");
+    if (engine.current && phaseRef.current === "asking") {
+      go("listening");
+      /* A held button ticks when the engine is actually listening, so the
+         first word is not spoken into the start-up gap (the owner,
+         2026-11-23: he held a second before speaking to be safe). */
+      if (held.current) tap();
+    }
   };
 
   const finish = (text, alternatives) => {
@@ -608,8 +621,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
         try { M.stop(); } catch (e) { /* the end event still arrives */ }
       };
       const heldFor = Date.now() - startedAt.current;
-      if (heldFor >= MIN_LISTEN_MS) stop();
-      else stopTimer.current = setTimeout(stop, MIN_LISTEN_MS - heldFor);
+      stopTimer.current = setTimeout(stop, Math.max(RELEASE_TAIL_MS, MIN_LISTEN_MS - heldFor));
       if (watchdog.current) clearTimeout(watchdog.current);
       watchdog.current = setTimeout(() => {
         watchdog.current = null;

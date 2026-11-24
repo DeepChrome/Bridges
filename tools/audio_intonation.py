@@ -110,6 +110,11 @@ def already_flagged(review, key, cid):
     it = (review.get("items") or {}).get(key)
     if not it:
         return False
+    # A person who kept this clip has the last word over the pitch contour
+    # (the owner, 2026-11-23: two words re-bought for rising sounded worse
+    # than the clips they replaced).
+    if any(v.get("verdict") == "keep" and v.get("id") == cid for v in it.get("verdicts") or []):
+        return True
     last = (it.get("verdicts") or [None])[-1]
     return bool(last and last.get("verdict") == "flag" and last.get("id") == cid)
 

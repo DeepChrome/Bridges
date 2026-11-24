@@ -68,13 +68,22 @@ export const COUNT_CHOICES = [
   { id: "gen-pl", label: "Genitive plural" },
   { id: "nom-pl", label: "Nominative plural" },
 ];
+/* `say` is the number a card counts a real noun with (core/casecards.js puts
+   «оди́н» and «два» in the noun's gender); `why` is the rule as the back of
+   the card states it. */
 export const COUNT_RULES = [
-  { id: "one", words: "оди́н, одна́, одно́", wants: "nom-sg" },
-  { id: "two-four", words: "два, три, четы́ре", wants: "gen-sg", make: "три", row: "Genitive", num: "sg" },
-  { id: "five-up", words: "пять, шесть… два́дцать", wants: "gen-pl", make: "пять", row: "Genitive", num: "pl" },
-  { id: "many", words: "мно́го, ма́ло, ско́лько", wants: "gen-pl", note: "a noun you count" },
-  { id: "twenty-one", words: "два́дцать оди́н", wants: "nom-sg" },
-  { id: "twenty-two", words: "два́дцать два", wants: "gen-sg" },
+  { id: "one", words: "оди́н, одна́, одно́", wants: "nom-sg", say: "оди́н",
+    why: "After «оди́н», «одна́», «одно́» the noun stays in the nominative singular, and the number matches its gender." },
+  { id: "two-four", words: "два, три, четы́ре", wants: "gen-sg", say: "три",
+    why: "After «два», «три», «четы́ре» the noun is in the genitive singular." },
+  { id: "five-up", words: "пять, шесть… два́дцать", wants: "gen-pl", say: "пять",
+    why: "From «пять» up to «два́дцать», the noun is in the genitive plural." },
+  { id: "many", words: "мно́го, ма́ло, ско́лько", wants: "gen-pl", say: "мно́го", note: "a noun you count",
+    why: "After «мно́го», «ма́ло», «ско́лько», a noun you can count is in the genitive plural." },
+  { id: "twenty-one", words: "два́дцать оди́н", wants: "nom-sg", say: "два́дцать оди́н",
+    why: "A number that ends in «оди́н» counts like «оди́н»: the noun stays nominative singular." },
+  { id: "twenty-two", words: "два́дцать два", wants: "gen-sg", say: "два́дцать два",
+    why: "A number that ends in «два», «три» or «четы́ре» counts like them: genitive singular." },
 ];
 
 /* The question each case answers. A pair, because «кого́?» alone is the

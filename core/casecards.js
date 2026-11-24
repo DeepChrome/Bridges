@@ -105,7 +105,22 @@ function pickSighting(list, ctx, pred) {
   return best;
 }
 
-/* ------------------------------------------------------------ the cards */
+/* ------------------------------------------------------------ the cards
+ *
+ * Every card says what it asks (`front.ask`), and every back says the rule
+ * that makes the answer right, in a sentence (`back.why`), with an example in
+ * Russian and English and the noun's table where there is a noun (the owner,
+ * 2026-11-23: "confusing what's even being asked but more confusing that we
+ * don't know the rule that makes the answer correct"; "the learner needs the
+ * ability to review why they were wrong"). A wrong pick says what it would
+ * have been (`misses`, keyed by the case or the option picked). Russian in a
+ * sentence goes in «guillemets», which the screen draws loud (ui.js Marked).
+ */
+
+const lower = (id) => caseName(id).toLowerCase();
+const capital = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const numName = (n) => (n === "pl" ? "plural" : n === "sg" ? "singular" : "");
+const meaningOf = (ctx, i) => (ctx.lex.meaning && i !== undefined && i !== null ? ctx.lex.meaning(i) || null : null);
 
 const titleOf = (x, s, lex) => {
   if (x.words) return x.words[0];
@@ -113,11 +128,47 @@ const titleOf = (x, s, lex) => {
   if (x.verbs) return s ? lex.lemma(s.gov) : lex.stress(x.verbs[0]);
   return s ? `${lex.lemma(s.gov)} + …` : x.gov === "noun" ? "noun + …" : "verb + …";
 };
-/* The line on the back that says what the trigger is: the case, the word, its
-   meaning and the question it answers. */
-const lineOf = (x, s, lex) => ({ case: x.case, word: titleOf(x, s, lex), text: `${x.en} · ${x.ask}` });
+
+/* The rule a trigger is, as a sentence. */
+function triggerWhy(x, s, lex) {
+  const c = lower(x.case);
+  if (x.words) return `«${x.words[0]}» meaning ${x.en} takes the ${c}. It answers «${x.ask}».`;
+  if (x.preds) return `With «${s ? s.gov.toLowerCase() : x.preds[0]}» (${x.en}), the person it is about is in the ${c}.`;
+  if (x.verbs) return `«${titleOf(x, s, lex)}» (${x.en}) takes the ${c}.`;
+  const g = s ? lex.lemma(s.gov) : null;
+  if (x.gov === "noun") return `A noun that belongs to another noun${g ? ` (here after «${g}»)` : ""} is in the genitive: 'of'.`;
+  return `A verb's direct object${g ? `, here of «${g}»,` : ""} is in the accusative.`;
+}
+/* What the marked noun is: «до́ме» is «дом» (house) in the prepositional
+   singular. */
+function nounLine(s, ctx) {
+  const w = ctx.lex.word(s.i);
+  if (!w) return null;
+  const m = meaningOf(ctx, s.i);
+  const num = s.pronoun ? "" : ` ${numName(s.plural ? "pl" : "sg")}`;
+  return `«${s.said}» is «${w.w}»${m ? ` (${m})` : ""} in the ${lower(s.trigger ? triggerById(s.trigger).case : "")}${num}.`;
+}
 const exampleOf = (s) => ({ ru: s.ru, en: s.en, hl: [s.token, s.gov] });
 const sentenceNum = (s) => (s.pronoun ? null : s.plural ? "pl" : "sg");
+
+/* A wrong case, for a card with a noun: what the noun would have been in the
+   case picked, read off its own table. */
+function caseMisses(t, at, answer) {
+  const out = {};
+  if (!t || !at) return out;
+  const rightCell = (t.rows[at[0]] || [])[at[1]] || [];
+  for (const c of CASES) {
+    if (c.id === answer) continue;
+    const row = t.rows.find((r) => r[0] === c.row);
+    const cell = row && row[at[1]];
+    if (!cell || !cell.length) continue;
+    out[c.id] = cell.some((f) => rightCell.some((g) => fold(f) === fold(g)))
+      ? `«${cell[0]}» looks the same in the ${c.name.toLowerCase()}; here the word in front decides it is the ${lower(answer)}.`
+      : `In the ${c.name.toLowerCase()} it would be «${cell[0]}».`;
+  }
+  return out;
+}
+const withTable = (back, s, w) => ({ ...back, table: s.table, at: s.at, headword: w ? w.w : null });
 
 /* Four options, the right one among them, in an order that says nothing. */
 function optionsOf(right, wrong, rng) {
@@ -144,6 +195,9 @@ const ALSO = { "под": ["accusative"], "о": ["accusative"], "об": ["accusat
 /* Every trigger word and «на́до»-like word, so a "what makes it this case?"
    card never offers another governor as a wrong answer. */
 const GOVERNORS = new Set(TRIGGERS.flatMap((x) => (x.words || []).concat(x.preds || [])));
+/* The cases a word takes, for a wrong option on "which takes it?". */
+const casesOfWord = (w) => [...new Set(TRIGGERS.filter((y) => (y.words || y.verbs || y.preds || []).includes(fold(w)))
+  .map((y) => lower(y.case)).concat((ALSO[fold(w)] || []).map(lower)))];
 
 const TRIGGER_MAKERS = {
   /* The trigger → which case. A verb trigger shows the verb this sentence
@@ -151,9 +205,13 @@ const TRIGGER_MAKERS = {
   "trigger-case": (x, ctx) => {
     const s = pickSighting(ctx.sightings[x.id], ctx);
     if (!s) return null;
+    const w = ctx.lex.word(s.i);
     return { check: "case", answer: x.case, s,
-             front: { big: titleOf(x, s, ctx.lex), sub: x.words ? x.en : null },
-             back: { line: lineOf(x, s, ctx.lex), example: exampleOf(s), speak: s.ru } };
+             front: { ask: x.gov ? "Which case is the noun after it?" : "Which case does it take?",
+                      big: titleOf(x, s, ctx.lex), sub: x.words ? x.en : null },
+             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)],
+                               example: exampleOf(s), speak: s.ru }, s, w),
+             misses: caseMisses(s.table, s.at, x.case) };
   },
   /* The case → which of four words takes it. The wrong ones never take it in
      any meaning, so «за» is right for the instrumental and never wrong for it. */
@@ -170,9 +228,15 @@ const TRIGGER_MAKERS = {
       .flatMap((y) => (asVerb ? y.verbs : y.words).filter((w) => !takes.has(w)).slice(0, asVerb ? 2 : 1))
       .map((w) => (asVerb ? ctx.lex.stress(w) : w)), [right], ctx.rng);
     if (!wrong) return null;
-    return { check: "choice", options: optionsOf(right, wrong, ctx.rng), s,
-             front: { big: caseName(x.case), sub: "Which takes it?" },
-             back: { line: lineOf(x, s, ctx.lex), example: exampleOf(s), speak: s.ru } };
+    const misses = {};
+    for (const w of wrong) {
+      const cs = casesOfWord(w);
+      if (cs.length) misses[w] = `«${w}» takes the ${cs.join(" or ")}, not the ${lower(x.case)}.`;
+    }
+    return { check: "choice", options: optionsOf(right, wrong, ctx.rng), s, misses,
+             front: { ask: "Which of these takes this case?", big: caseName(x.case) },
+             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), speak: s.ru },
+                             s, ctx.lex.word(s.i)) };
   },
   /* A preposition and its case → what it means: «за» + instrumental is
      behind, + accusative for. The sibling's meaning is always among the
@@ -189,17 +253,25 @@ const TRIGGER_MAKERS = {
       .map((y) => y.en);
     const wrong = sibs.slice(0, 1).concat(threeFrom(others, [x.en].concat(sibs), ctx.rng) || []).slice(0, 3);
     if (wrong.length < 3) return null;
-    return { check: "choice", options: optionsOf(x.en, wrong, ctx.rng), s,
-             front: { big: x.words[0], pills: [caseName(x.case)] },
-             back: { line: lineOf(x, s, ctx.lex), example: exampleOf(s), speak: s.ru } };
+    const misses = {};
+    for (const m of wrong) {
+      const y = TRIGGERS.find((z) => z.en === m);
+      if (y) misses[m] = `'${m}' is «${y.words ? y.words[0] : ""}» with the ${lower(y.case)}.`;
+    }
+    return { check: "choice", options: optionsOf(x.en, wrong, ctx.rng), s, misses,
+             front: { ask: "What does it mean with this case?", big: x.words[0], pills: [caseName(x.case)] },
+             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), speak: s.ru },
+                             s, ctx.lex.word(s.i)) };
   },
   /* A real sentence, its noun marked → which case. */
   "sentence-case": (x, ctx) => {
     const s = pickSighting(ctx.sightings[x.id], ctx, ctx.numOk);
     if (!s) return null;
     return { check: "case", answer: x.case, s, word: null,
-             front: { sentence: { s }, sub: s.en },
-             back: { line: lineOf(x, s, ctx.lex), speak: s.ru, example: null, linked: true } };
+             front: { ask: "Which case is the coloured word?", sentence: { s }, sub: s.en },
+             back: withTable({ line: { case: x.case }, why: [nounLine(s, ctx), triggerWhy(x, s, ctx.lex)],
+                               speak: s.ru, linked: true }, s, ctx.lex.word(s.i)),
+             misses: caseMisses(s.table, s.at, x.case) };
   },
   /* The sentence and its case → which word makes it that case. The options
      are words of the sentence itself, so it is read, not recognised. */
@@ -211,9 +283,11 @@ const TRIGGER_MAKERS = {
     const others = toks.filter((t, k) => k !== s.k && k !== s.j && !GOVERNORS.has(fold(t))).map((t) => t.toLowerCase());
     const wrong = threeFrom(others, [right, s.token], ctx.rng);
     if (!wrong) return null;
-    return { check: "choice", options: optionsOf(right, wrong, ctx.rng), s,
-             front: { sentence: { s, plain: true }, pills: [caseName(x.case)], sub: "What makes it this case?" },
-             back: { line: lineOf(x, s, ctx.lex), speak: s.ru, linked: true } };
+    const misses = Object.fromEntries(wrong.map((w) => [w, `«${w}» does not decide the case of «${s.token}»; «${right}» does.`]));
+    return { check: "choice", options: optionsOf(right, wrong, ctx.rng), s, misses,
+             front: { ask: `Which word puts the coloured word in the ${lower(x.case)}?`, sentence: { s, plain: true }, sub: s.en },
+             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)],
+                               speak: s.ru, linked: true }, s, ctx.lex.word(s.i)) };
   },
   /* The sentence with a gap, the dictionary form given → the form in place. */
   "gap": (x, ctx) => {
@@ -221,8 +295,10 @@ const TRIGGER_MAKERS = {
     if (!s) return null;
     const w = ctx.lex.word(s.i);
     return { check: "self", s, word: w ? w.b : null,
-             front: { sentence: { s, gap: true }, pills: [w ? w.w : s.token].concat(s.plural ? ["plural"] : []), sub: s.en },
-             back: { answer: s.said, speak: s.ru, line: lineOf(x, s, ctx.lex), example: exampleOf(s) } };
+             front: { ask: "Put the word in the form the gap needs", sentence: { s, gap: true },
+                      pills: [w ? w.w : s.token].concat(s.plural ? ["plural"] : []), sub: s.en },
+             back: withTable({ answer: s.said, speak: s.ru, line: { case: x.case },
+                               why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)], example: exampleOf(s) }, s, w) };
   },
   /* The trigger + the dictionary form → the phrase. */
   "phrase": (x, ctx) => {
@@ -231,16 +307,27 @@ const TRIGGER_MAKERS = {
     const w = ctx.lex.word(s.i);
     const parts = [s.gov.toLowerCase(), w ? w.w : s.token];
     if (s.j > s.k) parts.reverse();
+    const m = meaningOf(ctx, s.i);
     return { check: "self", s, word: w ? w.b : null,
-             front: { big: parts.join(" + "), pills: (x.words ? [x.en] : []).concat(s.plural ? ["plural"] : []) },
-             back: { answer: phraseOf(s), speak: phraseOf(s), line: lineOf(x, s, ctx.lex), example: exampleOf(s),
-                     table: s.table, at: s.at, headword: w ? w.w : null } };
+             front: { ask: "Join them in the right form", big: parts.join(" + "),
+                      pills: (x.words ? [x.en] : []).concat(s.plural ? ["plural"] : []), sub: m },
+             back: withTable({ answer: phraseOf(s), speak: phraseOf(s), line: { case: x.case },
+                               why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), tableOpen: true }, s, w) };
   },
 };
 
 /* The rule a word's cell follows, if any: shown on the back of a word card,
    so the form is seen as a pattern and not a one-off. */
 const ruleFor = (w, t, caseId, num) => ENDING_RULES.find((r) => r.case === caseId && r.num === num && fits(r, w, t)) || null;
+/* An ending rule, as a sentence: "All nouns: the prepositional plural ends in
+   «-ах» or «-ях»." */
+function ruleSentence(r) {
+  const what = `the ${lower(r.case)} ${numName(r.num)}`;
+  const how = r.same ? `is the same as the ${r.same.toLowerCase()}`
+    : r.zero ? "has no ending: the word just loses its last vowel"
+    : `ends in ${r.label.split("/").map((e) => `«${e.trim()}»`).join(" or ")}`;
+  return `${capital(r.who)}: ${what} ${how}.`;
+}
 /* A name is not a word to decline on a card: «А́нглия». */
 /* …nor is a counting word, which the lexicon files as a noun with a wrong
    table («пять», genitive «пя»). */
@@ -262,10 +349,14 @@ const WORD_MAKERS = {
     if (!asks.length) return null;
     const a = asks[Math.floor(ctx.rng() * asks.length)];
     const rule = a.num ? ruleFor(w, t, a.c, a.num) : null;
+    const m = meaningOf(ctx, i);
     return { check: "self", word: w.b, i,
-             front: { big: w.w, pills: [caseName(a.c)].concat(a.num === "pl" ? ["plural"] : []) },
-             back: { answer: a.got.cell.join(" / "), speak: a.got.cell[0], table: t, at: a.got.at, headword: w.w,
-                     rule: rule ? `${rule.label} · ${rule.who}` : null } };
+             front: { ask: "Put the word in this case", big: w.w, sub: m,
+                      pills: [caseName(a.c)].concat(a.num === "pl" ? ["plural"] : []) },
+             back: { answer: a.got.cell.join(" / "), speak: a.got.cell[0], table: t, at: a.got.at, headword: w.w, tableOpen: true,
+                     line: { case: a.c },
+                     why: [rule ? ruleSentence(rule)
+                       : `«${w.w}» does not follow the usual pattern here: learn «${a.got.cell[0]}» with it.`] } };
   },
   /* A form, out of a sentence → its case. Only a form that is one case in its
      own table: «кни́ге» is dative or prepositional and is never asked. */
@@ -284,10 +375,14 @@ const WORD_MAKERS = {
     if (!ok.length) return null;
     const x = ok[Math.floor(ctx.rng() * ok.length)];
     const num = cellNum(t, x.at);
+    const m = meaningOf(ctx, i);
+    const rule = num ? ruleFor(w, t, x.c.id, num) : null;
     return { check: "case", answer: x.c.id, word: w.b, i,
-             front: { big: x.f },
-             back: { speak: x.f, table: t, at: x.at, headword: w.w,
-                     line: { case: x.c.id, word: w.w, text: num === "pl" ? "plural" : num === "sg" ? "singular" : "" } } };
+             front: { ask: "Which case is this form?", big: x.f },
+             back: { speak: x.f, table: t, at: x.at, headword: w.w, tableOpen: true, line: { case: x.c.id },
+                     why: [`«${x.f}» is «${w.w}»${m ? ` (${m})` : ""} in the ${lower(x.c.id)}${num ? ` ${numName(num)}` : ""}.`,
+                           rule ? ruleSentence(rule) : null] },
+             misses: caseMisses(t, x.at, x.c.id) };
   },
 };
 
@@ -308,6 +403,7 @@ function exampleFor(rule, ctx) {
   }
   return null;
 }
+const wordExample = (e, ctx) => ({ ru: `${e.w.w} → ${e.got.cell[0]}`, en: meaningOf(ctx, e.i) || undefined, hl: [] });
 
 const RULE_MAKERS = {
   /* A case, a number and a kind of noun → the ending, with a word to show it. */
@@ -315,54 +411,90 @@ const RULE_MAKERS = {
     const e = exampleFor(r, ctx);
     if (!e) return null;
     return { check: "self", i: e.i,
-             front: { big: `${caseName(r.case)} ${r.num === "pl" ? "plural" : "singular"}`, sub: `${r.who} · like «${e.w.w}»` },
-             back: { answer: r.label, speak: e.got.cell[0], example: { ru: `${e.w.w} → ${e.got.cell[0]}` },
-                     table: e.t, at: e.got.at, headword: e.w.w } };
+             front: { ask: "Which ending?", big: `${caseName(r.case)} ${numName(r.num)}`, sub: `${capital(r.who)}, like «${e.w.w}»` },
+             back: { answer: r.label, speak: e.got.cell[0], line: { case: r.case }, why: [ruleSentence(r)],
+                     example: wordExample(e, ctx), table: e.t, at: e.got.at, headword: e.w.w, tableOpen: true } };
   },
   /* An ending → its case: only the endings no other case of a noun has. */
   "ending-case": (r, ctx) => {
     if (!r.cue) return null;
     const e = exampleFor(r, ctx);
     if (!e) return null;
-    return { check: "case", answer: r.case, i: e.i,
-             front: { big: r.cue },
-             back: { line: { case: r.case, word: r.num === "pl" ? "plural" : "singular", text: r.who },
-                     example: { ru: `${e.w.w} → ${e.got.cell[0]}` }, speak: e.got.cell[0] } };
+    const misses = {};
+    for (const c of CASES) {
+      if (c.id === r.case) continue;
+      const rules = ENDING_RULES.filter((o) => o.case === c.id && o.num === r.num);
+      const ends = [...new Set(rules.filter((o) => o.ends).flatMap((o) => o.label.split("/").map((x) => `«${x.trim()}»`)))];
+      const same = [...new Set(rules.filter((o) => o.same).map((o) => o.same.toLowerCase()))];
+      const zero = rules.some((o) => o.zero);
+      const parts = [];
+      if (ends.length) parts.push(`ends in ${ends.join(", ")}`);
+      if (zero) parts.push("can have no ending");
+      if (same.length) parts.push(`is the same as the ${same.join(" or the ")}`);
+      misses[c.id] = `The ${c.name.toLowerCase()} ${numName(r.num)} ${parts.join(", or ") || "ends differently"}.`;
+    }
+    return { check: "case", answer: r.case, i: e.i, misses,
+             front: { ask: "Which case ends like this?", big: r.cue, sub: "A noun ending" },
+             back: { line: { case: r.case }, why: [ruleSentence(r)], example: wordExample(e, ctx), speak: e.got.cell[0],
+                     table: e.t, at: e.got.at, headword: e.w.w } };
   },
 };
 
-/* A counting rule, asked as which case and number, or — where the rule has a
-   word to count with — as the phrase made from a known noun: «три + стол». */
+/* A counting rule, asked as which case and number, or as the phrase made from
+   a known noun: «три + стол». The number agrees with the noun where it has
+   a gender («одна́ ло́жка», «две ло́жки»). */
+const NUMBER_FORMS = { "один": { m: "оди́н", f: "одна́", n: "одно́" }, "два": { m: "два", f: "две", n: "два" } };
+function counted(word, g) {
+  const parts = word.split(" ");
+  const last = parts[parts.length - 1];
+  const forms = NUMBER_FORMS[fold(last)];
+  if (forms) parts[parts.length - 1] = forms[g] || forms.m;
+  return parts.join(" ");
+}
 function countingCard(r, ctx) {
   const right = COUNT_CHOICES.find((c) => c.id === r.wants);
+  const row = r.wants.startsWith("nom") ? "Nominative" : "Genitive";
+  const num = r.wants.endsWith("pl") ? "pl" : "sg";
   let made = null;
-  if (r.make) {
-    for (const { i } of ctx.words.slice().sort((a, b) => b.weight - a.weight + (ctx.rng() - 0.5))) {
-      const w = ctx.lex.word(i), t = declension(w);
-      if (!w || w.p !== "noun" || !t || isName(w) || ctx.usedWords.has(i)) continue;
-      const got = cellOf(t, r.row, r.num);
-      if (got && /singular/i.test(t.columns[1] || "")) { made = { w, t, got, i }; break; }
-    }
+  for (const { i } of ctx.words.slice().sort((a, b) => b.weight - a.weight + (ctx.rng() - 0.5))) {
+    const w = ctx.lex.word(i), t = declension(w);
+    if (!w || w.p !== "noun" || !t || isName(w) || ctx.usedWords.has(i) || !w.g || w.g === "pl") continue;
+    const got = cellOf(t, row, num);
+    if (got && /singular/i.test(t.columns[1] || "")) { made = { w, t, got, i, n: counted(r.say, w.g) }; break; }
   }
+  const phrase = made ? `${made.n} ${made.got.cell[0]}` : null;
+  const back = { why: [r.why], speak: phrase || undefined,
+                 example: made ? { ru: phrase, en: `${r.say === "много" ? "many" : r.en} ${meaningOf(ctx, made.i) || ""}`.trim(), hl: [] } : undefined,
+                 table: made ? made.t : undefined, at: made ? made.got.at : undefined, headword: made ? made.w.w : undefined };
   if (made && ctx.rng() < 0.5) {
-    const phrase = `${r.make} ${made.got.cell[0]}`;
     return { check: "self", word: made.w.b, i: made.i,
-             front: { big: `${r.make} + ${made.w.w}` },
-             back: { answer: phrase, speak: phrase, table: made.t, at: made.got.at, headword: made.w.w,
-                     rule: `${r.words}: ${right.label.toLowerCase()}` } };
+             front: { ask: "Say them together", big: `${made.n} + ${made.w.w}`, sub: meaningOf(ctx, made.i) },
+             back: { ...back, answer: phrase, example: undefined, tableOpen: true } };
   }
-  return { check: "choice", options: optionsOf(right.label, COUNT_CHOICES.filter((c) => c !== right).map((c) => c.label), ctx.rng),
-           front: { big: `${r.words} + …`, sub: r.note || null },
-           back: made ? { example: { ru: `${r.make} ${made.got.cell[0]}` }, speak: `${r.make} ${made.got.cell[0]}` } : {} };
+  const misses = {};
+  for (const c of COUNT_CHOICES) {
+    if (c === right) continue;
+    const by = COUNT_RULES.filter((o) => o.wants === c.id).map((o) => `«${o.words}»`);
+    misses[c.label] = by.length ? `${c.label} comes after ${by.join(" and ")}.` : `${c.label} is not what a number takes.`;
+  }
+  return { check: "choice", misses,
+           options: optionsOf(right.label, COUNT_CHOICES.filter((c) => c !== right).map((c) => c.label), ctx.rng),
+           front: { ask: "What form does the noun take after these?", big: `${r.words} + …`, sub: r.note || null },
+           back };
 }
 
 /* The question a case answers, either way round. */
 function questionCard(caseId, ctx) {
   const q = CASE_QUESTIONS[caseId];
+  const why = [`«${q}» asks for the ${lower(caseId)}.`];
   if (ctx.rng() < 0.5) {
-    return { check: "case", answer: caseId, front: { big: q }, back: { speak: q } };
+    const misses = Object.fromEntries(CASES.filter((c) => c.id !== caseId)
+      .map((c) => [c.id, `The ${c.name.toLowerCase()} asks «${CASE_QUESTIONS[c.id]}».`]));
+    return { check: "case", answer: caseId, misses, front: { ask: "Which case answers this question?", big: q },
+             back: { speak: q, line: { case: caseId }, why } };
   }
-  return { check: "self", front: { big: caseName(caseId), sub: "Its question words" }, back: { answer: q, speak: q } };
+  return { check: "self", front: { ask: "Which question words ask for this case?", big: caseName(caseId) },
+           back: { answer: q, speak: q, line: { case: caseId }, why } };
 }
 
 /* -------------------------------------------------------------- the deal */

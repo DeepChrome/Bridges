@@ -19,7 +19,7 @@ import { ScoreRing } from "./skills";
 import { RuleCard, IrregularTag } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
-import { L, UN, idxOfWord, rankOf } from "./data";
+import { L, UN, idxOfWord, rankOf, wordScore } from "./data";
 import { hasRealAudio } from "./audio";
 
 /* The sections and groups a list is drawn in live in wordgroups.js, which has
@@ -133,7 +133,7 @@ function Jump({ word, active, onPress }) {
 export function WordRow({ word, seen, active, onJump, first, speaker, testID = "prep" }) {
   const t = useTheme();
   const e = L[idxOfWord(word)];
-  const score = familiarity(cardFor(seen[word] || null), rankOf(word));
+  const score = wordScore(seen[word], word);
   return (
     <View testID={`${testID}-${word}`}
           style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8,

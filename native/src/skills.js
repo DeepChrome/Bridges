@@ -30,7 +30,7 @@ import Svg, { Path, Defs, RadialGradient, Stop } from "react-native-svg";
 import { useTheme, type as T } from "./theme";
 import { Bubble, Familiarity, Text, Muted, Btn, familiarityColor } from "./ui";
 import { useSession } from "./session";
-import { L, idxOfWord, rankOf } from "./data";
+import { L, idxOfWord, rankOf, wordScore } from "./data";
 import { navRef } from "./words";
 import { Q, SKILL_DRILL_OF } from "./questions";
 import { motionOff } from "./motion";
@@ -238,7 +238,7 @@ function SkillBreakdown({ word, onClose }) {
   const entry = seen[word] || null;
   const rank = rankOf(word);
   const scores = skillScores(entry, rank);
-  const overall = familiarity(cardFor(entry), rank);
+  const overall = wordScore(entry, word);
   const i = idxOfWord(word);
   const shown = i >= 0 ? L[i].w : word;
   const skill = selected ? SKILLS.find((s) => s.id === selected) : null;

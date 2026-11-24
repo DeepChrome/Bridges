@@ -2559,7 +2559,8 @@ group("a chapter's grammar run");
     let seed = 7;
     const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     const lemmaOf = (tok) => { const h = IX[fold(tok)]; return h && L[h[0]] ? L[h[0]].w : tok; };
-    const lex = { word: (i) => L[i], lemma: lemmaOf, stress: lemmaOf };
+    const { firstSense: senseOf } = await import("../core/util.js");
+    const lex = { word: (i) => L[i], lemma: lemmaOf, stress: lemmaOf, meaning: (i) => (L[i] ? senseOf(L[i]) : null) };
     const nouns = [...new Set(UN.flatMap((u) => u.w))].filter((i) => L[i] && L[i].p === "noun");
     const words = nouns.slice(0, 150).map((i, k) => ({ i, weight: 0.2 + (k % 9) / 3 }));
     // Every ending rule has a course noun that follows it, checked against its own form.
@@ -2626,6 +2627,15 @@ group("a chapter's grammar run");
           if (!r || c.back.answer !== r.label) bad.push(`ending ${c.key}`);
         }
         if ((c.type === "gap" || c.type === "sentence-case") && c.s.trigger !== c.key) bad.push(`${c.type}: a ${c.s.trigger} sentence on ${c.key}`);
+        // The owner, 2026-11-23: "confusing what's even being asked… we don't
+        // know the rule that makes the answer correct"; "a lot of sentences
+        // that don't get translated".
+        if (!c.front.ask) bad.push(`${c.type}: no question`);
+        if (!(c.back.why || []).filter(Boolean).length) bad.push(`${c.type}: no rule on the back`);
+        if (c.front.sentence && !c.front.sub) bad.push(`${c.type}: a sentence with no English`);
+        if (c.back.example && c.back.example.hl && c.back.example.hl.length && !c.back.example.en) bad.push(`${c.type}: an example with no English`);
+        if (c.check === "case" && c.back.table && Object.keys(c.misses || {}).length < 3) bad.push(`${c.type}: wrong picks unexplained`);
+        if (c.check === "choice" && c.options.some((o) => !o.right && !(c.misses || {})[o.label])) bad.push(`${c.type}: a wrong option unexplained`);
       }
     }
     ok(!bad.length, "every card's answer is right, its options sound, nothing twice in a deal", [...new Set(bad)].slice(0, 6).join("; "));
@@ -2687,6 +2697,57 @@ group("a chapter's grammar run");
     if (!run.length || !words.includes(run[0].i)) misses.push(`lesson ${i + 1}: ${run[0] && L[run[0].i].b}`);
   }
   ok(!misses.length, "a lesson's run starts on that lesson's words", misses.join(", "));
+}
+
+/* The owner, 2026-11-23: «брат» showed 100 with its cases at 0. The score a
+   word shows takes in every skill it has; the schedule still runs on the card. */
+group("the score a word shows");
+{
+  const now = Date.now();
+  let card = null;
+  for (let k = 0; k < 8; k++) card = S.review(card, 4, now - (40 - k * 5) * 86400000);
+  const entry = { recognise: card };
+  const meaning = S.familiarity(card, 5);
+  ok(S.overallScore(entry, 5) === meaning, "a word that does not inflect shows its meaning score");
+  const inflected = S.overallScore(entry, 5, { inflects: true });
+  ok(inflected === Math.round(meaning / 2), `a noun never asked its forms shows half (${meaning} → ${inflected})`);
+  const formsAsked = { ...entry, forms: card };
+  ok(S.overallScore(formsAsked, 5, { inflects: true }) === meaning, "forms as strong as the meaning: the same score");
+  const weakEnglish = { ...entry, en2ru: S.review(null, 1, now) };
+  ok(S.overallScore(weakEnglish, 5) < meaning, "a weak direction pulls the score down");
+  ok(S.overallScore({}, 5, { inflects: true }) === null, "no card, no score");
+}
+
+/* The owner, 2026-11-23: rare words ("to treat") came back day after day.
+   How common a word is weighs in the review's draw, and "Common words"
+   weighs it again. */
+group("common words weigh in the review");
+{
+  const Qm = await import("../core/queue.js");
+  ok(Qm.commonness(1) > 0.9 && Qm.commonness(100) > Qm.commonness(2000) && Qm.commonness(20000) === 0,
+     "commonness runs from the commonest word down to nothing past the horizon");
+  const now = Date.now(), DAYm = 86400000;
+  const held = () => ({ recognise: { state: 2, s: 120, d: 5, reps: 6, lapses: 0, lastAt: now - 30 * DAYm, dueAt: now + 90 * DAYm } });
+  const seen = { "общий": held(), "редкий": held() };
+  const rank = (w) => (w === "общий" ? 20 : 4500);
+  const first = (focus) => Qm.goalSession({ seen, words: ["редкий", "общий"], dirs: ["recognise"], now, daily: null,
+                                            owed: 1, rng: () => 0.5, rank, focus }).items[0].word;
+  ok(first("personal") === "общий", "two words alike in every other way: the commoner is dealt first");
+  // Over many draws, Common words leans harder than Personal.
+  let seed = 11;
+  const rng = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const share = (focus) => {
+    let n = 0;
+    for (let k = 0; k < 400; k++) {
+      const w = Qm.goalSession({ seen, words: ["редкий", "общий"], dirs: ["recognise"], now, daily: null,
+                                 owed: 1, rng, rank, focus }).items[0].word;
+      if (w === "общий") n++;
+    }
+    return n / 400;
+  };
+  const personal = share("personal"), common = share("common");
+  ok(personal > 0.5 && common > personal && common > 0.9,
+     `the common word leads ${Math.round(personal * 100)}% of draws, ${Math.round(common * 100)}% on Common words`);
 }
 
 /* The agreement drill took the first form of the masculine accusative cell,

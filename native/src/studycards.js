@@ -5,7 +5,7 @@
 
 import { L, UN, SPEECH, reachedUnits, idxOfWord, exactIdx, rankOf, videoLines,
          personalWords, pathRank, goalNow, englishOfSentence, isLowPriority, lessonCount, lessonWords,
-         lessonDone } from "./data";
+         lessonDone, wordScore } from "./data";
 import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability,
          isDue, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
@@ -53,7 +53,7 @@ export function flagsFor(st, item) {
     isNew: item.kind === "new",
     /* The word's memory, 0–100 (core/scheduler.js familiarity); null while it
        is new, when the New flag says everything there is to say. */
-    score: item.kind === "new" ? null : familiarity(cardFor(entry), rankOf(item.word)),
+    score: item.kind === "new" ? null : wordScore(entry, item.word),
     /* A word that breaks the rules says so on the back (2026-09-29). */
     irregular: (() => { const i = idxOfWord(item.word); return i >= 0 && isIrregular(L[i]); })(),
   };
@@ -389,6 +389,9 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
     // "From the start" walks the route from its first words (the owner,
     // 2026-11-02); the default is most faded first.
     order: st.reviewOrder === "path" ? pathRank(st) : undefined,
+    // How common a word is weighs in the draw; "Common words" weighs it again
+    // (the owner, 2026-11-23).
+    rank: rankOf, focus: st.reviewFocus === "common" ? "common" : "personal",
     /* Met in random order (the owner, 2026-11-19: "integrated and shuffled
        randomly among themselves… not sequential"); "From the start" keeps the
        route's order, which is what that option is for. */

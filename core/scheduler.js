@@ -527,6 +527,25 @@ export function skillScores(entry, rank) {
   return out;
 }
 
+/* The score a word shows: everything it has to be known for, not the card
+   alone (the owner, 2026-11-23: "I have a score of 100 with brat however my
+   score is 0 in cases. Cases/forms/everything should contribute to the overall
+   familiarity score"). The mean of its meaning — the two directions, each
+   read off the card until it has been asked on its own — its "Cases & forms"
+   for a word that inflects (`inflects`), at 0 until a form has been asked, and
+   its use in a sentence once that has been asked. Null while the word has no
+   card. The schedule still runs on the card: this is what the learner is shown. */
+export function overallScore(entry, rank, { inflects = false } = {}) {
+  const base = familiarity(cardFor(entry), rank);
+  if (base === null) return null;
+  const s = skillScores(entry, rank);
+  const have = (x) => x !== null && x !== undefined;
+  const parts = [((have(s.ru2en) ? s.ru2en : base) + (have(s.en2ru) ? s.en2ru : base)) / 2];
+  if (inflects) parts.push(have(s.forms) ? s.forms : 0);
+  if (have(s.usage)) parts.push(s.usage);
+  return Math.round(parts.reduce((a, b) => a + b, 0) / parts.length);
+}
+
 /* The skill the word most needs, among `among` (every skill by default): the
    one never asked first, then the lowest stability. Ties keep the table's
    order, so a caller can rely on the answer being stable. */

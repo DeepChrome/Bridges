@@ -26,7 +26,7 @@ import { View, Animated, BackHandler } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, List, Row, RowText, Text, Muted, Sheet, Loading, Lift, toneOf, Speaker, Pill,
-         OptionRow, Familiarity } from "../ui";
+         OptionRow, Familiarity, Marked } from "../ui";
 import { Linked } from "../words";
 import { useHeaderOptions } from "../headermenu";
 import { useAbout } from "../about";
@@ -39,7 +39,7 @@ import { triggerById, TRIGGER_KINDS } from "@core/triggers";
 import { ENDING_RULES, COUNT_RULES } from "@core/caserules";
 import { caseDeck, offered, gradeOf, itemOf, gradeItem, keepRecent, CARD_TYPES, NUMBERS } from "@core/casecards";
 import { gradeSkill, familiarity, cardFor, skillScores, schedulerOpts, isDue } from "@core/scheduler";
-import { fold, TOKEN } from "@core/util";
+import { fold, TOKEN, firstSense } from "@core/util";
 
 /* The score a word card's grade moves (FormCards' FORM_SKILL). */
 const FORMS = "forms";
@@ -59,7 +59,9 @@ const stressed = (bare) => {
   const ids = IX[fold(bare)];
   return ids && L[ids[0]] ? L[ids[0]].w : bare;
 };
-const LEX = { word: (i) => L[i], lemma: stressed, stress: stressed };
+/* What the deck may ask of the lexicon; `meaning` is the English a card puts
+   beside every Russian word it shows. */
+const LEX = { word: (i) => L[i], lemma: stressed, stress: stressed, meaning: (i) => (L[i] ? firstSense(L[i]) : null) };
 
 /* How a trigger is named in the options and the end list. */
 function triggerTitle(x) {
@@ -189,29 +191,44 @@ function OptionChoices({ options, picked, onPick }) {
   );
 }
 
-/* What the card was about, under the answer: the case, the word that takes
-   it, and a short line. The case is always green: it is the answer. */
+/* The case the answer is, always green: it is the answer, whatever was
+   picked (the red is on the wrong button already). */
 function CaseLine({ line }) {
-  const t = useTheme();
   return (
-    <View testID="casecard-why" style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+    <View testID="casecard-why" style={{ flexDirection: "row", marginBottom: 8 }}>
       <Pill tone="good" testID="casecard-case">{caseName(line.case)}</Pill>
-      {line.word ? <Text style={{ color: t.ink, fontWeight: "700", fontSize: T.body }}>{line.word}</Text> : null}
-      {line.text ? <Muted size={T.small} style={{ flexShrink: 1 }}>{line.text}</Muted> : null}
     </View>
   );
 }
 
-function CaseCard({ card, state, onPick }) {
+/* What a card asks for, as the answer to it reads. */
+export function answerText(card) {
+  if (card.check === "case") return caseName(card.answer);
+  if (card.check === "choice") return (card.options.find((o) => o.right) || {}).label || "";
+  return (card.back && card.back.answer) || "";
+}
+/* What the pick that was wrong would have meant (core/casecards.js misses). */
+function missOf(card, picked) {
+  if (picked === null || picked === undefined || !card.misses) return null;
+  if (card.check === "case") return picked === card.answer ? null : card.misses[picked] || null;
+  const o = card.options && card.options[picked];
+  return o && !o.right ? card.misses[o.label] || null : null;
+}
+
+export function CaseCard({ card, state, onPick, openTable = false }) {
   const t = useTheme();
   const f = card.front, b = card.back || {};
   const done = state.picked !== null || state.shown;
   const sent = f.sentence;
   const hl = useMemo(() => (sent ? new Set([fold(sent.s.token), fold(sent.s.gov || "")]) : null), [sent]);
+  const [table, setTable] = useState(!!(b.tableOpen || openTable));
+  const miss = missOf(card, state.picked);
+  const why = (b.why || []).filter(Boolean);
 
   return (
     <View testID={`casecard-${card.type}`} style={{ borderWidth: 1, borderColor: t.lineSoft, borderRadius: radius.xl,
                                                     backgroundColor: t.surface, padding: 20 }}>
+      {f.ask ? <Muted testID="casecard-ask" size={T.small} style={{ marginBottom: 10 }}>{f.ask}</Muted> : null}
       {f.big ? (
         <Text testID="casecard-big" style={{ color: t.ink, fontSize: f.big.length > 22 ? T.title : T.display, fontWeight: "700" }}>
           {f.big}
@@ -225,45 +242,49 @@ function CaseCard({ card, state, onPick }) {
           {f.pills.map((p, k) => <Pill key={k} tone={k === 0 ? "brand" : undefined}>{p}</Pill>)}
         </View>
       ) : null}
-      {f.sub ? <Muted size={T.small} style={{ marginTop: 8 }}>{f.sub}</Muted> : null}
+      {f.sub ? <Muted testID="casecard-sub" size={T.small} style={{ marginTop: 8 }}>{f.sub}</Muted> : null}
 
       {card.check === "case" ? <CaseChoices answer={card.answer} picked={state.picked} onPick={onPick} /> : null}
       {card.check === "choice" ? <OptionChoices options={card.options} picked={state.picked} onPick={onPick} /> : null}
 
-      {done && (b.answer || b.rule || b.line || b.example || b.speak || b.table) ? (
+      {done ? (
         <View testID="casecard-back" style={{ marginTop: 18, borderTopWidth: 1, borderTopColor: t.lineSoft, paddingTop: 16 }}>
           {b.answer ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 8 }}>
               <Text testID="casecard-answer" style={{ flex: 1, color: t.brandInk, fontSize: T.display, fontWeight: "700" }}>
                 {b.answer}
               </Text>
               {b.speak ? <Speaker text={b.speak} size={36} recordedOnly /> : null}
             </View>
           ) : null}
-          {b.rule ? <Muted testID="casecard-rule" size={T.small} style={{ marginTop: 6 }}>{b.rule}</Muted> : null}
-          {b.line ? <CaseLine line={b.line} /> : null}
+          {b.line && !b.answer ? <CaseLine line={b.line} /> : null}
+          {miss ? <Marked testID="casecard-miss" text={miss} size={T.small} color={t.bad} style={{ marginBottom: 6 }} /> : null}
+          {why.map((line, k) => (
+            <Marked key={k} testID={`casecard-rule-${k}`} text={line} size={T.body} color={t.ink} style={{ marginBottom: 6 }} />
+          ))}
           {b.example ? (
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8 }}>
               <View style={{ flex: 1 }}>
-                {b.example.en ? (
-                  <>
-                    <Linked text={b.example.ru} hl={new Set(b.example.hl.map(fold))} size={T.body} testID="casecard-example" />
-                    <Muted size={T.small} style={{ marginTop: 4 }}>{b.example.en}</Muted>
-                  </>
-                ) : <Text testID="casecard-example" style={{ color: t.ink, fontSize: T.body }}>{b.example.ru}</Text>}
+                {b.example.hl && b.example.hl.length
+                  ? <Linked text={b.example.ru} hl={new Set(b.example.hl.map(fold))} size={T.body} testID="casecard-example" />
+                  : <Text testID="casecard-example" style={{ color: t.ink, fontSize: T.body }}>{b.example.ru}</Text>}
+                {b.example.en ? <Muted size={T.small} style={{ marginTop: 4 }}>{b.example.en}</Muted> : null}
               </View>
               {!b.answer && b.speak ? <Speaker text={b.speak} size={36} recordedOnly /> : null}
             </View>
           ) : !b.answer && b.speak ? (
-            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 10 }}>
+            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 6 }}>
               <Speaker text={b.speak} size={36} recordedOnly />
             </View>
           ) : null}
-          {b.table ? (
+          {b.table ? (table ? (
             <View style={{ marginTop: 14 }}>
               <Table table={b.table} mark={b.at} narrow testID="casecard-table" headword={b.headword} />
             </View>
-          ) : null}
+          ) : (
+            <Btn kind="link" testID="casecard-show-table" label="Table" style={{ alignSelf: "flex-start", marginTop: 8 }}
+                 onPress={() => setTable(true)} />
+          )) : null}
         </View>
       ) : null}
     </View>
@@ -369,6 +390,12 @@ export function CaseStack({ route, active = true }) {
   const dealtFor = useRef(null);             // the options the queue was dealt under
   const deals = useRef(0);
   const [nothing, setNothing] = useState(false);
+  /* The cards missed this sitting, as they were left, for the end screen to
+     open again with their rule and table (the owner, 2026-11-23: "the learner
+     needs the ability to review why they were wrong at the end"). */
+  const [missed, setMissed] = useState([]);
+  const [review, setReview] = useState(null);
+  const lastG = useRef(null);
   /* The cards answered this sitting, as they were left, and how many of them
      back the learner has stepped (the owner, 2026-11-23: "would be nice to be
      able to return the previous card via backswipe"). A card stepped back to
@@ -434,7 +461,7 @@ export function CaseStack({ route, active = true }) {
   if (!ready) return <Screen><Loading /></Screen>;
 
   const begin = () => {
-    lately.current = []; shownRu.current = []; history.current = []; setBack(0); setCount(0); setRight(0); setEnded({}); setQueue([]);
+    lately.current = []; shownRu.current = []; history.current = []; setBack(0); setCount(0); setMissed([]); lastG.current = null; setRight(0); setEnded({}); setQueue([]);
     dealtFor.current = null; setFinished(false); setNothing(false); setStarted(true);
   };
   const focus = prefs.focus ? triggerById(prefs.focus) : null;
@@ -476,6 +503,20 @@ export function CaseStack({ route, active = true }) {
         <Text testID="casecards-end" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", marginBottom: 12 }}>
           {none ? "Nothing to practice with these options" : `${right} of ${count} right`}
         </Text>
+        {missed.length ? (
+          <>
+            <Muted testID="casecards-missed" size={T.small} style={{ marginBottom: 6 }}>Missed · tap for the rule</Muted>
+            <List>
+              {missed.map((m, k) => (
+                <Row key={`miss-${k}`} testID={`casecards-miss-${k}`} onPress={() => setReview(m)}>
+                  <RowText title={m.card.front.big || (m.card.front.sentence ? m.card.front.sentence.s.ru : "")}
+                           sub={answerText(m.card)} />
+                </Row>
+              ))}
+            </List>
+            <View style={{ height: 16 }} />
+          </>
+        ) : null}
         <List>
           {keys.map((key) => {
             const it = itemTitle(key);
@@ -490,6 +531,11 @@ export function CaseStack({ route, active = true }) {
             );
           })}
         </List>
+        {review ? (
+          <Sheet testID="casecards-review" title="Missed" onClose={() => setReview(null)} maxHeight="88%">
+            <CaseCard card={review.card} state={review.state} onPick={() => {}} openTable />
+          </Sheet>
+        ) : null}
         {options}
       </Screen>
     );
@@ -514,12 +560,15 @@ export function CaseStack({ route, active = true }) {
       }
       return next;
     });
+    lastG.current = g;
     if (item) setEnded((was) => ({ ...was, [item]: g }));
     lately.current = lately.current.filter((k) => k !== card.key).concat(card.key).slice(-LATELY_KEPT);
     setCount((n) => n + 1);
     if (g >= 3) setRight((n) => n + 1);
   };
+  const keepMiss = (left) => { if (lastG.current === 1) setMissed((m) => m.concat({ card, state: left })); lastG.current = null; };
   const next = (left = state) => {
+    keepMiss(left);
     history.current = history.current.concat({ card, state: left }).slice(-50);
     setQueue(queue.slice(1)); setState(FRESH);
   };
@@ -559,7 +608,7 @@ export function CaseStack({ route, active = true }) {
     <>
       {main}
       <Btn kind="ghost" testID="casecards-finish" label="Finish" style={{ marginTop: main ? 10 : 0 }}
-           onPress={() => { setFinished(true); setQueue([]); }} />
+           onPress={() => { keepMiss(state); setFinished(true); setQueue([]); }} />
     </>
   );
 

@@ -39,6 +39,11 @@ export const FRONTS = [
 const KINDS = [["words", "Words"], ["sentences", "Sentences"]];
 const ORDERS = [{ id: "weak", name: "Where you struggle", sub: "Most faded first" },
                 { id: "path", name: "From the start", sub: "The route from its first lesson" }];
+/* What the review leans on, once the due cards are dealt (the owner,
+   2026-11-23: "the user can select between personal (anything they've been
+   exposed to) versus common"; core/queue.js commonness). */
+const FOCUSES = [{ id: "personal", name: "Personal", sub: "Everything you have met" },
+                 { id: "common", name: "Common words", sub: "The most used words first" }];
 const REVIEWS = [{ id: "personal", name: "Personalized", sub: "Your path, where you are" },
                  { id: "custom", name: "Custom", sub: "Chapters or decks you choose" }];
 
@@ -174,6 +179,8 @@ export function SetPicker({ visible, onClose }) {
         {/* Which met cards make the review up once the due ones are dealt:
             the most faded, or the route from its first lesson forward (the
             owner, 2026-11-02). */}
+        <OptionRow testID="review-focus" title="Focus" value={st.reviewFocus === "common" ? "common" : "personal"}
+                   options={FOCUSES} onPick={(id) => update((p) => ({ ...p, reviewFocus: id }))} />
         <OptionRow testID="review-order" title="Order" value={st.reviewOrder === "path" ? "path" : "weak"}
                    options={ORDERS} onPick={(id) => update((p) => ({ ...p, reviewOrder: id }))} />
         <LowPriorityRow />

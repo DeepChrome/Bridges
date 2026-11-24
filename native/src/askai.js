@@ -30,6 +30,7 @@ import { routePosition } from "./data";
 import { ask, config, isCap, capNotice } from "./lib/feedback";
 import { talkLevelFor } from "./screens/Talk";
 import { screenAbout } from "./about";
+import { groundQuestion, unknownIn } from "./groundask";
 import { GuidePop } from "./guide";
 import { useConverse } from "./converse";
 import { LangToggle, ConverseToggle } from "./mic";
@@ -95,16 +96,36 @@ export function useAskThread({ mode = "russian", guide } = {}) {
     question = String(question || "").trim();
     if (!question || busy) return null;
     setBusy(true); setFailed(null); setText("");
-    const history = threadRef.current;
+    const history = threadRef.current.map(({ q, a }) => ({ q, a }));
     setThread((h) => [...h, { q: question, a: null }]);
     const a = about.current || screenAbout();
-    const r = await ask(mode === "app"
-      ? { mode, question, screen: a.title || a.screen, guide: guide ? guide(a) : "", history }
-      : { question, screen: a.screen, about: aboutForAsk(a), level: talkLevelFor(st),
-          chapter: routePosition(st).stage + 1, history, converse });
+    let r, unchecked = [];
+    if (mode === "app") {
+      r = await ask({ mode, question, screen: a.title || a.screen, guide: guide ? guide(a) : "", history });
+    } else {
+      /* Grounded in the app's own dictionary, and the answer's Russian checked
+         against it (groundask.js): a made-up form is asked about once more,
+         and anything still unrecognised is said under the answer. */
+      const about = aboutForAsk(a);
+      const grounded = groundQuestion(question, about);
+      const body = { question, screen: a.screen, about, level: talkLevelFor(st),
+                     chapter: routePosition(st).stage + 1, history, converse,
+                     dictionary: grounded.dictionary, notWords: grounded.notWords };
+      r = await ask(body);
+      if (r && r.ok === true && typeof r.answer === "string") {
+        unchecked = unknownIn(r.answer, question, grounded);
+        if (unchecked.length) {
+          const again = await ask({ ...body, invalid: unchecked, previous: r.answer });
+          if (again && again.ok === true && typeof again.answer === "string") {
+            r = again;
+            unchecked = unknownIn(again.answer, question, grounded);
+          }
+        }
+      }
+    }
     setBusy(false);
     if (r && r.ok === true && typeof r.answer === "string") {
-      setThread((h) => h.map((x) => (x.q === question && x.a === null ? { q: question, a: r.answer } : x)));
+      setThread((h) => h.map((x) => (x.q === question && x.a === null ? { q: question, a: r.answer, unchecked } : x)));
       return r.answer;
     }
     setThread((h) => h.filter((x) => x.a !== null));
@@ -135,7 +156,12 @@ export function AskTurns({ thread, busy, prefix = "ask" }) {
           {h.a === null ? (
             <TypingTurn testID={`${prefix}-busy`} avatar={castById[GUIDE_ID].avatar} />
           ) : (
-            <ChatTurn testID={`${prefix}-reply-${k}`} side="left" avatar={castById[GUIDE_ID].avatar}>
+            <ChatTurn testID={`${prefix}-reply-${k}`} side="left" avatar={castById[GUIDE_ID].avatar}
+                      below={h.unchecked && h.unchecked.length ? (
+                        <Muted testID={`${prefix}-unchecked-${k}`} size={T.small}>
+                          {`Not in the dictionary: ${h.unchecked.map((w) => `«${w}»`).join(", ")}`}
+                        </Muted>
+                      ) : null}>
               <Note text={h.a} size={T.body} testID={`${prefix}-answer-${k}`} />
             </ChatTurn>
           )}

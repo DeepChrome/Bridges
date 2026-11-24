@@ -88,6 +88,42 @@ it("sends the question with the card on screen, and a follow-up with the turn be
 /* Driven through the hook: reopening a Modal inside one test leaves the test
    renderer drawing the old sheet (§30be's Modal trap), which says nothing
    about the thread. */
+/* The owner, 2026-11-23: asked whether «время» was feminine («врем» or
+   «времы»?), the answer said «време», neuter in -е, and held to it. */
+it("grounds a question in the dictionary and asks again over a made-up form", async () => {
+  mockShown = { screen: "Cards", params: {} };
+  fb.ask.mockResolvedValueOnce({ ok: true, answer: "«время» is neuter; its nominative is «време»." })
+        .mockResolvedValueOnce({ ok: true, answer: "«вре́мя» is neuter, one of the -мя nouns: «вре́мени»." });
+  await open();
+  const { result } = await renderHook(() => useAskThread(), { wrapper: SessionProvider });
+  await act(async () => { result.current.open(); });
+  await act(async () => { await result.current.sendText("I thought время was feminine so врем or времы"); });
+  const sent = fb.ask.mock.calls[0][0];
+  const vremya = sent.dictionary.find((d) => d.asked === "время");
+  expect(vremya.gender).toBe("neuter");
+  expect(vremya.tables).toMatch(/Genitive: вре́мени/);
+  expect(sent.notWords).toContain("времы");
+  // «врем» is a real form, of another word: «врём», "we lie". The model is
+  // told so rather than left to guess.
+  expect(sent.dictionary.find((d) => d.asked === "врем")).toMatchObject({ word: "врать" });
+  // «време» is in no table and no question: asked once more, with it named.
+  expect(fb.ask).toHaveBeenCalledTimes(2);
+  expect(fb.ask.mock.calls[1][0]).toMatchObject({ invalid: ["време"], previous: expect.stringMatching(/време/) });
+  expect(result.current.thread[0]).toMatchObject({ a: expect.stringMatching(/вре́мени/), unchecked: [] });
+});
+
+it("says under the answer which Russian is still unrecognised after the second ask", async () => {
+  mockShown = { screen: "Cards", params: {} };
+  fb.ask.mockResolvedValue({ ok: true, answer: "It is «време», an ending in «-и»." });
+  await open();
+  const { result } = await renderHook(() => useAskThread(), { wrapper: SessionProvider });
+  await act(async () => { result.current.open(); });
+  await act(async () => { await result.current.sendText("gender of время?"); });
+  expect(fb.ask).toHaveBeenCalledTimes(2);
+  // The ending is not a word to check; the invented form is.
+  expect(result.current.thread[0].unchecked).toEqual(["време"]);
+});
+
 it("starts a fresh thread on another question, and keeps it on the same one", async () => {
   fb.ask.mockResolvedValue({ ok: true, answer: "Accusative." });
   await open();

@@ -121,3 +121,52 @@ test("POST /v1/ask: 401 without a token, 400 without a question, the answer thro
   assert.equal((await handle(req({ question: "a" }, auth), e, { fetch: up.fetch })).status, 200);
   assert.equal((await handle(req({ question: "b" }, auth), e, { fetch: up.fetch })).status, 429);
 });
+
+/* The owner, 2026-11-23: asked about «время», the answer said it ends in -е,
+   that its nominative is «време», and held to it when he pointed at the я. */
+test("a grammar answer is grounded in the app's dictionary and runs on the stronger model", async () => {
+  const dictionary = [{ asked: "время", word: "вре́мя", pos: "noun", gender: "neuter",
+    form: "Nominative singular", facts: ["Neuter: nouns in -мя are neuter."],
+    tables: "Declension: Singular | Plural\nNominative: вре́мя | времена́\nGenitive: вре́мени | времён" }];
+  const m = JSON.parse(askMessage({ question: "I thought время was feminine, so времы?", dictionary,
+                                    notWords: ["времы", "врем"] }));
+  assert.equal(m.dictionary[0].gender, "neuter");
+  assert.match(m.dictionary[0].tables, /Genitive: вре́мени/);
+  assert.deepEqual(m.not_words, ["времы", "врем"]);
+  assert.equal(m.invalid, undefined);
+  assert.match(SYSTEM_ASK, /This is the ground truth/);
+  assert.match(SYSTEM_ASK, /check it against "dictionary"/);
+  assert.match(SYSTEM_ASK, /never a correction of itself/);
+  // Asked again over a made-up word, the previous answer rides along.
+  const again = JSON.parse(askMessage({ question: "x", invalid: ["време"], previous: "It is «време»." }));
+  assert.deepEqual(again.invalid, ["време"]);
+  assert.match(again.previous, /време/);
+  // Four words' tables at most, cut by whole entries.
+  const big = new Array(6).fill(dictionary[0]).map((d) => ({ ...d, tables: "а".repeat(1600) }));
+  const cut = JSON.parse(askMessage({ question: "x", dictionary: big })).dictionary;
+  assert.ok(cut.length >= 1 && cut.length < 4);
+
+  // The route asks the ask model with effort and a fallback; the "?" stays on the shared one.
+  const up = upstream([JSON.stringify({ answer: "«вре́мя» is neuter: «вре́мени»." })]);
+  await handle(req({ question: "gender of время?", dictionary }, auth), env(), { fetch: up.fetch });
+  assert.equal(up.calls[0].model, "claude-opus-5-5");
+  assert.equal(up.calls[0].output_config.effort, "low");
+  assert.equal(up.calls[0].fallbacks, "default");
+  assert.ok(up.calls[0].max_tokens >= 2000);
+  const set = upstream([JSON.stringify({ answer: "ok." })]);
+  await handle(req({ question: "q" }, auth), env({ ASK_MODEL: "claude-sonnet-5-5", ASK_EFFORT: "medium" }), { fetch: set.fetch });
+  assert.equal(set.calls[0].model, "claude-sonnet-5-5");
+  assert.equal(set.calls[0].output_config.effort, "medium");
+  const app = upstream([JSON.stringify({ answer: "Open Study." })]);
+  await handle(req({ question: "how?", mode: "app", guide: "g" }, auth), env(), { fetch: app.fetch });
+  assert.equal(app.calls[0].model, "m");
+  assert.equal(app.calls[0].output_config, undefined);
+  assert.equal(app.calls[0].fallbacks, undefined);
+
+  // A bad first reply is asked again fresh: one user turn, never a replayed assistant turn.
+  const retry = upstream(["not json", JSON.stringify({ answer: "fine." })]);
+  const rr = await handle(req({ question: "q" }, auth), env(), { fetch: retry.fetch });
+  assert.equal((await rr.json()).ok, true);
+  assert.equal(retry.calls[1].messages.length, 1);
+  assert.match(retry.calls[1].messages[0].content, /no JSON object/);
+});

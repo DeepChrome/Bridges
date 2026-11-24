@@ -195,21 +195,34 @@ async function register(request, env, now) {
   return json(200, { ok: true, token });
 }
 
-async function askModel(fetchFn, env, system, messages, maxTokens) {
+/* `opts.model` and `opts.effort` are a route's own (the grammar answers run
+   on a stronger model than the conversation routes; 2026-11-23). A model of
+   the Opus 5.5 line thinks always and is steered by effort alone, and on a
+   policy decline is re-run server-side on a fallback model, so its request
+   carries `output_config.effort` and `fallbacks` and the routes on the
+   shared model do not. */
+const THINKING_MODELS = /^claude-(opus-5|sonnet-5|fable-5|haiku-5)/;
+async function askModel(fetchFn, env, system, messages, maxTokens, opts = {}) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), UPSTREAM_TIMEOUT_MS);
+  const model = opts.model || env.MODEL || "claude-haiku-4-5-20251001";
+  const thinks = THINKING_MODELS.test(model);
+  const headers = {
+    "content-type": "application/json",
+    "x-api-key": env.ANTHROPIC_API_KEY,
+    "anthropic-version": API_VERSION,
+  };
+  if (thinks) headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
+  const extra = thinks ? { output_config: { effort: opts.effort || "low" }, fallbacks: "default" } : {};
   try {
     const r = await fetchFn(API, {
       method: "POST",
       signal: ctl.signal,
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
-        "anthropic-version": API_VERSION,
-      },
+      headers,
       body: JSON.stringify({
-        model: env.MODEL || "claude-haiku-4-5-20251001",
+        model,
         max_tokens: maxTokens,
+        ...extra,
         /* The system prompt is the same on every request of a route and is the
            larger half of the input, so it is marked cacheable: the model reads
            it once and reuses it for five minutes, which takes time off the front
@@ -224,7 +237,7 @@ async function askModel(fetchFn, env, system, messages, maxTokens) {
     const body = await r.json().catch(() => null);
     if (!r.ok || !body) return { error: `upstream ${r.status}`, status: r.status };
     const text = (body.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
-    return { text, usage: body.usage || {}, stop: body.stop_reason || null };
+    return { text, usage: body.usage || {}, stop: body.stop_reason || null, model: body.model || model };
   } catch (e) {
     return { error: e.name === "AbortError" ? "upstream timeout" : `upstream ${e.message || e}` };
   } finally {
@@ -301,14 +314,23 @@ const ROUTES = {
      counter (core/plans.js COUNTER_OF). */
   "/v1/ask": {
     kind: "ask", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
-    maxTokens: 400, system: SYSTEM_ASK,
+    /* A grammar answer has to be right (the owner, 2026-11-23: the old model
+       told him «время» was «време», neuter in -е, and held to it when he
+       pointed at the я). `ASK_MODEL` and `ASK_EFFORT` in wrangler.toml; the
+       token budget covers the thinking as well as the answer. Retried fresh
+       rather than as a conversation, since a thinking model's earlier turn
+       would have to be replayed whole. */
+    maxTokens: 3000, system: SYSTEM_ASK, freshRetry: true,
+    model: (env) => env.ASK_MODEL || "claude-opus-5-5", effort: (env) => env.ASK_EFFORT || "low",
     check: (b) => checkAsk(b),
     message: (b) => askMessage(b),
     validate: (parsed) => validateAsk(parsed),
     capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
     /* `mode: "app"` — the "?" asking how to use the app, answered from the
        guide the app sends. Same counter. */
-    variant: (b) => (b.mode === "app" ? { system: SYSTEM_APP } : null),
+    /* How to use the app is read off the guide the app sends, not reasoned
+       about: the shared conversation model is enough for it. */
+    variant: (b) => (b.mode === "app" ? { system: SYSTEM_APP, model: null, effort: null, maxTokens: 400, freshRetry: false } : null),
   },
   /* The free conversation with a tutor who is handed the learner's standing
      (tutor.js). It counts as talk: a turn of it is a turn of the tutor's time,
@@ -464,14 +486,16 @@ export async function handle(request, env, deps = {}) {
                        message: "The tutor has had a busy day; resets at 00:00 UTC." });
   }
 
-  const messages = [{ role: "user", content: route.message(body) }];
-  let tokensIn = 0, tokensOut = 0, result = null, lastErrors = null;
+  const first = route.message(body);
+  const messages = [{ role: "user", content: first }];
+  const modelOpts = { model: route.model ? route.model(env) : null, effort: route.effort ? route.effort(env) : null };
+  let tokensIn = 0, tokensOut = 0, result = null, lastErrors = null, answeredBy = null;
   /* Three tries, not two (2026-09-24). A conversational turn came back
      "malformed" often enough for the owner to see it: the reply's tokens not
      matching the reply word for word, mostly. A nudge fixes it more often than
      not, and a third try costs a fraction of a cent against a dead turn. */
   for (let attempt = 0; attempt < 3 && !result; attempt++) {
-    const reply = await askModel(fetchFn, env, route.system, messages, route.maxTokens);
+    const reply = await askModel(fetchFn, env, route.system, messages, route.maxTokens, modelOpts);
     if (reply.error) {
       await logUsage(env, day, now, { kind: route.kind, user: user.id, error: reply.error, attempt });
       // Nothing reached the learner. The global unit comes back too when no
@@ -482,22 +506,28 @@ export async function handle(request, env, deps = {}) {
     }
     tokensIn += reply.usage.input_tokens || 0;
     tokensOut += reply.usage.output_tokens || 0;
+    answeredBy = reply.model || answeredBy;
     const parsed = extractJson(reply.text);
     // A reply cut at the token limit is a length problem, and the nudge should
     // say so; it must not be filed under "no JSON" where it looks like a format slip.
-    const v = reply.stop === "max_tokens"
+    const v = reply.stop === "refusal" ? { ok: false, errors: ["declined"] }
+      : reply.stop === "max_tokens"
       ? { ok: false, errors: [`reply cut off at ${route.maxTokens} tokens; answer more briefly`] }
       : parsed ? route.validate(parsed, body) : { ok: false, errors: ["no JSON object in reply"] };
     if (v.ok) result = v.value;
     else {
       lastErrors = v.errors;
-      messages.push({ role: "assistant", content: reply.text || "" });
-      messages.push({ role: "user", content: RETRY_NUDGE + " Problems: " + v.errors.slice(0, 4).join("; ") });
+      const nudge = RETRY_NUDGE + " Problems: " + v.errors.slice(0, 4).join("; ");
+      if (route.freshRetry) messages.splice(0, messages.length, { role: "user", content: first + "\n\n" + nudge });
+      else {
+        messages.push({ role: "assistant", content: reply.text || "" });
+        messages.push({ role: "user", content: nudge });
+      }
     }
   }
 
   await logUsage(env, day, now, { kind: route.kind, user: user.id, in: tokensIn, out: tokensOut,
-                                  model: env.MODEL, parsed: !!result });
+                                  model: answeredBy || modelOpts.model || env.MODEL, parsed: !!result });
   // The model was billed for this, so the global unit stays; the learner's comes back.
   if (!result) { await untick(env, userKey); return json(200, { ok: false, reason: "parse", errors: lastErrors }); }
   return json(200, { ok: true, ...result });

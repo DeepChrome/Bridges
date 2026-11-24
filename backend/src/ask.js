@@ -51,6 +51,9 @@ You receive JSON with:
 - "text": the running text on the screen when it has one — a grammar rule card (title, rule, table rows, examples), a conversation's lines with who said each, a word list, a grammar reference page, or a dictionary entry's paradigm tables (a table's title and columns, then a row per form: "они: читают"). A question about "this rule", "the second line", "what she said" or "the они form" is about this text.
 - "level": the learner's level ("beginner", "intermediate" or "advanced") and "chapter": where they are in the course.
 - "history": the earlier questions and answers in this same conversation, oldest first, if any.
+- "dictionary": the app's own dictionary entries for the Russian words in the question and on the screen: the headword, part of speech, gender, the form the learner wrote and which cell it is, the facts the app states about the word, and its full tables. This is the ground truth.
+- "not_words": things the learner wrote in Cyrillic that are not Russian words in the dictionary (a guess such as «времы»).
+- "invalid": present only when you are being asked again: words your previous answer ("previous") used that are not Russian words. Answer again without them.
 
 Reply with JSON only, no prose around it:
 {"answer":"<at most ${ANSWER_WORDS} words>"}
@@ -65,7 +68,10 @@ Rules:
 - Pitch it to the learner's level: plain words for a beginner, grammar terms only when you also say what they mean.
 - At most ${ANSWER_WORDS} words. Short sentences. No lists of more than three items, no headings, no markdown.
 - If the question is not about Russian or this app's exercise, say in one sentence that you can only help with Russian.
-- Never invent a Russian word. If you are not sure of a form, say so.
+- Never invent a Russian word. Every Russian form you write must be in "dictionary" or on the screen, or be a word you are certain exists. Never state a gender, ending or form that the dictionary's tables contradict; if the dictionary has the word, read its gender and forms from there, not from memory. If you are not sure of a form, say so.
+- When "not_words" is present, each is missing from the app's dictionary, usually because it is the learner's guess. Say plainly which of them is not a real Russian form, and give the real one from the dictionary.
+- When the learner disputes something you said, check it against "dictionary" and the screen before answering. If they are right, say so in your first sentence and give the corrected fact. Never repeat a claim the data contradicts.
+- Work the answer out before you write it: the answer holds only the final explanation, never a correction of itself ("wait", "actually").
 - Do not praise, do not say "great question". Outside "converse", do not end with a question and do not set an exercise.
 - Never use dashes in anything you write.`;
 
@@ -86,6 +92,22 @@ Rules:
 - Short sentences, no markdown, no lists of more than three items, no dashes. Do not praise or end with a question.`;
 
 const str = (x, n = 300) => (x === undefined || x === null ? null : String(x).slice(0, n));
+
+/* The dictionary entries the app looked up for the words in the question
+   (native/src/groundask.js), cut to DICTIONARY_CHARS as JSON: three words'
+   full tables fit, a fourth is dropped before any table is cut. */
+export const DICTIONARY_CHARS = 4000;
+function dictionaryOf(d) {
+  if (!Array.isArray(d)) return null;
+  const out = d.slice(0, 4).filter((x) => x && typeof x === "object").map((x) => ({
+    asked: str(x.asked, 60), word: str(x.word, 60), pos: str(x.pos, 20), gender: str(x.gender, 20),
+    form: str(x.form, 80), facts: Array.isArray(x.facts) ? x.facts.slice(0, 6).map((f) => str(f, 200)) : undefined,
+    tables: str(x.tables, 1600),
+  }));
+  while (out.length && JSON.stringify(out).length > DICTIONARY_CHARS) out.pop();
+  return out.length ? out : null;
+}
+const words = (a, n) => (Array.isArray(a) ? a.slice(0, n).map((w) => str(w, 40)).filter(Boolean) : undefined);
 
 /* The card, numbered as the screen numbers it, cut to CARD_CHARS as JSON so
    a long entry costs a bounded number of tokens. */
@@ -131,6 +153,10 @@ export function askMessage(b) {
     level: str(b.level, 20), chapter: typeof b.chapter === "number" ? b.chapter : null,
     converse: b.converse === true,
     history: history.map((h) => ({ q: str(h && h.q, QUESTION_CHARS), a: str(h && h.a, 1200) })),
+    dictionary: dictionaryOf(b.dictionary),
+    not_words: words(b.notWords, 8),
+    invalid: words(b.invalid, 8),
+    previous: b.invalid ? str(b.previous, 1200) : undefined,
   });
 }
 

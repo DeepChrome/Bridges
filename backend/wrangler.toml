@@ -30,6 +30,10 @@ new_sqlite_classes = ["SyncAccount", "Pairings"]
 
 [vars]
 MODEL = "claude-haiku-4-5-20251001"
+# The grammar answers (/v1/ask) run on a stronger model: the old one invented
+# Russian forms (2026-11-23). Thinking always on; effort steers its depth.
+ASK_MODEL = "claude-opus-5-5"
+ASK_EFFORT = "low"
 DAILY_CAP = "300"
 # Conversation turns a day for one user: a backstop against a runaway loop, not a
 # budget — the owner lifted the three-sessions limit on 2026-09-07.

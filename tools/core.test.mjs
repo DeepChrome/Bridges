@@ -2718,6 +2718,18 @@ group("the score a word shows");
   ok(S.overallScore({}, 5, { inflects: true }) === null, "no card, no score");
 }
 
+/* Russian beyond the app (core/media.js): every item a name, its English, a
+   level, a short why and an address. */
+group("media beyond the app");
+{
+  const M = await import("../core/media.js");
+  const errs = M.checkMedia();
+  ok(!errs.length, "every recommendation has its fields, a level, a why under ten words and an https link", errs.join("; "));
+  ok(M.MEDIA.some((g) => g.items.some((x) => x.ru === "Брат")), "Brother is on the list");
+  ok(["films", "cartoons", "music", "channels", "tools", "books"].every((id) => M.MEDIA.some((g) => g.id === id)),
+     "films, cartoons, music, channels, tools and books");
+}
+
 /* The owner, 2026-11-23: rare words ("to treat") came back day after day.
    How common a word is weighs in the review's draw, and "Common words"
    weighs it again. */

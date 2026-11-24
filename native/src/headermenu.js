@@ -1,38 +1,39 @@
-/* The header's third button, and the menu behind it (the owner, 2026-11-19:
- * *"The top menu items (the flag, the sparkle for ai, the home button, the
- * help button, the customize button) should be the same for every slide.
- * Looks too chaotic that they're always changing around… maybe the home and
- * the sparkle are there and then a plus sign for any other options which
- * would open the submenu"*).
+/* The header's buttons, the same five on every screen, in the same places
+ * (the owner, 2026-11-19: "the top menu items… should be the same for every
+ * slide. Looks too chaotic that they're always changing around"; then
+ * 2026-11-23: "perhaps it should just be the same exact toolbar at the top on
+ * every page… maybe no longer use the plus bar. If an item doesn't appear on
+ * the page maybe just gray it out").
  *
- * So every header is the same three: the sparkle (askai.js), Home, and this
- * "more" button. Its sheet holds what the headers used to carry each in its
- * own arrangement — the profile, the screen's options where it has any, how
- * to use this screen (help.js), and the report flag — one row each. A screen
- * with options registers them with `useHeaderOptions`; the menu reads the
- * registry when it opens, so a screen that mounts after its header drew still
- * puts its row there, and the cog that used to sit on the screen is gone.
+ * Left to right: the sparkle (askai.js), help for this screen (help.js; its
+ * sheet also sends feedback), the screen's options, Home, and the profile.
+ * Nothing moves from screen to screen: a button with nothing to do here is
+ * drawn faint and does nothing (Options on a screen with none, Home on the
+ * path). A screen with options registers them with `useHeaderOptions`; the
+ * header subscribes, so a screen that mounts after its header drew still
+ * lights its Options.
  */
 
 import React, { useEffect, useState } from "react";
 import { View, Pressable } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, Circle } from "react-native-svg";
 import { useTheme } from "./theme";
-import { Sheet, List, Row, RowText, Thumb, Avatar } from "./ui";
+import { Avatar } from "./ui";
 import { useSession } from "./session";
 import { navRef } from "./words";
 import { HelpSheet, HELP } from "./help";
 import { aiOffered } from "./askai";
-import { screenAbout } from "./about";
 
 /* route key -> { label, open } for the screen on that route. A screen
    mounted with no route (a test renders it alone) registers under its own
    key, and `openScreenOptions` opens the newest registration — the way a
-   test reaches what the header's menu would. */
+   test reaches what the header would. */
 const registry = new Map();
 let newest = null;
+const listeners = new Set();
+const changed = () => listeners.forEach((f) => f());
 /* `enabled` false registers nothing: a screen holding two tabs that are both
-   mounted (Study: Vocabulary · Cases) lets the one on show own the menu row. */
+   mounted (Study: Vocabulary · Cases) lets the one on show own the button. */
 export function useHeaderOptions(route, open, label = "Options", enabled = true) {
   const key = (route && route.key) || "screen";
   useEffect(() => {
@@ -40,9 +41,11 @@ export function useHeaderOptions(route, open, label = "Options", enabled = true)
     const entry = { label, open };
     registry.set(key, entry);
     newest = entry;
+    changed();
     return () => {
       if (registry.get(key) === entry) registry.delete(key);
       if (newest === entry) newest = null;
+      changed();
     };
   }, [key, open, label, enabled]);
 }
@@ -51,81 +54,92 @@ export function openScreenOptions() {
   if (newest) newest.open();
   return !!newest;
 }
+/* The options registered for a route, kept current. */
+function useOptionsFor(route) {
+  const [entry, setEntry] = useState(() => optionsFor(route));
+  useEffect(() => {
+    const read = () => setEntry(optionsFor(route));
+    read();
+    listeners.add(read);
+    return () => listeners.delete(read);
+  }, [route && route.key]);   // eslint-disable-line react-hooks/exhaustive-deps
+  return entry;
+}
 
-const GLYPH = { width: 30, height: 30, alignItems: "center", justifyContent: "center" };
+const SLOT = { width: 34, height: 34, alignItems: "center", justifyContent: "center", marginLeft: 2 };
+/* One header button: a glyph in a slot of fixed size, faint and inert when
+   there is nothing for it to do here. */
+export function HeaderButton({ testID, label, onPress, children, off = false }) {
+  return (
+    <Pressable testID={testID} onPress={off ? undefined : onPress} hitSlop={6}
+               accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ disabled: off }}
+               style={({ pressed }) => [SLOT, { opacity: off ? 0.3 : pressed ? 0.6 : 1 }]}>
+      {children}
+    </Pressable>
+  );
+}
+const Glyph = ({ color, children }) => (
+  <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.9}
+       strokeLinecap="round" strokeLinejoin="round">{children}</Svg>
+);
 
-export function MoreButton({ navigation, route }) {
+function HelpButton({ route }) {
   const t = useTheme();
-  const { account } = useSession();
   const [open, setOpen] = useState(false);
-  const [help, setHelp] = useState(false);
   const name = route && route.name;
-  /* Read when the menu opens, not when the header draws: a screen registers
-     its options from an effect, after the header has already rendered. */
-  const [options, setOptions] = useState(null);
-  const hasHelp = !!HELP[name] || aiOffered();
-  const profile = () => {
-    setOpen(false);
-    const names = navigation && navigation.getState ? (navigation.getState() || {}).routeNames || [] : [];
-    if (names.includes("You") && navigation) navigation.navigate("You");
-    else if (navRef.isReady && navRef.isReady()) navRef.navigate("Tabs", { screen: "Learn", params: { screen: "You" } });
-  };
-  const report = () => {
-    setOpen(false);
-    const about = screenAbout();
-    if (navRef.isReady && navRef.isReady()) navRef.navigate("Feedback", { about, from: about.screen });
-  };
+  const has = !!HELP[name] || aiOffered();
   return (
     <>
-      <Pressable testID="more-button" onPress={() => { setOptions(optionsFor(route)); setOpen(true); }} hitSlop={8}
-                 accessibilityRole="button" accessibilityLabel="More" style={[GLYPH, { marginRight: 4 }]}>
-        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
-             strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M12 5v14M5 12h14" />
-        </Svg>
-      </Pressable>
-      {open ? (
-        <Sheet testID="more-sheet" onClose={() => setOpen(false)}>
-          <List>
-            {account ? (
-              <Row testID="more-profile" onPress={profile}>
-                <Avatar id={account.avatar} size={32} />
-                <RowText title={account.name} sub="Your profile" bold={false} />
-              </Row>
-            ) : null}
-            {options ? (
-              <Row testID="more-options" onPress={() => { setOpen(false); options.open(); }}>
-                <Thumb id="cog" tone="brand" />
-                <RowText title={options.label} bold={false} />
-              </Row>
-            ) : null}
-            {hasHelp ? (
-              <Row testID="more-help" onPress={() => { setOpen(false); setHelp(true); }}>
-                <Thumb id="help" tone="info" />
-                <RowText title="How to use this screen" bold={false} />
-              </Row>
-            ) : null}
-            <Row testID="more-report" onPress={report}>
-              <Thumb id="flag" />
-              <RowText title="Report a problem" bold={false} />
-            </Row>
-          </List>
-        </Sheet>
-      ) : null}
-      {help ? <HelpSheet route={name} onClose={() => setHelp(false)} /> : null}
+      <HeaderButton testID="help-button" label="How to use this screen" off={!has} onPress={() => { if (has) setOpen(true); }}>
+        <Glyph color={t.ink2}>
+          <Circle cx="12" cy="12" r="9" />
+          <Path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.4M12 17h.01" />
+        </Glyph>
+      </HeaderButton>
+      {open ? <HelpSheet route={name} onClose={() => setOpen(false)} /> : null}
     </>
   );
 }
 
-/* The header's right side, the same on every screen: the sparkle, Home (not
-   on the path, which is home), and the menu. */
+function OptionsButton({ route }) {
+  const t = useTheme();
+  const entry = useOptionsFor(route);
+  return (
+    <HeaderButton testID="options-button" label={entry ? entry.label : "No options here"} off={!entry}
+                  onPress={() => entry && entry.open()}>
+      <Glyph color={t.ink2}>
+        <Path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+        <Circle cx="16" cy="7" r="2" />
+        <Circle cx="10" cy="17" r="2" />
+      </Glyph>
+    </HeaderButton>
+  );
+}
+
+function ProfileButton({ navigation }) {
+  const { account } = useSession();
+  const go = () => {
+    const names = navigation && navigation.getState ? (navigation.getState() || {}).routeNames || [] : [];
+    if (names.includes("You") && navigation) navigation.navigate("You");
+    else if (navRef.isReady && navRef.isReady()) navRef.navigate("Tabs", { screen: "Learn", params: { screen: "You" } });
+  };
+  return (
+    <HeaderButton testID="profile-button" label="Your profile" off={!account} onPress={() => { if (account) go(); }}>
+      {account ? <Avatar id={account.avatar} size={28} /> : null}
+    </HeaderButton>
+  );
+}
+
+/* The header's right side, the same on every screen. */
 export function HeaderTools({ navigation, route, AskButton, HomeButton }) {
   const home = !route || route.name !== "Path";
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "center", marginRight: 4 }}>
       <AskButton />
-      {home ? <HomeButton /> : null}
-      <MoreButton navigation={navigation} route={route} />
+      <HelpButton route={route} />
+      <OptionsButton route={route} />
+      <HomeButton off={!home} />
+      <ProfileButton navigation={navigation} />
     </View>
   );
 }

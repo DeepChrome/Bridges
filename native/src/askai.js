@@ -35,6 +35,7 @@ import { GuidePop } from "./guide";
 import { useConverse } from "./converse";
 import { LangToggle, ConverseToggle } from "./mic";
 import { HoldButton, Blocked } from "./activities/Say";
+import { HeaderButton } from "./headermenu";
 
 export const aiOffered = () => !!config("/v1/ask");
 
@@ -243,18 +244,19 @@ export function AskButton() {
     enabled: open,
     onTurn: (text) => th.sendText(text, { converse: true }),
   });
-  if (!aiOffered()) return null;
+  /* Faint, not gone, in a build with no Worker: the toolbar is the same on
+     every screen and in every build (headermenu.js). */
+  const off = !aiOffered();
   return (
     <>
-      <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={8} testID="ask-button"
-                 accessibilityRole="button" accessibilityLabel="Ask the AI about the Russian here"
-                 style={{ marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
+      <HeaderButton testID="ask-button" label="Ask the AI about the Russian here" off={off}
+                    onPress={() => { if (off) return; th.open(); setOpen(true); }}>
         <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.brand}
              strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
           <Path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z" />
           <Path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
         </Svg>
-      </Pressable>
+      </HeaderButton>
       {open ? (
         /* Teddy asks (the owner, 2026-10-08: "an avatar of teddy asking 'how
            can I help' and looking cute") — he is the voice of the app's help,

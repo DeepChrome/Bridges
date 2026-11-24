@@ -8178,6 +8178,18 @@ The owner's next look at the case cards, and a bug report on the sparkle.
   `--rebuy-flagged` respect. Changing `data/word_audio/manifest.json` does
   nothing until `build_word_assets.mjs` runs and the changed pack is
   uploaded.
+- **The same five header buttons on every screen, no "+" menu**
+  (headermenu.js `HeaderTools`): the sparkle, help (its sheet sends
+  feedback), the screen's options (sliders), Home, the profile — in fixed
+  places, a button with nothing to do here drawn faint and inert
+  (`HeaderButton off`): Options where no screen registered any, Home on the
+  path, the sparkle in a build with no Worker. The header subscribes to
+  `useHeaderOptions`, so options registered after it drew still light it.
+  Guard each handler, not only the control (§23's RNTL trap).
+- **Immerse → Recommended** (`core/media.js`, `checkMedia`): films, cartoons,
+  series, music, channels, tools and books, each with its English, year,
+  level, a line on why, and a search or the site's own address. Only what is
+  well known and checkable.
 
 ## 31. Verification
 

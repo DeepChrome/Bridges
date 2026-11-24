@@ -23,7 +23,7 @@ import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, HeaderTitle, Text } from "./src/ui";
 import { AskButton } from "./src/askai";
-import { HeaderTools } from "./src/headermenu";
+import { HeaderTools, HeaderButton } from "./src/headermenu";
 import { DRILL_TYPES, wordDrillSpec } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
@@ -146,20 +146,18 @@ export function goHome() {
   navRef.navigate("Tabs", { screen: "Learn" });
 }
 
-function HomeButton() {
+/* Home, faint on the path, which is home (headermenu.js: every header the
+   same five buttons in the same places). */
+function HomeButton({ off = false }) {
   const scheme = useScheme();
   const p = palette(scheme);
   return (
-    <Pressable onPress={goHome}
-               hitSlop={8} accessibilityRole="button" accessibilityLabel="Home, the path"
-               testID="home-button"
-               style={{ marginRight: 12, width: 30, height: 30, alignItems: "center",
-                        justifyContent: "center" }}>
+    <HeaderButton testID="home-button" label="Home, the path" off={off} onPress={() => { if (!off) goHome(); }}>
       <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={p.ink2}
            strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
         <Path d="M4 11 12 4l8 7M6 10v9h12v-9M10 19v-5h4v5" />
       </Svg>
-    </Pressable>
+    </HeaderButton>
   );
 }
 

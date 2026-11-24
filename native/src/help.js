@@ -42,7 +42,7 @@ export const HELP = {
   Cards: { title: "Study", lines: [
     ["Show, then grade", "Again, Hard, Good, Easy set the next review"],
     ["Counter", "Done, coming back, left; tap it for more"],
-    ["Options", "In the + menu: review, front, cards, order, new words"],
+    ["Options", "Sliders, top right: review, front, cards, order, new words"],
     ["Goal reached", "A note; the cards keep coming"],
     ["Finish", "Past the goal: stop, and choose another round"],
     ["Resting", "Ten misses in a row: a new word instead"],
@@ -53,7 +53,7 @@ export const HELP = {
     ["Switch", "Offered when one direction falls far behind"],
     ["Cases", "Case cards: triggers, sentences, endings, forms, counting"],
     ["Which case?", "Tap one of the five; checked at once"],
-    ["Case options", "In the + menu: cards, cases, number, one trigger"],
+    ["Case options", "Sliders, top right: cards, cases, number, one trigger"],
     ["Back", "On a case card: the card before"],
   ] },
   WordDrill: { title: "One word's drill", lines: [
@@ -73,10 +73,10 @@ export const HELP = {
     ["Front", "The word and the form it asks for"],
     ["Show", "The form, its sound and the table"],
     ["Again · Hard · Good · Easy", "Your own grade; moves Cases & forms only"],
-    ["Options", "In the + menu: which drills, which words"],
+    ["Options", "Sliders, top right: which drills, which words"],
   ] },
   Drill: { title: "A drill", lines: [
-    ["Options", "In the + menu: what to ask, words, answer style"],
+    ["Options", "Sliders, top right: what to ask, words, answer style"],
     ["a_", "The answer a piece at a time; costs the grade"],
     ["Bulb", "The word's tables and rules; costs the grade"],
     ["Speaker", "Hear the word; twice for slower"],
@@ -112,7 +112,7 @@ export const HELP = {
   Drive: { title: "Drive mode", lines: [
     ["Episodes", "Each chapter's words, about fifty an episode"],
     ["Your playlists", "Your studied words, trouble words, a chapter's learned words"],
-    ["Options", "In the + menu: prompt, pause, speed, voice, next episode"],
+    ["Options", "Sliders, top right: prompt, pause, speed, voice, next episode"],
   ] },
   DriveEpisode: { title: "An episode", lines: [
     ["The pause", "Say the Russian aloud before you hear it"],
@@ -127,7 +127,7 @@ export const HELP = {
     ["Microphone", "Hold to speak, in either language"],
     ["Loop", "Hands-free: it listens after each answer"],
     ["Bulb", "The grammar reference"],
-    ["Options", "In the + menu: level, English under Russian, start over"],
+    ["Options", "Sliders, top right: level, English under Russian, start over"],
   ] },
 };
 HELP.GrammarRun = HELP.Drill;

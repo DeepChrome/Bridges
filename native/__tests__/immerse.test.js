@@ -150,6 +150,22 @@ describe("the library", () => {
     await act(async () => { fireEvent.changeText(screen.getByTestId("video-search"), "travel"); });
     expect(libraryState().query).toBe("travel");
   });
+
+  /* The owner, 2026-11-23: "a whole list of reputable Russian movies, songs,
+     podcasts, and other media". A second tab, kept like the rest of the
+     library's place; a row opens its link. */
+  it("has a Recommended tab of films, music, channels and tools, each opening its link", async () => {
+    const { Linking } = require("react-native");
+    const spy = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await withProfile(<Immerse navigation={nav} />);
+    await act(async () => { fireEvent.press(screen.getByTestId("immerse-tabs-picks")); });
+    expect(screen.getByTestId("media-list")).toBeTruthy();
+    expect(screen.queryByTestId("video-search")).toBeNull();
+    expect(libraryState().tab).toBe("picks");
+    await act(async () => { fireEvent.press(screen.getByTestId("media-films-Брат")); });
+    expect(spy).toHaveBeenCalledWith(expect.stringMatching(/^https:\/\/www\.youtube\.com\/results/));
+    spy.mockRestore();
+  });
 });
 
 describe("the player", () => {

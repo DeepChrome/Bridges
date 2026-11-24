@@ -215,7 +215,7 @@ function missOf(card, picked) {
   return o && !o.right ? card.misses[o.label] || null : null;
 }
 
-export function CaseCard({ card, state, onPick, openTable = false }) {
+function CaseCard({ card, state, onPick, openTable = false }) {
   const t = useTheme();
   const f = card.front, b = card.back || {};
   const done = state.picked !== null || state.shown;

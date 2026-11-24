@@ -23,7 +23,8 @@ jest.mock("../src/about", () => ({
 const fb = require("../src/lib/feedback");
 const { AskButton, useAskThread } = require("../src/askai");
 const { HELP, HelpSheet, APP_GUIDE } = require("../src/help");
-const { MoreButton, useHeaderOptions } = require("../src/headermenu");
+const { HeaderTools, useHeaderOptions } = require("../src/headermenu");
+const { Text } = require("react-native");
 
 const casesQuestion = {
   screen: "CaseRun", title: "Accusative", params: { caseId: "acc" },
@@ -156,10 +157,13 @@ it("says when the day's AI is used up", async () => {
   expect((await screen.findByTestId("ask-failed")).props.children).toMatch(/^Today's AI is used up · More /);
 });
 
-it("draws nothing in a build with no Worker", async () => {
+it("draws the sparkle faint and inert in a build with no Worker", async () => {
   mockConfigured = false;
   await open();
-  await waitFor(() => expect(screen.queryByTestId("ask-button")).toBeNull());
+  const b = await screen.findByTestId("ask-button");
+  expect(b.props.accessibilityState.disabled).toBe(true);
+  await act(async () => { fireEvent.press(b); });
+  expect(screen.queryByTestId("ask-sheet")).toBeNull();
   expect(HELP.Lesson.lines.some(([w]) => w === "Grammar")).toBe(false);
   expect(HELP.Drill.lines.some(([w]) => w === "Sparkle")).toBe(true);
 });
@@ -198,34 +202,38 @@ it("answers how to use the app from the map and the screen's own lines", async (
    registered any, how to use this screen, the report flag. The old inline
    pair in the exercise is gone from Run.js. */
 function Registers({ label, open }) { useHeaderOptions({ key: "r1" }, open, label); return null; }
-it("puts the profile, the screen's options, its help and the flag behind the menu button", async () => {
+const AskStub = () => null;
+const HomeStub = ({ off }) => <Text testID="home-stub">{off ? "off" : "on"}</Text>;
+/* The same five on every screen, in the same places, the ones with nothing
+   to do faint (the owner, 2026-11-23: "the same exact toolbar at the top on
+   every page… maybe no longer use the plus bar… gray it out"). */
+it("draws the same toolbar everywhere: options lit only where the screen has some", async () => {
   await seed();
   const open = jest.fn();
   const nav = { getState: () => ({ routeNames: ["You"] }), navigate: jest.fn() };
   await render(<SessionProvider><Registers label="Drill options" open={open} />
-    <MoreButton navigation={nav} route={{ key: "r1", name: "Drill" }} /></SessionProvider>);
-  await act(async () => { fireEvent.press(await screen.findByTestId("more-button")); });
-  expect(await screen.findByTestId("more-sheet")).toBeTruthy();
-  expect(within(screen.getByTestId("more-profile")).getByText("Jared")).toBeTruthy();
-  expect(within(screen.getByTestId("more-options")).getByText("Drill options")).toBeTruthy();
-  expect(screen.getByTestId("more-help")).toBeTruthy();
-  expect(screen.getByTestId("more-report")).toBeTruthy();
-  await act(async () => { fireEvent.press(screen.getByTestId("more-options")); });
+    <HeaderTools navigation={nav} route={{ key: "r1", name: "Drill" }} AskButton={AskStub} HomeButton={HomeStub} /></SessionProvider>);
+  const opts = await screen.findByTestId("options-button");
+  expect(opts.props.accessibilityState.disabled).toBe(false);
+  expect(opts.props.accessibilityLabel).toBe("Drill options");
+  await act(async () => { fireEvent.press(opts); });
   expect(open).toHaveBeenCalledTimes(1);
-  const runSrc = require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Run.js"), "utf8");
-  expect(runSrc).not.toMatch(/RunTools/);
+  expect(screen.getByTestId("help-button").props.accessibilityState.disabled).toBe(false);
+  await act(async () => { fireEvent.press(screen.getByTestId("profile-button")); });
+  expect(nav.navigate).toHaveBeenCalledWith("You");
+  expect(screen.getByTestId("home-stub").props.children).toBe("on");
   const appSrc = require("fs").readFileSync(require("path").join(__dirname, "../App.js"), "utf8");
   expect(appSrc).toMatch(/<HeaderTools /);
-  expect(appSrc).not.toMatch(/help=\{false\}/);
+  expect(require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Run.js"), "utf8")).not.toMatch(/RunTools/);
 });
 
-it("leaves the options row out where no screen registered any", async () => {
+it("greys Options where no screen registered any, and Home on the path", async () => {
   await seed();
-  await render(<SessionProvider><MoreButton navigation={{}} route={{ key: "r2", name: "Settings" }} /></SessionProvider>);
-  await act(async () => { fireEvent.press(await screen.findByTestId("more-button")); });
-  expect(await screen.findByTestId("more-sheet")).toBeTruthy();
-  expect(screen.queryByTestId("more-options")).toBeNull();
-  expect(screen.getByTestId("more-help")).toBeTruthy();   // the AI can answer, so help is offered
+  await render(<SessionProvider>
+    <HeaderTools navigation={{}} route={{ key: "r2", name: "Path" }} AskButton={AskStub} HomeButton={HomeStub} /></SessionProvider>);
+  expect((await screen.findByTestId("options-button")).props.accessibilityState.disabled).toBe(true);
+  expect(screen.getByTestId("home-stub").props.children).toBe("off");
+  expect(screen.queryByTestId("more-button")).toBeNull();
 });
 
 it("keeps the map honest: every Practice row and tab it names exists", () => {

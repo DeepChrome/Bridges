@@ -5,7 +5,8 @@ import { View, Image, Pressable, Linking } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
-import { Screen, List, Row, Btn, Pill, Muted, SearchField, SectionLabel, Sheet, Dropdown, Text } from "../ui";
+import { Screen, List, Row, Btn, Pill, Muted, SearchField, SectionLabel, Sheet, Dropdown, Text, SegmentTabs, RowText } from "../ui";
+import { MEDIA } from "@core/media";
 import { videos, videoById, videoWatched, unitById, CHANNELS, routePosition, rankOf, KNOWN_AT } from "../data";
 import { libraryState, setLibraryState, watchHistory } from "../immerse";
 import { today } from "@core/util";
@@ -186,6 +187,31 @@ export function VideoHistory({ navigation }) {
   );
 }
 
+/* Russian beyond the app (core/media.js; the owner, 2026-11-23: "a whole list
+   of reputable Russian movies, songs, podcasts, and other media and
+   materials"): grouped, each with its English, year, level and one line on
+   why, opening a search or the site itself. */
+function Recommended() {
+  return (
+    <View testID="media-list">
+      {MEDIA.map((g, k) => (
+        <View key={g.id} style={{ marginTop: k ? 18 : 4 }}>
+          <SectionLabel>{g.name}</SectionLabel>
+          <List>
+            {g.items.map((x) => (
+              <Row key={x.ru} testID={`media-${g.id}-${x.ru}`} onPress={() => Linking.openURL(x.url).catch(() => {})}>
+                <RowText title={x.ru} sub={[x.en, x.year, x.level].filter(Boolean).join(" · ")} />
+                <Muted size={T.small} style={{ maxWidth: "42%", textAlign: "right" }}>{x.why}</Muted>
+              </Row>
+            ))}
+          </List>
+        </View>
+      ))}
+    </View>
+  );
+}
+const IMMERSE_TABS = [{ id: "videos", name: "Videos" }, { id: "picks", name: "Recommended" }];
+
 export function Immerse({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
@@ -202,6 +228,8 @@ export function Immerse({ navigation }) {
   const setFilter = keep(setFilterRaw, "filter");
   const setSort = keep(setSortRaw, "sort");
   const setChannel = keep(setChannelRaw, "channel");
+  const [tab, setTabRaw] = useState(kept.tab === "picks" ? "picks" : "videos");
+  const setTab = keep(setTabRaw, "tab");
   const [credits, setCredits] = useState(false);
   const all = videos();
   const channels = useMemo(() => [{ id: ALL_CHANNELS, name: "All channels", note: all.length }]
@@ -231,8 +259,18 @@ export function Immerse({ navigation }) {
      the 2 of 321 watched. Leave the search bar"). The watched filter says the
      same thing when it is wanted, and a tally at the top of the library read
      as a score for not having watched enough. */
+  const tabs = <SegmentTabs testID="immerse-tabs" options={IMMERSE_TABS} value={tab} onPick={setTab} />;
+  if (tab === "picks") {
+    return (
+      <Screen>
+        <View style={{ marginBottom: 12 }}>{tabs}</View>
+        <Recommended />
+      </Screen>
+    );
+  }
   return (
     <Screen restoreY={kept.y || 0} onScrollY={(y) => setLibraryState({ y: Math.round(y) })}>
+      <View style={{ marginBottom: 12 }}>{tabs}</View>
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />

@@ -230,7 +230,7 @@ function CaseCard({ card, state, onPick }) {
       {card.check === "case" ? <CaseChoices answer={card.answer} picked={state.picked} onPick={onPick} /> : null}
       {card.check === "choice" ? <OptionChoices options={card.options} picked={state.picked} onPick={onPick} /> : null}
 
-      {done ? (
+      {done && (b.answer || b.rule || b.line || b.example || b.speak || b.table) ? (
         <View testID="casecard-back" style={{ marginTop: 18, borderTopWidth: 1, borderTopColor: t.lineSoft, paddingTop: 16 }}>
           {b.answer ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>

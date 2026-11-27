@@ -8197,6 +8197,22 @@ The owner's next look at the case cards, and a bug report on the sparkle.
   path, the sparkle in a build with no Worker. The header subscribes to
   `useHeaderOptions`, so options registered after it drew still light it.
   Guard each handler, not only the control (§23's RNTL trap).
+  **A sixth, the report flag, since 2026-11-27** (*"not buried in a
+  submenu"*), beside the sparkle: `openFeedback` sends `screenAbout()` with
+  the report, as the help sheet's button now does too. The help sheet's had
+  sent the route's name alone, so reports arrived with no card attached
+  ("Question unclear"). A screen that shows a card registers it with
+  `useAbout` — the case cards now give their type, question and answer.
+- **Case cards say what the case is doing** (`lineOf` in core/casecards.js):
+  "Prepositional · in (where) · after «в»", and a tap opens *why* before the
+  reference. "Case → trigger" is asked only of a trigger with a quarter of
+  its case's commonest trigger's sentences (`commonTrigger`): «при» as the
+  one right answer for the prepositional taught nothing. An ending card asks
+  about a real noun (the word big, case and number as pills). The question
+  words carry their English and are linked on the back, never the front.
+- **Senses are one numbered list** (`SenseList`, `Senses`): every meaning
+  in the same ink and weight, the order the ranking (reverses 2026-09-16's
+  primary-set-apart).
 - **Immerse → Recommended** (`core/media.js`, `checkMedia`): films, cartoons,
   series, music, channels, tools and books, each with its English, year,
   level, a line on why, and a search or the site's own address. Only what is

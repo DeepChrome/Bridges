@@ -2629,8 +2629,19 @@ group("a chapter's grammar run");
         }
         if (c.type === "ending") {
           const r = R.ENDING_RULES.find((y) => `end:${y.id}` === c.key);
-          if (!r || c.back.answer !== r.label) bad.push(`ending ${c.key}`);
+          if (!r || !c.back.answer.startsWith(`${r.label} · `)) bad.push(`ending ${c.key}`);
+          // The word is the question (2026-11-26: "doesn't clearly articulate
+          // the question"): a real noun on the front, the case in the pills.
+          if (!L.some((w) => w.w === c.front.big) || !c.front.pills.length) bad.push(`ending ${c.key}: no word on the front`);
         }
+        if (c.type === "case-trigger" && x && !x.gov) {
+          const n = (y) => (sight[y.id] || []).length;
+          const top = Math.max(...T.TRIGGERS.filter((y) => y.case === x.case && !y.gov && !!y.words === !!x.words).map(n));
+          if (n(x) < 0.25 * top) bad.push(`case-trigger on a rare trigger ${x.id}`);
+        }
+        // The case's job in this sentence rides with every trigger card.
+        if (x && c.back.line && !(c.back.line.use && c.back.line.why)) bad.push(`${c.type} ${c.key}: case line says no use`);
+        if (c.type === "question" && !(c.back.example && c.back.example.en)) bad.push("question words with no English");
         if ((c.type === "gap" || c.type === "sentence-case") && c.s.trigger !== c.key) bad.push(`${c.type}: a ${c.s.trigger} sentence on ${c.key}`);
         // The owner, 2026-11-23: "confusing what's even being asked… we don't
         // know the rule that makes the answer correct"; "a lot of sentences
@@ -2658,7 +2669,7 @@ group("a chapter's grammar run");
     ok(dat.length && dat.every((c) => caseOfCard(c) === "dative"), "a deck narrowed to the dative is the dative",
        dat.map((c) => `${c.type}:${caseOfCard(c)}`).filter((s) => !s.endsWith("dative")).join(", "));
     const plural = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, numbers: ["pl"], types: ["make-case", "ending"] });
-    ok(plural.length && plural.every((c) => (c.type === "ending" ? /plural/.test(c.front.big) : c.front.pills.includes("plural")
+    ok(plural.length && plural.every((c) => (c.type === "ending" ? c.front.pills.includes("Plural") : c.front.pills.includes("plural")
                                                                   || !c.back.table.columns.some((x) => /plural/i.test(x)))),
        "a deck narrowed to the plural asks plurals");
     const focused = CC.caseDeck({ sightings: sight, cards, words, nouns, lex, rng, now, focus: "za-instr" });

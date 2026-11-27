@@ -20,6 +20,7 @@ import { View } from "react-native";
 import { useTheme, radius } from "./theme";
 import { Sheet, Text, Muted, Btn } from "./ui";
 import { navRef } from "./words";
+import { screenAbout } from "./about";
 import { useAskThread, AskTurns, AskInput, aiOffered } from "./askai";
 import { APP_GUIDE } from "./appguide";
 
@@ -155,7 +156,7 @@ export function HelpSheet({ route, onClose }) {
                <Btn kind="ghost" testID="help-feedback" label="Send feedback" style={{ marginTop: 6 }}
                     onPress={() => {
                       onClose();
-                      if (navRef.isReady()) navRef.navigate("Feedback", { from: route });
+                      if (navRef.isReady()) navRef.navigate("Feedback", { from: route, about: screenAbout() });
                     }} />
              </>
            )}>

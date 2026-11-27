@@ -34,7 +34,7 @@
 
 import { TRIGGERS, TEACH_ORDER, triggerById, siblingsOf, triggerKind } from "./triggers.js";
 import { CASES, caseById } from "./cases.js";
-import { ENDING_RULES, COUNT_RULES, COUNT_CHOICES, CASE_QUESTIONS, fits, cellOf, rowOfCase } from "./caserules.js";
+import { ENDING_RULES, COUNT_RULES, COUNT_CHOICES, CASE_QUESTIONS, CASE_QUESTIONS_EN, fits, cellOf, rowOfCase } from "./caserules.js";
 import { isDue, retrievability, review } from "./scheduler.js";
 import { fold, TOKEN } from "./util.js";
 
@@ -149,6 +149,14 @@ function nounLine(s, ctx) {
   return `«${s.said}» is «${w.w}»${m ? ` (${m})` : ""} in the ${lower(s.trigger ? triggerById(s.trigger).case : "")}${num}.`;
 }
 const exampleOf = (s) => ({ ru: s.ru, en: s.en, hl: [s.token, s.gov] });
+/* The case as it is working here: not "Prepositional" alone but what it does
+   in this sentence and what put it there — "where · after «в»" (the owner,
+   2026-11-27: "rather than saying accusative/dative… I'd much prefer it to say
+   the specific way it's acting in that specific sentence… when the user
+   clicks the name of the case, it states why that case is used"). `why` is
+   what the tap on it says first. */
+const lineOf = (x, s, lex) => ({ case: x.case, use: x.en, by: x.gov ? null : titleOf(x, s, lex),
+                                 why: triggerWhy(x, s, lex) });
 const sentenceNum = (s) => (s.pronoun ? null : s.plural ? "pl" : "sg");
 
 /* A wrong case, for a card with a noun: what the noun would have been in the
@@ -199,6 +207,21 @@ const GOVERNORS = new Set(TRIGGERS.flatMap((x) => (x.words || []).concat(x.preds
 const casesOfWord = (w) => [...new Set(TRIGGERS.filter((y) => (y.words || y.verbs || y.preds || []).includes(fold(w)))
   .map((y) => lower(y.case)).concat((ALSO[fold(w)] || []).map(lower)))];
 
+/* "Which of these takes the prepositional?" with «при» the answer teaches
+   the case's least useful word (the owner, 2026-11-24: "legit just one option
+   for words that are maybe the least common for identifying the usage of the
+   prepositional"). That card is asked only of a trigger that carries its case
+   — at least `COMMON_SHARE` of the sentences of the case's commonest trigger
+   of the same sort (a preposition against prepositions, a verb against
+   verbs). The rare ones keep every other card. */
+const COMMON_SHARE = 0.25;
+function commonTrigger(x, sightings) {
+  const n = (y) => ((sightings && sightings[y.id]) || []).length;
+  const peers = TRIGGERS.filter((y) => y.case === x.case && !y.gov && !!y.words === !!x.words);
+  const top = Math.max(0, ...peers.map(n));
+  return top > 0 && n(x) >= COMMON_SHARE * top;
+}
+
 const TRIGGER_MAKERS = {
   /* The trigger → which case. A verb trigger shows the verb this sentence
      used, so the cards range across all of «дава́ть», «показа́ть», «купи́ть». */
@@ -209,14 +232,14 @@ const TRIGGER_MAKERS = {
     return { check: "case", answer: x.case, s,
              front: { ask: x.gov ? "Which case is the noun after it?" : "Which case does it take?",
                       big: titleOf(x, s, ctx.lex), sub: x.words ? x.en : null },
-             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)],
+             back: withTable({ line: lineOf(x, s, ctx.lex), why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)],
                                example: exampleOf(s), speak: s.ru }, s, w),
              misses: caseMisses(s.table, s.at, x.case) };
   },
   /* The case → which of four words takes it. The wrong ones never take it in
      any meaning, so «за» is right for the instrumental and never wrong for it. */
   "case-trigger": (x, ctx) => {
-    if (x.gov) return null;
+    if (x.gov || !commonTrigger(x, ctx.sightings)) return null;
     const s = pickSighting(ctx.sightings[x.id], ctx);
     if (!s) return null;
     const right = titleOf(x, s, ctx.lex);
@@ -235,7 +258,7 @@ const TRIGGER_MAKERS = {
     }
     return { check: "choice", options: optionsOf(right, wrong, ctx.rng), s, misses,
              front: { ask: "Which of these takes this case?", big: caseName(x.case) },
-             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), speak: s.ru },
+             back: withTable({ line: lineOf(x, s, ctx.lex), why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), speak: s.ru },
                              s, ctx.lex.word(s.i)) };
   },
   /* A preposition and its case → what it means: «за» + instrumental is
@@ -260,7 +283,7 @@ const TRIGGER_MAKERS = {
     }
     return { check: "choice", options: optionsOf(x.en, wrong, ctx.rng), s, misses,
              front: { ask: "What does it mean with this case?", big: x.words[0], pills: [caseName(x.case)] },
-             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), speak: s.ru },
+             back: withTable({ line: lineOf(x, s, ctx.lex), why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), speak: s.ru },
                              s, ctx.lex.word(s.i)) };
   },
   /* A real sentence, its noun marked → which case. */
@@ -269,7 +292,7 @@ const TRIGGER_MAKERS = {
     if (!s) return null;
     return { check: "case", answer: x.case, s, word: null,
              front: { ask: "Which case is the coloured word?", sentence: { s }, sub: s.en },
-             back: withTable({ line: { case: x.case }, why: [nounLine(s, ctx), triggerWhy(x, s, ctx.lex)],
+             back: withTable({ line: lineOf(x, s, ctx.lex), why: [nounLine(s, ctx), triggerWhy(x, s, ctx.lex)],
                                speak: s.ru, linked: true }, s, ctx.lex.word(s.i)),
              misses: caseMisses(s.table, s.at, x.case) };
   },
@@ -286,7 +309,7 @@ const TRIGGER_MAKERS = {
     const misses = Object.fromEntries(wrong.map((w) => [w, `«${w}» does not decide the case of «${s.token}»; «${right}» does.`]));
     return { check: "choice", options: optionsOf(right, wrong, ctx.rng), s, misses,
              front: { ask: `Which word puts the coloured word in the ${lower(x.case)}?`, sentence: { s, plain: true }, sub: s.en },
-             back: withTable({ line: { case: x.case }, why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)],
+             back: withTable({ line: lineOf(x, s, ctx.lex), why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)],
                                speak: s.ru, linked: true }, s, ctx.lex.word(s.i)) };
   },
   /* The sentence with a gap, the dictionary form given → the form in place. */
@@ -297,7 +320,7 @@ const TRIGGER_MAKERS = {
     return { check: "self", s, word: w ? w.b : null,
              front: { ask: "Put the word in the form the gap needs", sentence: { s, gap: true },
                       pills: [w ? w.w : s.token].concat(s.plural ? ["plural"] : []), sub: s.en },
-             back: withTable({ answer: s.said, speak: s.ru, line: { case: x.case },
+             back: withTable({ answer: s.said, speak: s.ru, line: lineOf(x, s, ctx.lex),
                                why: [triggerWhy(x, s, ctx.lex), nounLine(s, ctx)], example: exampleOf(s) }, s, w) };
   },
   /* The trigger + the dictionary form → the phrase. */
@@ -311,7 +334,7 @@ const TRIGGER_MAKERS = {
     return { check: "self", s, word: w ? w.b : null,
              front: { ask: "Join them in the right form", big: parts.join(" + "),
                       pills: (x.words ? [x.en] : []).concat(s.plural ? ["plural"] : []), sub: m },
-             back: withTable({ answer: phraseOf(s), speak: phraseOf(s), line: { case: x.case },
+             back: withTable({ answer: phraseOf(s), speak: phraseOf(s), line: lineOf(x, s, ctx.lex),
                                why: [triggerWhy(x, s, ctx.lex)], example: exampleOf(s), tableOpen: true }, s, w) };
   },
 };
@@ -412,10 +435,17 @@ const RULE_MAKERS = {
   "ending": (r, ctx) => {
     const e = exampleFor(r, ctx);
     if (!e) return null;
+    /* The word is the question, the case and number its pills: "Which ending?"
+       over "Prepositional singular" left it unclear which noun was meant, and
+       the owner, picturing «стол», answered -е for a rule about «дверь»
+       (2026-11-26: "the front side to me doesn't clearly articulate the
+       question"). The answer is the ending and the word made with it. */
+    const m = meaningOf(ctx, e.i);
     return { check: "self", i: e.i,
-             front: { ask: "Which ending?", big: `${caseName(r.case)} ${numName(r.num)}`, sub: `${capital(r.who)}, like «${e.w.w}»` },
-             back: { answer: r.label, speak: e.got.cell[0], line: { case: r.case }, why: [ruleSentence(r)],
-                     example: wordExample(e, ctx), table: e.t, at: e.got.at, headword: e.w.w, tableOpen: true } };
+             front: { ask: `Which ending does it take in the ${lower(r.case)} ${numName(r.num)}?`, big: e.w.w,
+                      pills: [caseName(r.case), capital(numName(r.num))], sub: [m, capital(r.who)].filter(Boolean).join(" · ") },
+             back: { answer: `${r.label} · ${e.got.cell[0]}`, speak: e.got.cell[0], line: { case: r.case }, why: [ruleSentence(r)],
+                     table: e.t, at: e.got.at, headword: e.w.w, tableOpen: true } };
   },
   /* An ending → its case: only the endings no other case of a noun has. */
   "ending-case": (r, ctx) => {
@@ -489,14 +519,18 @@ function countingCard(r, ctx) {
 function questionCard(caseId, ctx) {
   const q = CASE_QUESTIONS[caseId];
   const why = [`«${q}» asks for the ${lower(caseId)}.`];
+  /* The words themselves, linked on the back with their English, so «кого́»
+     and «чего́» open their entries. Not on the front: a tapped word's sheet
+     names its case, which is the answer. */
+  const example = { ru: q, en: CASE_QUESTIONS_EN[caseId], hl: q.match(TOKEN) || [] };
   if (ctx.rng() < 0.5) {
     const misses = Object.fromEntries(CASES.filter((c) => c.id !== caseId)
-      .map((c) => [c.id, `The ${c.name.toLowerCase()} asks «${CASE_QUESTIONS[c.id]}».`]));
+      .map((c) => [c.id, `The ${c.name.toLowerCase()} asks «${CASE_QUESTIONS[c.id]}» (${CASE_QUESTIONS_EN[c.id]}).`]));
     return { check: "case", answer: caseId, misses, front: { ask: "Which case answers this question?", big: q },
-             back: { speak: q, line: { case: caseId }, why } };
+             back: { speak: q, line: { case: caseId }, why, example } };
   }
   return { check: "self", front: { ask: "Which question words ask for this case?", big: caseName(caseId) },
-           back: { answer: q, speak: q, line: { case: caseId }, why } };
+           back: { answer: q, speak: q, line: { case: caseId }, why, example } };
 }
 
 /* -------------------------------------------------------------- the deal */

@@ -1743,28 +1743,23 @@ export function SenseList({ senses, size = 15, style, max, brief, plain, testID,
   };
   return (
     <View testID={testID || "sense-list"} style={[{ alignSelf: "stretch", gap: 10 }, style]}>
-      {/* The first sense is the word's primary meaning and it is set apart —
-          the full ink rather than the muted one, and a little heavier (the
-          owner, 2026-09-16: *"primary definitions are a different color or
-          shade so they stand out from the card itself. A bit of formatting
-          goes a long way"*). Everything after it is a further sense and stays
-          quiet, so the eye lands on the meaning the learner is being taught
-          before it reaches the ones they are not.
-          Shade, not a new colour: `ink` and `ink2` are both audited against
-          every surface they sit on (tools/contrast.js), and picking a fresh
-          value by eye is what §31 forbids. */}
+      {/* Every sense alike, numbered from the commonest: the order is the
+          ranking (the owner, 2026-11-27: "the sub definitions being smaller
+          and greyed out presents a bit confusingly. Just number them from
+          most common to least common"). Until then the first was set apart
+          in a heavier ink and the rest greyed (2026-09-16), which read as two
+          kinds of meaning rather than one list. */}
       {shown.map((s, k) => (
         <View key={k} style={{ flexDirection: "row", gap: 8 }}>
           {many ? (
-            <Text style={{ color: k === 0 ? t.brandInk : t.ink3, fontSize: size, fontWeight: "700",
+            <Text style={{ color: t.brandInk, fontSize: size, fontWeight: "700",
                            minWidth: 16, lineHeight: size + 6 }}>
               {k + 1}
             </Text>
           ) : null}
           <View style={{ flex: 1 }}>
             <Text testID={k === 0 ? "sense-primary" : undefined} selectable={canSelect}
-                  style={{ color: k === 0 ? t.ink : t.ink2, fontSize: size,
-                           fontWeight: k === 0 ? "600" : "400", lineHeight: size + 6 }}>
+                  style={{ color: t.ink, fontSize: size, fontWeight: "500", lineHeight: size + 6 }}>
               {/* The labels read as part of the sentence, in italics, the way a
                   dictionary sets them — not as chips, which would make every
                   entry a row of badges (§25). */}
@@ -1814,13 +1809,12 @@ export function Senses({ e, size = 15, align = "center", style, max, plain }) {
   const rest = plain ? 0 : groups.length - shown.length;
   return (
     <View testID="senses" style={[{ marginTop: 10, alignSelf: "stretch", gap: 3 }, style]}>
-      {/* The same hierarchy `SenseList` draws, for the 2 % of words with no
-          Wiktionary entry and for a deck card, where a translation is all
-          there is. One rule, both renderers. */}
+      {/* Drawn as `SenseList` draws them — every meaning alike, numbered —
+          for the 2 % of words with no Wiktionary entry and for a deck card,
+          where a translation is all there is. One rule, both renderers. */}
       {shown.map((g, k) => (
         <Text key={k} testID={k === 0 ? "sense-primary" : undefined} selectable={canSelect}
-              style={{ color: k === 0 ? t.ink : t.ink2, fontSize: size, textAlign: align,
-                       fontWeight: k === 0 ? "600" : "400", lineHeight: size + 6 }}>
+              style={{ color: t.ink, fontSize: size, textAlign: align, fontWeight: "500", lineHeight: size + 6 }}>
           {groups.length > 1 ? `${k + 1}. ${g}` : g}
         </Text>
       ))}

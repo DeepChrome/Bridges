@@ -5,8 +5,8 @@
  * every page… maybe no longer use the plus bar. If an item doesn't appear on
  * the page maybe just gray it out").
  *
- * Left to right: the sparkle (askai.js), help for this screen (help.js; its
- * sheet also sends feedback), the screen's options, Home, and the profile.
+ * Left to right: the sparkle (askai.js), the report flag, help for this
+ * screen (help.js), the screen's options, Home, and the profile.
  * Nothing moves from screen to screen: a button with nothing to do here is
  * drawn faint and does nothing (Options on a screen with none, Home on the
  * path). A screen with options registers them with `useHeaderOptions`; the
@@ -23,6 +23,7 @@ import { useSession } from "./session";
 import { navRef } from "./words";
 import { HelpSheet, HELP } from "./help";
 import { aiOffered } from "./askai";
+import { screenAbout } from "./about";
 
 /* route key -> { label, open } for the screen on that route. A screen
    mounted with no route (a test renders it alone) registers under its own
@@ -66,7 +67,7 @@ function useOptionsFor(route) {
   return entry;
 }
 
-const SLOT = { width: 34, height: 34, alignItems: "center", justifyContent: "center", marginLeft: 2 };
+const SLOT = { width: 32, height: 34, alignItems: "center", justifyContent: "center", marginLeft: 1 };
 /* One header button: a glyph in a slot of fixed size, faint and inert when
    there is nothing for it to do here. */
 export function HeaderButton({ testID, label, onPress, children, off = false }) {
@@ -98,6 +99,26 @@ function HelpButton({ route }) {
       </HeaderButton>
       {open ? <HelpSheet route={name} onClose={() => setOpen(false)} /> : null}
     </>
+  );
+}
+
+/* A report, one press from anywhere (the owner, 2026-11-26: "the feedback
+   button should be more accessible and convenient and not buried in a
+   submenu"). What is on screen rides along (about.js screenAbout): the
+   reports sent from inside the help sheet carried only the route's name, so
+   "Question unclear" arrived with no question. */
+export function openFeedback(from) {
+  if (!navRef.isReady || !navRef.isReady()) return;
+  navRef.navigate("Feedback", { from, about: screenAbout() });
+}
+function FlagButton({ route }) {
+  const t = useTheme();
+  return (
+    <HeaderButton testID="report-button" label="Report a problem" onPress={() => openFeedback(route && route.name)}>
+      <Glyph color={t.ink2}>
+        <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+      </Glyph>
+    </HeaderButton>
   );
 }
 
@@ -136,6 +157,7 @@ export function HeaderTools({ navigation, route, AskButton, HomeButton }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", marginRight: 4 }}>
       <AskButton />
+      <FlagButton route={route} />
       <HelpButton route={route} />
       <OptionsButton route={route} />
       <HomeButton off={!home} />

@@ -227,6 +227,25 @@ it("draws the same toolbar everywhere: options lit only where the screen has som
   expect(require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Run.js"), "utf8")).not.toMatch(/RunTools/);
 });
 
+/* The flag is one press from every screen and carries what is on it (the
+   owner, 2026-11-26: "not buried in a submenu"; the reports sent from the
+   help sheet arrived with no question attached). */
+it("reports from the header with the card on screen attached", async () => {
+  await seed();
+  const { navRef } = require("../src/words");
+  const go = jest.spyOn(navRef, "navigate").mockImplementation(() => {});
+  const ready = jest.spyOn(navRef, "isReady").mockReturnValue(true);
+  await render(<SessionProvider>
+    <HeaderTools navigation={{}} route={{ key: "r3", name: "Study" }} AskButton={AskStub} HomeButton={HomeStub} /></SessionProvider>);
+  await act(async () => { fireEvent.press(await screen.findByTestId("report-button")); });
+  // screenAbout is the reading the sparkle uses too; here it is mocked to the cases question.
+  expect(go).toHaveBeenCalledWith("Feedback", { from: "Study", about: casesQuestion });
+  // The help sheet's own button sends the same.
+  expect(require("fs").readFileSync(require("path").join(__dirname, "../src/help.js"), "utf8"))
+    .toMatch(/navigate\("Feedback", \{ from: route, about: screenAbout\(\) \}\)/);
+  go.mockRestore(); ready.mockRestore();
+});
+
 it("greys Options where no screen registered any, and Home on the path", async () => {
   await seed();
   await render(<SessionProvider>

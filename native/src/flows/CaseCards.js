@@ -199,7 +199,7 @@ function OptionChoices({ options, picked, onPick }) {
    own page of the grammar reference — the same section, drawn by the same
    component, so the card and the reference cannot disagree — and under it
    the words that take the case, from the trigger catalogue. */
-function CaseReference({ caseId, onClose }) {
+function CaseReference({ caseId, line, onClose }) {
   const t = useTheme();
   const topic = topicById("cases");
   const section = topic ? topic.sections.find((s) => s.heading === caseName(caseId)) : null;
@@ -208,9 +208,19 @@ function CaseReference({ caseId, onClose }) {
     onClose();
     if (navRef.isReady()) navRef.navigate("Grammar", { topic: "cases", section: caseName(caseId), only: true });
   };
+  /* Why it is this case here first, when the card knows (a trigger put it
+     there); the case in general under it. */
+  const here = line && line.why;
   return (
-    <Sheet testID="casecard-reference" title={caseName(caseId)} onClose={onClose} maxHeight="88%"
+    <Sheet testID="casecard-reference" title={here ? `Why the ${caseName(caseId).toLowerCase()}` : caseName(caseId)}
+           onClose={onClose} maxHeight="88%"
            footer={<Btn block kind="plain" testID="casecard-reference-page" label="Open the full page" onPress={open} />}>
+      {here ? (
+        <View testID="casecard-reference-why" style={{ marginBottom: 14 }}>
+          <Marked text={line.why} size={T.body} color={t.ink} />
+          {line.use ? <Muted size={T.small} style={{ marginTop: 6 }}>{`Here: ${line.use}`}</Muted> : null}
+        </View>
+      ) : null}
       {section ? <TopicSection section={{ ...section, heading: "" }} cards={cardsFor(section)} testID="casecard-reference-section" /> : null}
       {takes.length ? (
         <View style={{ marginTop: 12 }}>
@@ -230,22 +240,28 @@ function CaseReference({ caseId, onClose }) {
 }
 
 /* The case the answer is, always green: it is the answer, whatever was
-   picked (the red is on the wrong button already). A tap opens the case for
-   reference. */
+   picked (the red is on the wrong button already). Beside it, what the case
+   is doing in this sentence and what put it there — "where · after «в»" —
+   where a trigger did. A tap says why, then the case for reference. */
 function CaseLine({ line }) {
   const t = useTheme();
   const [open, setOpen] = useState(false);
+  const role = line.use ? (line.by ? `${line.use} · after «${line.by}»` : line.use) : null;
   return (
     <View testID="casecard-why" style={{ flexDirection: "row", marginBottom: 8 }}>
       <Pressable testID="casecard-case-open" accessibilityRole="button" hitSlop={8}
-                 accessibilityLabel={`${caseName(line.case)}: the table and its rules`}
+                 accessibilityLabel={`${caseName(line.case)}${line.use ? `, ${line.use}` : ""}: why, and the table`}
                  onPress={() => setOpen(true)}
-                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 6, opacity: pressed ? 0.6 : 1 })}>
+                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1,
+                                            opacity: pressed ? 0.6 : 1 })}>
         <Pill tone="good" testID="casecard-case">{caseName(line.case)}</Pill>
+        {role ? (
+          <Marked testID="casecard-role" text={role} size={T.small} color={t.ink} style={{ flexShrink: 1 }} />
+        ) : null}
         <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={t.ink3} strokeWidth={2}
              strokeLinecap="round" strokeLinejoin="round"><Path d="M9 6l6 6-6 6" /></Svg>
       </Pressable>
-      {open ? <CaseReference caseId={line.case} onClose={() => setOpen(false)} /> : null}
+      {open ? <CaseReference caseId={line.case} line={line} onClose={() => setOpen(false)} /> : null}
     </View>
   );
 }
@@ -492,8 +508,12 @@ export function CaseStack({ route, active = true }) {
   }, [started, finished, queue.length, prefsKey]);
 
   const card = started && !finished ? queue[0] || null : null;
+  /* What a report and the sparkle see: the card's type, its question, what it
+     shows and its answer (a report with none of these was untraceable). */
   useAbout(card && active ? {
-    kind: "casecard",
+    kind: "casecard", type: card.type, ask: card.front.ask,
+    prompt: card.front.big || (card.front.sentence ? card.front.sentence.s.ru : undefined),
+    answer: answerText(card) || undefined,
     text: [card.front.big || "", card.front.sentence ? card.front.sentence.s.ru : "", (card.front.pills || []).join(", "),
            card.front.sub || "",
            state.picked !== null || state.shown

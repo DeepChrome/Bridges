@@ -95,6 +95,18 @@ export const CASE_QUESTIONS = {
   dative: "кому́? чему́?",
   instrumental: "кем? чем?",
 };
+/* …and what they mean, since «кого́? чего́?» is two words nobody has been
+   taught by the time the card asks (the owner, 2026-11-26: "dunno what kovo
+   and chevo are"). The English says the case's job, so it cannot stand in
+   for the answer on its own: "whom? what?" is the accusative and the
+   genitive's "of whom? of what?" both start the same. */
+export const CASE_QUESTIONS_EN = {
+  prepositional: "about whom? about what?",
+  accusative: "whom? what? (the object)",
+  genitive: "of whom? of what? (also: without whom, there is no…)",
+  dative: "to whom? to what?",
+  instrumental: "with whom? with what? (by means of)",
+};
 
 /* ------------------------------------------------------------ the nouns */
 

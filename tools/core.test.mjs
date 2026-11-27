@@ -2639,6 +2639,9 @@ group("a chapter's grammar run");
           const top = Math.max(...T.TRIGGERS.filter((y) => y.case === x.case && !y.gov && !!y.words === !!x.words).map(n));
           if (n(x) < 0.25 * top) bad.push(`case-trigger on a rare trigger ${x.id}`);
         }
+        // "Which word sets the case" is never a preposition: it is always
+        // the word before the noun (2026-11-27: "stupidly obvious").
+        if (c.type === "sentence-why" && x && T.triggerKind(x) === "prep") bad.push(`sentence-why on a preposition ${x.id}`);
         // The case's job in this sentence rides with every trigger card.
         if (x && c.back.line && !(c.back.line.use && c.back.line.why)) bad.push(`${c.type} ${c.key}: case line says no use`);
         if (c.type === "question" && !(c.back.example && c.back.example.en)) bad.push("question words with no English");

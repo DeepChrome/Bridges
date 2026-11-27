@@ -297,9 +297,13 @@ const TRIGGER_MAKERS = {
              misses: caseMisses(s.table, s.at, x.case) };
   },
   /* The sentence and its case → which word makes it that case. The options
-     are words of the sentence itself, so it is read, not recognised. */
+     are words of the sentence itself, so it is read, not recognised. Never
+     for a preposition: the word before the noun is always the answer, which
+     the owner found "stupidly obvious" (2026-11-27). A verb, «нет» or a
+     number is worth finding. */
   "sentence-why": (x, ctx) => {
-    const s = pickSighting(ctx.sightings[x.id], ctx, (t) => t.j >= 0 && ctx.numOk(t));
+    if (triggerKind(x) === "prep") return null;
+    const s =pickSighting(ctx.sightings[x.id], ctx, (t) => t.j >= 0 && ctx.numOk(t));
     if (!s) return null;
     const toks = s.ru.match(TOKEN) || [];
     const right = toks[s.j].toLowerCase();

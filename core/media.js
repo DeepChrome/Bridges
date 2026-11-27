@@ -76,6 +76,7 @@ export const MEDIA = [
     id: "channels", name: "Channels and podcasts",
     items: [
       { ru: "Easy Russian", en: "Street interviews, subtitled in both languages", level: "A2", why: "Real people in the street, subtitled; in Immerse already", url: yt("Easy Russian") },
+      { ru: "Russian Readers", en: "Grammar lessons taught in English", level: "A2", why: "Each case explained clearly, one video each", url: "https://www.youtube.com/@russianreaders" },
       { ru: "Russian with Max", en: "Podcast and videos in slow Russian", level: "B1", why: "Slow, clear Russian about Russian life", url: yt("Russian with Max") },
       { ru: "Мосфильм", en: "Mosfilm, the studio's own channel", level: "B1", why: "Many Soviet classics free, many with subtitles", url: yt("Мосфильм официальный канал") },
       { ru: "Союзмультфильм", en: "Soyuzmultfilm, the studio's own channel", level: "A2", why: "The Soviet cartoons, free", url: yt("Союзмультфильм официальный канал") },

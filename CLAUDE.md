@@ -7572,9 +7572,19 @@ installed build are deleted at launch (`pruneDownloads`). Where the fetch or
 the installer fails the sheet says so and offers the browser, the old route.
 Leaving the screen cancels a download. `jest.setup.js` mocks the legacy API
 on the same in-memory store as the new one, and records intents on
-`global.__intents`. **Not verified on a device**: the first build carrying
-this is installed by the old route, so the in-app install is first seen on
-the build after it.
+`global.__intents`.
+
+**The installer returning means nothing was installed** (2026-11-27; the
+owner: *"It didn't download in the app… I want to always download via app"*).
+Driven on the emulator: download and installer both worked, but the first
+time Android sends the learner to "Install unknown apps", and allowing it
+then pressing Back lands on the app with the installer gone — and the job had
+been dropped, so nothing offered the update again until a relaunch. A real
+install ends the process, so `startActivityAsync` resolving at all means it
+was closed: the job stays `ready` with Install on the sheet and the banner,
+the file reused. A failure shows its reason and offers Try again; **there is
+no browser route** any more. Verified: 441f533c5 → f7d4e2acd installed from
+inside the app on the emulator once the permission was granted.
 
 **Open**: a Play Store build must not offer side-loaded APKs (a different
 signing key would refuse to install anyway) — point `LATEST_URL` at nothing

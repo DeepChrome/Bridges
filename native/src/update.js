@@ -29,7 +29,8 @@
  * URI from expo-file-system's own file provider — the installer then asks the
  * one question it always asks and replaces the app. The first time, Android
  * also asks to allow this app to install unknown apps; it remembers the
- * answer. The browser route stays as the fallback where either step fails. It
+ * answer. **There is no browser route** (the owner, 2026-11-27: "I want to
+ * always download via app"): a failure says why and offers Try again. It
  * needs `REQUEST_INSTALL_PACKAGES` in the manifest (app.json), which **a Play
  * Store build must drop along with LATEST_URL**: Play's policy reserves that
  * permission for app stores. A file already downloaded for the offered code is
@@ -47,7 +48,7 @@
  * The notes are a few bullets (NOTE_LINES), with Read more opening the host's
  * changelog. */
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Linking } from "react-native";
 import * as Application from "expo-application";
 import * as FS from "expo-file-system/legacy";
@@ -146,13 +147,6 @@ export async function launchUpdate(deps) {
 export function putBackUpdate() { offered = false; }
 /* Tests start each case as a fresh launch. */
 export function resetUpdate() { launched = null; offered = false; cancelInstall(); }
-
-/* The fallback: the browser fetches the file and Android offers to install it,
-   as the testers first installed. A failure to open is nothing to report: the
-   sheet is closing anyway and the next launch offers it again. */
-export function openUpdate(update) {
-  return Promise.resolve().then(() => Linking.openURL(update.url)).catch(() => {});
-}
 
 /* The package installer's MIME type, and Intent.FLAG_GRANT_READ_URI_PERMISSION:
    the installer is another app, and the content URI is what lets it read a
@@ -270,13 +264,25 @@ export function UpdateCard({ update }) {
    away, the update will stop. Or at least hide… I was unsure if it was
    updating at all"). One job at a time, held here: Download starts it, the
    sheet and the banner on the path read it, leaving a screen does not touch
-   it, and only Cancel stops it. `phase` is downloading · installing · failed;
-   a finished job is gone, since the installer has the screen by then. */
-let job = null;                       // { update, phase, written, total, task }
+   it, and only Cancel stops it. `phase` is downloading · installing · ready ·
+   failed.
+
+   **The installer coming back means nothing was installed** (the owner,
+   2026-11-27: "It didn't download in the app"). A successful install replaces
+   this app and ends its process, so `installUpdate` returning at all says the
+   installer was closed: backed out of, or — the case found on the emulator —
+   left behind by the first-time detour to "Install unknown apps", where
+   allowing the app and pressing Back lands on the app with the installer gone.
+   The job used to be dropped there, and with it every way to install short of
+   restarting the app. It is kept as `ready` now, the file whole in the cache:
+   the sheet and the banner offer Install, which opens the installer on it
+   again, with the permission granted this time. */
+let job = null;                       // { update, phase, written, total, task, error }
 const watchers = new Set();
 const tell = () => { const s = installState(); for (const fn of watchers) fn(s); };
 export function installState() {
-  return job ? { update: job.update, phase: job.phase, written: job.written, total: job.total } : null;
+  return job ? { update: job.update, phase: job.phase, written: job.written, total: job.total,
+                 ...(job.error ? { error: job.error } : null) } : null;
 }
 export function onInstall(fn) { watchers.add(fn); return () => watchers.delete(fn); }
 export function useInstall() {
@@ -285,7 +291,8 @@ export function useInstall() {
   return s;
 }
 export async function startInstall(update, deps = {}) {
-  if (job && job.phase !== "failed" && job.update.code === update.code) return;   // already on its way
+  if (job && (job.phase === "downloading" || job.phase === "installing")
+      && job.update.code === update.code) return;                                  // already on its way
   const mine = { update, phase: "downloading", written: 0, total: update.size, task: null };
   job = mine;
   tell();
@@ -310,11 +317,15 @@ export async function startInstall(update, deps = {}) {
       if (job !== mine) return;                                   // cancelled meanwhile
       mine.task = null;
     }
-    mine.phase = "installing"; tell();
+    mine.phase = "installing"; mine.written = Math.round((mine.total || update.size) / 1048576); tell();
     await installUpdate(uri, deps);
-    if (job === mine) { job = null; tell(); }
+    // Still running, so the installer closed without installing: ready again.
+    if (job === mine) { mine.phase = "ready"; tell(); }
   } catch (e) {
-    if (job === mine) { mine.phase = "failed"; mine.task = null; tell(); }
+    /* Said under the failure, so a report from a phone names the step that
+       broke rather than "it didn't work". */
+    const error = String((e && e.message) || e || "").slice(0, 120);
+    if (job === mine) { mine.phase = "failed"; mine.task = null; mine.error = error; tell(); }
   }
 }
 export function cancelInstall() {
@@ -323,8 +334,10 @@ export function cancelInstall() {
   if (j && j.task) j.task.cancel();
   tell();
 }
-/* A failed job is kept so the banner can say so; this is the dismissal. */
-export function clearInstall() { if (job && job.phase === "failed") { job = null; tell(); } }
+/* A failed or a ready job is kept so the banner can say so; this is the
+   dismissal. The file stays in the cache, so the next offer installs it
+   without fetching again. */
+export function clearInstall() { if (job && (job.phase === "failed" || job.phase === "ready")) { job = null; tell(); } }
 
 /* A second look at the host, on a pull down the path (the owner, 2026-11-18:
    "rather than restarting the app, I can just drag up on the home screen and
@@ -345,6 +358,7 @@ export function UpdateBanner({ onPress }) {
   const totalMb = Math.round((s.total || s.update.size) / 1048576);
   const frac = totalMb > 0 ? Math.min(1, s.written / totalMb) : 0;
   const text = s.phase === "failed" ? "Update failed"
+    : s.phase === "ready" ? "Update ready"
     : s.phase === "installing" ? "Opening the installer"
     : `Updating · ${Math.round(frac * 100)}%`;
   return (
@@ -356,10 +370,12 @@ export function UpdateBanner({ onPress }) {
             style={{ flex: 1, color: t.ink, fontSize: T.body, fontWeight: "600" }}>{text}</Text>
       {s.phase === "downloading" ? (
         <View style={{ width: 90 }}><Bar value={frac} /></View>
-      ) : s.phase === "failed" ? (
+      ) : s.phase === "failed" || s.phase === "ready" ? (
         <>
           <Text testID="update-banner-retry" accessibilityRole="button" onPress={() => startInstall(s.update)}
-                style={{ color: t.brandInk, fontSize: T.body, fontWeight: "600", paddingHorizontal: 6 }}>Retry</Text>
+                style={{ color: t.brandInk, fontSize: T.body, fontWeight: "600", paddingHorizontal: 6 }}>
+            {s.phase === "ready" ? "Install" : "Retry"}
+          </Text>
           <Text testID="update-banner-dismiss" accessibilityRole="button" accessibilityLabel="Dismiss"
                 onPress={clearInstall} style={{ color: t.ink3, fontSize: T.body, paddingHorizontal: 6 }}>✕</Text>
         </>
@@ -372,20 +388,17 @@ export function UpdateBanner({ onPress }) {
    progress while it is open and closes when the installer takes the screen.
    Closing it mid-download leaves the download running — the banner on the
    path carries it from there — and Cancel is the one thing that stops it.
-   Where the fetch or the installer fails, it says so and offers the browser,
-   the one route that cannot fail for the app's own reasons. */
+   Where the fetch or the installer fails, it says so, with the reason, and
+   offers Try again. */
 export function UpdateSheet({ update, onClose }) {
   const t = useTheme();
   const s = useInstall();
   const mine = s && s.update.code === update.code ? s : null;
-  const phase = mine ? mine.phase : "offer";                // offer · downloading · installing · failed
-  const gone = useRef(false);
-  useEffect(() => () => { gone.current = true; }, []);
-  const install = async () => {
-    await startInstall(update);
-    // Finished and handed over: the installer has the screen, the sheet goes.
-    if (!gone.current && !installState()) onClose();
-  };
+  const phase = mine ? mine.phase : "offer";                // offer · downloading · installing · ready · failed
+  /* The sheet stays open through the install: when the installer comes back
+     without installing, Install is right there (ready). A successful install
+     ends the app, sheet and all. */
+  const install = () => startInstall(update);
   const cancel = () => { cancelInstall(); onClose(); };
   const later = () => { clearInstall(); onClose(); };
 
@@ -395,8 +408,9 @@ export function UpdateSheet({ update, onClose }) {
     <View style={{ flexDirection: "row", gap: 10 }}>
       <Btn kind="ghost" testID="update-later" label="Later" style={{ flex: 1 }} onPress={later} />
       {phase === "failed"
-        ? <Btn kind="pri" testID="update-browser" label="Open in browser" style={{ flex: 1 }}
-               onPress={() => { openUpdate(update); later(); }} />
+        ? <Btn kind="pri" testID="update-retry" label="Try again" style={{ flex: 1 }} onPress={install} />
+        : phase === "ready"
+        ? <Btn kind="pri" testID="update-install" label="Install" style={{ flex: 1 }} onPress={install} />
         : <Btn kind="pri" testID="update-download" label="Download" style={{ flex: 1 }} onPress={install} />}
     </View>
   );
@@ -407,24 +421,26 @@ export function UpdateSheet({ update, onClose }) {
     <Sheet testID="update-sheet" title="Update available" onClose={phase === "failed" ? later : onClose}
            footer={footer}>
       <UpdateCard update={update} />
-      {phase === "downloading" || phase === "installing" ? (
+      {phase === "downloading" || phase === "installing" || phase === "ready" ? (
         /* The percentage is the thing: large, the bar under it, the megabytes
            quiet beneath (the owner, 2026-11-18: "make the downloader look a
            little more modern as it's happening"). */
         <View testID="update-progress" style={{ marginTop: 20, alignItems: "center", gap: 10 }}>
           <Text testID="update-percent" style={{ color: t.ink, fontSize: T.display, fontWeight: "700" }}>
-            {phase === "installing" ? "100%" : `${Math.round(frac * 100)}%`}
+            {phase === "downloading" ? `${Math.round(frac * 100)}%` : "100%"}
           </Text>
-          <View style={{ alignSelf: "stretch" }}><Bar value={phase === "installing" ? 1 : frac} /></View>
+          <View style={{ alignSelf: "stretch" }}><Bar value={phase === "downloading" ? frac : 1} /></View>
           <Muted testID="update-progress-text">
             {phase === "installing" ? "Opening the installer"
+              : phase === "ready" ? "Downloaded · ready to install"
               : totalMb > 0 ? `${progress.written} of ${totalMb} MB` : `${progress.written} MB`}
           </Muted>
         </View>
       ) : phase === "failed" ? (
-        <Muted testID="update-failed" style={{ marginTop: 14, textAlign: "center" }}>
-          The download could not be installed
-        </Muted>
+        <View style={{ marginTop: 14, alignItems: "center", gap: 4 }}>
+          <Muted testID="update-failed" style={{ textAlign: "center" }}>The update could not be installed</Muted>
+          {mine.error ? <Muted testID="update-error" numberOfLines={2} size={T.small} style={{ textAlign: "center" }}>{mine.error}</Muted> : null}
+        </View>
       ) : null}
     </Sheet>
   );

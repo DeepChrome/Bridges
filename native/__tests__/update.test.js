@@ -147,7 +147,15 @@ describe("installing in the app", () => {
     expect(global.__intents).toEqual([{ action: INSTALL_ACTION, data: expect.stringMatching(/^content:\/\/.*update-29800500\.apk$/),
                                         type: APK_TYPE, flags: 1 }]);
     expect(Linking.openURL).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("update-sheet")).toBeNull();      // the installer has the screen
+    /* A real install ends the app. The mock installer returns, which on a
+       phone means it was closed without installing — the first-time detour to
+       "Install unknown apps" lands here — so the sheet waits with Install,
+       and Install opens the installer again on the same file. */
+    expect(screen.getByTestId("update-progress-text")).toHaveTextContent(/ready to install/);
+    await act(async () => { fireEvent.press(screen.getByTestId("update-install")); });
+    expect(global.__downloads).toHaveLength(1);                    // not fetched twice
+    expect(global.__intents).toHaveLength(2);
+    expect(Linking.openURL).not.toHaveBeenCalled();
   });
 
   it("shows the download's progress, and Cancel stops it", async () => {
@@ -180,19 +188,23 @@ describe("installing in the app", () => {
     expect(await downloadedUpdate({ ...LATEST, size: 0 })).toBeNull();   // no promised size: nothing to compare
   });
 
-  it("a fetch that fails, or an installer that will not open, offers the browser", async () => {
+  /* Never the browser (the owner, 2026-11-27: "I want to always download via
+     app"): a failure says what broke and tries again in the app. */
+  it("a fetch that fails, or an installer that will not open, says why and tries again in the app", async () => {
     global.__downloadFail = () => true;
     await path();
     await screen.findByTestId("update-sheet");
     await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
     expect(await screen.findByTestId("update-failed")).toBeTruthy();
+    expect(screen.getByTestId("update-error")).toBeTruthy();
     expect(global.__intents).toEqual([]);
-    await act(async () => { fireEvent.press(screen.getByTestId("update-browser")); });
-    expect(Linking.openURL).toHaveBeenCalledWith(LATEST.url);
-    expect(screen.queryByTestId("update-sheet")).toBeNull();
+    global.__downloadFail = null;
+    await act(async () => { fireEvent.press(screen.getByTestId("update-retry")); });
+    expect(global.__intents).toHaveLength(1);
+    expect(Linking.openURL).not.toHaveBeenCalled();
 
     resetUpdate(); jest.clearAllMocks();
-    global.__downloadFail = null; global.__intentFail = true;
+    global.__downloadFail = null; global.__intentFail = true; global.__intents = [];
     await path();
     await screen.findByTestId("update-sheet");
     await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
@@ -219,7 +231,11 @@ describe("installing in the app", () => {
     expect(screen.getByTestId("update-progress")).toBeTruthy();
     await act(async () => { release(); });
     expect(global.__intents).toHaveLength(1);
-    expect(screen.queryByTestId("update-banner")).toBeNull();                       // handed over: gone
+    // The installer came back without installing: the banner offers it again.
+    await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });
+    expect(screen.getByTestId("update-banner-text")).toHaveTextContent("Update ready");
+    await act(async () => { fireEvent.press(screen.getByTestId("update-banner-retry")); });
+    expect(global.__intents).toHaveLength(2);
   });
 
   /* An install that failed while the learner was elsewhere waits on the
@@ -234,7 +250,7 @@ describe("installing in the app", () => {
     global.__downloadFail = null;
     await act(async () => { fireEvent.press(screen.getByTestId("update-banner-retry")); });
     expect(global.__intents).toHaveLength(1);                                // the retry went through
-    expect(screen.queryByTestId("update-banner")).toBeNull();
+    expect(screen.getByTestId("update-banner-text")).toHaveTextContent("Update ready");
     global.__downloadFail = () => true;
     global.__fs.files.clear();                                                 // or the whole file installs again
     await act(async () => { await startInstall(LATEST); });
